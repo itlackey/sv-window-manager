@@ -31,13 +31,20 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Confirm the following (from Constitution):
+
+- Reusability: API surface minimal, composable, exported via `src/lib/index.ts`.
+- Clean Code: Types complete, no lint/type errors, small focused modules.
+- Tests: Vitest browser component tests planned; target ≥80% coverage for `src/lib/*`.
+- UX/A11y: Keyboard/focus/ARIA covered in spec and stories.
+- DX: Quickstart snippet to be added to README/Storybook.
+- Svelte 5 Runes: `$props()`, `$derived`, `$state` usage planned; SSR safety considered.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
-```
+```text
 specs/[###-feature]/
 ├── plan.md              # This file (/speckit.plan command output)
 ├── research.md          # Phase 0 output (/speckit.plan command)
@@ -55,7 +62,7 @@ specs/[###-feature]/
   not include Option labels.
 -->
 
-```
+```text
 # [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
 ├── models/
@@ -96,7 +103,7 @@ directories captured above]
 
 ## Complexity Tracking
 
-*Fill ONLY if Constitution Check has violations that must be justified*
+NOTE: Fill ONLY if Constitution Check has violations that must be justified.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|

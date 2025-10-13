@@ -20,6 +20,12 @@
   - Demonstrated to users independently
 -->
 
+Constitution-aligned notes:
+
+- Include accessibility expectations per story (roles, labels, keyboard order, focus management).
+- For component-driven features, specify the primary interactions that tests must cover
+  using Vitest + `vitest-browser-svelte`.
+
 ### User Story 1 - [Brief Title] (Priority: P1)
 
 [Describe this user journey in plain language]
@@ -113,3 +119,8 @@
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
 - **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+### Quality Gates Traceability
+
+- Link each outcome to a test or story demonstrating it (component test or E2E as applicable).
+- Identify any a11y assertions to be validated in Storybook or tests.
