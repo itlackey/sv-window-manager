@@ -1,6 +1,6 @@
 # SV Window Manager
 
-**Early Proof of Concept (POC):** This project is an early POC of a Svelte-based tiling window manager component. It is built using Svelte 5 runes and is inspired by Wave Terminal.
+**Early Proof of Concept (POC):** This project is an early POC of a Svelte-based tiling window manager component. It is built using Svelte 5 runes and is inspired by Wave Terminal. https://bhjsdev.github.io/bwin-docs/
 
 # Svelte library
 

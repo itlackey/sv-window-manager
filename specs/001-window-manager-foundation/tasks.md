@@ -127,7 +127,7 @@ description: "Task list for implementing the Window Manager Foundation feature"
 - [X] T033 [P] Ensure all public exports present in `src/lib/index.ts` and package type exports validate — `src/lib/index.ts`, `package.json`
 - [X] T034 A11y audit in Storybook (fix critical issues) — `src/stories/WindowManagerShell.stories.svelte`
 - [X] T035 Code cleanup and comments for non-obvious decisions — multiple files (WindowManagerShell and FlashErrorOverlay annotated; no behavior changes)
-- [ ] T036 [P] (Optional) E2E demo scenario: reveal + toggle panel — `e2e/demo.test.ts`
+- [X] T036 [P] (Optional) E2E demo scenario: reveal + toggle panel — `e2e/demo.test.ts`
 
 ### Flash Error Overlay (FR-007)
 
