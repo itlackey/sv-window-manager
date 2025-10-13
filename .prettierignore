@@ -1,9 +1,22 @@
-# Package Managers
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
 bun.lock
 bun.lockb
-
-# Miscellaneous
 /static/
+dist/
+build/
+.svelte-kit/
+storybook-static/
+playwright-report/
+test-results/
+coverage/
+*.log
+
+# Exclude docs and story sources from formatting checks
+.github/
+.specify/
+specs/
+src/stories/
+.storybook/
+.vscode/

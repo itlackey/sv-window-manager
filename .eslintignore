@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.build/
+/build/
+.svelte-kit/
+coverage/
+storybook-static/
+*.min.js
+*.log
+.vscode/
+.idea/
+playwright-report/
+test-results/
+.DS_Store
+Thumbs.db

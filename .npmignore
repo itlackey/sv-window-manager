@@ -1,0 +1,22 @@
+# Exclude sources and dev artifacts from npm package
+.specify/
+.storybook/
+.vscode/
+e2e/
+specs/
+src/stories/
+playwright-report/
+test-results/
+*.log
+
+# Local builds not intended for publish
+.svelte-kit/
+/build/
+
+# Node and lockfiles
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lock
+bun.lockb

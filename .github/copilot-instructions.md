@@ -39,6 +39,12 @@ The project runs tests in **two separate environments** via Vitest projects:
 - `npm run test:unit` - Run Vitest tests only
 - `npm pack` - Build the library package
 
+### Linting & Type Checking
+
+- `npm run lint` - Run ESLint and `svelte-check` for type checking
+- `npm run format` - Format code with Prettier
+- `npm run check` - Combined lint and type check
+
 ### Building & Publishing
 - `npm run build` builds the showcase app
 - `npm run prepack` syncs SvelteKit and packages the library via `svelte-package`

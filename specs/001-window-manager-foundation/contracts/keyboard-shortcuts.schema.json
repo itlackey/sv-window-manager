@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Keyboard Shortcuts Config",
+  "type": "object",
+  "properties": {
+    "overridePolicy": {
+      "type": "string",
+      "enum": ["defer-to-os", "override-allowlist", "override-all"],
+      "default": "override-allowlist",
+      "description": "Global policy. Library defaults to a minimal allowlist overriding OS for core actions."
+    },
+    "allowlist": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["Ctrl+Tab", "Ctrl+Shift+Tab", "Ctrl+\"`\""],
+      "description": "Keys allowed to override OS by default (platform-normalized). Consumers can replace/empty."
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "properties": {
+        "nextTab": { "type": "string", "default": "Ctrl+Tab" },
+        "prevTab": { "type": "string", "default": "Ctrl+Shift+Tab" },
+  "togglePanel": { "type": "string", "default": "Ctrl+`" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
