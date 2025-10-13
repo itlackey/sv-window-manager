@@ -3,6 +3,9 @@
 ## Project Overview
 This is a Svelte 5 library package built with SvelteKit, designed for creating reusable window management components. The project uses modern Svelte 5 syntax (`$props()`, `$derived`) and follows a dual-purpose structure: `src/lib/` contains the exportable library code, while `src/routes/` serves as a showcase/demo app.
 
+
+**IMPORTANT**: Do not prefix commands with bash -lc "cd /home/founder3/code/github/itlackey/sv-window-manager && ...". The system automatically runs commands in the project root.
+
 ## Architecture & Key Patterns
 
 ### Library Structure

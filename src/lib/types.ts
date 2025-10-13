@@ -38,3 +38,10 @@ export interface ShellConfig {
 export interface ReadyDetail {
 	title: string;
 }
+
+// Flash error overlay item
+export interface FlashItem {
+	id: string;
+	message: string;
+	expiresInMs?: number;
+}

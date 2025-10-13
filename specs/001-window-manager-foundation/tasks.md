@@ -60,7 +60,7 @@ description: "Task list for implementing the Window Manager Foundation feature"
 - [X] T012 [US1] Implement `ready` event emission (≤100ms post-reveal) with `{ title }` payload — `src/lib/WindowManagerShell.svelte`
 - [X] T013 [US1] Title sync on reveal using provided workspace summary — `src/lib/WindowManagerShell.svelte`
 - [X] T014 [US1] SSR/browser guard for window-dependent APIs — `src/lib/WindowManagerShell.svelte`
-- [ ] T015 [US1] Storybook story: ready flow demonstration and knobs for appearance — `src/stories/WindowManagerShell.stories.svelte`
+- [X] T015 [US1] Storybook story: ready flow demonstration and knobs for appearance — `src/stories/WindowManagerShell.stories.svelte`
 
 **Checkpoint**: US1 independently testable (reveal + ready + appearance).
 
@@ -74,16 +74,16 @@ description: "Task list for implementing the Window Manager Foundation feature"
 
 ### Tests for User Story 2 (Write first)
 
-- [ ] T016 [P] [US2] Component test: keyboard bindings configurable and overridable — `src/lib/WindowManagerShell.svelte.spec.ts`
-- [ ] T017 [P] [US2] Component test: context menu item states (enabled/disabled) based on selection/clipboard — `src/lib/WindowManagerShell.svelte.spec.ts`
+- [X] T016 [P] [US2] Component test: keyboard bindings configurable and overridable — `src/lib/WindowManagerShell.svelte.spec.ts`
+- [X] T017 [P] [US2] Component test: context menu item states (enabled/disabled) based on selection/clipboard — `src/lib/WindowManagerShell.svelte.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Implement config-driven keyboard handler (overridePolicy, allowlist, bindings with `togglePanel`) — `src/lib/WindowManagerShell.svelte`
-- [ ] T019 [US2] Add basic context menu controller and items model — `src/lib/WindowManagerShell.svelte`
-- [ ] T020 [US2] Add accessible context menu UI (keyboard navigable) — `src/lib/components/ContextMenu.svelte`
-- [ ] T021 [US2] Wire selection/clipboard heuristics (non-blocking, lazy) — `src/lib/WindowManagerShell.svelte`
-- [ ] T022 [US2] Storybook story: keyboard + menu showcase with knobs — `src/stories/WindowManagerShell.stories.svelte`
+- [X] T018 [US2] Implement config-driven keyboard handler (overridePolicy, allowlist, bindings with `togglePanel`) — `src/lib/WindowManagerShell.svelte`
+- [X] T019 [US2] Add basic context menu controller and items model — `src/lib/WindowManagerShell.svelte`
+- [X] T020 [US2] Add accessible context menu UI (keyboard navigable) — `src/lib/components/ContextMenu.svelte` (inlined for MVP)
+- [X] T021 [US2] Wire selection/clipboard heuristics (non-blocking, lazy) — `src/lib/WindowManagerShell.svelte`
+- [X] T022 [US2] Storybook story: keyboard + menu showcase with knobs — `src/stories/WindowManagerShell.stories.svelte`
 
 **Checkpoint**: US1 + US2 independently testable (shortcuts + context menu).
 
@@ -97,22 +97,22 @@ description: "Task list for implementing the Window Manager Foundation feature"
 
 ### Tests for User Story 3 (Write first)
 
-- [ ] T023 [P] [US3] Component test: landmarks/roles (toolbar/main/complementary) — `src/lib/WindowManagerShell.svelte.spec.ts`
-- [ ] T024 [P] [US3] Component test: side panel toggle persists visibility and width in-session — `src/lib/WindowManagerShell.svelte.spec.ts`
-- [ ] T025 [P] [US3] Component test: responsive resize without overlap — `src/lib/WindowManagerShell.svelte.spec.ts`
+- [X] T023 [P] [US3] Component test: landmarks/roles (toolbar/main/complementary) — `src/lib/WindowManagerShell.svelte.spec.ts`
+- [X] T024 [P] [US3] Component test: side panel toggle persists visibility and width in-session — `src/lib/WindowManagerShell.svelte.spec.ts`
+- [X] T025 [P] [US3] Component test: responsive resize without overlap — `src/lib/WindowManagerShell.svelte.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T026 [US3] Implement layout regions with roles and focus order — `src/lib/WindowManagerShell.svelte`
-- [ ] T027 [US3] Implement side panel container with session memory (visibility, widthPx) — `src/lib/WindowManagerShell.svelte`
-- [ ] T028 [US3] Implement resizable behavior with reduced-motion compatibility — `src/lib/WindowManagerShell.svelte`
-- [ ] T029 [US3] Render `ExamplePanel.svelte` inside the side panel — `src/lib/WindowManagerShell.svelte`
-- [ ] T030 [US3] Storybook story: layout/resize demo with side panel shown/hidden — `src/stories/WindowManagerShell.stories.svelte`
+- [X] T026 [US3] Implement layout regions with roles and focus order — `src/lib/WindowManagerShell.svelte`
+- [X] T027 [US3] Implement side panel container with session memory (visibility, widthPx) — `src/lib/WindowManagerShell.svelte`
+- [X] T028 [US3] Implement resizable behavior with reduced-motion compatibility — `src/lib/WindowManagerShell.svelte`
+- [X] T029 [US3] Render `ExamplePanel.svelte` inside the side panel — `src/lib/WindowManagerShell.svelte`
+- [X] T030 [US3] Storybook story: layout/resize demo with side panel shown/hidden — `src/stories/WindowManagerShell.stories.svelte`
 
 ### Additional for User Story 3 — Host Precedence for Panel State
 
-- [ ] T030A [US3] Initialize side panel state from host-provided config; fall back to session cache — `src/lib/WindowManagerShell.svelte`
-- [ ] T030B [P] [US3] Component test: host precedence overrides session cache for panel state — `src/lib/WindowManagerShell.svelte.spec.ts`
+- [X] T030A [US3] Initialize side panel state from host-provided config; fall back to session cache — `src/lib/WindowManagerShell.svelte`
+- [X] T030B [P] [US3] Component test: host precedence overrides session cache for panel state — `src/lib/WindowManagerShell.svelte.spec.ts`
 
 **Checkpoint**: US1 + US2 + US3 independently testable; foundation complete.
 
@@ -122,19 +122,19 @@ description: "Task list for implementing the Window Manager Foundation feature"
 
 **Purpose**: Stabilize API, docs, and a11y; ensure exports and packaging.
 
-- [ ] T031 [P] Validate quickstart snippet works as-is — `specs/001-window-manager-foundation/quickstart.md`
-- [ ] T032 [P] Add component README with usage and events — `src/lib/README.md`
-- [ ] T033 [P] Ensure all public exports present in `src/lib/index.ts` and package type exports validate — `src/lib/index.ts`, `package.json`
-- [ ] T034 A11y audit in Storybook (fix critical issues) — `src/stories/WindowManagerShell.stories.svelte`
-- [ ] T035 Code cleanup and comments for non-obvious decisions — multiple files
+- [X] T031 [P] Validate quickstart snippet works as-is — `specs/001-window-manager-foundation/quickstart.md`
+- [X] T032 [P] Add component README with usage and events — `src/lib/README.md`
+- [X] T033 [P] Ensure all public exports present in `src/lib/index.ts` and package type exports validate — `src/lib/index.ts`, `package.json`
+- [X] T034 A11y audit in Storybook (fix critical issues) — `src/stories/WindowManagerShell.stories.svelte`
+- [X] T035 Code cleanup and comments for non-obvious decisions — multiple files (WindowManagerShell and FlashErrorOverlay annotated; no behavior changes)
 - [ ] T036 [P] (Optional) E2E demo scenario: reveal + toggle panel — `e2e/demo.test.ts`
 
 ### Flash Error Overlay (FR-007)
 
-- [ ] T037 [P] Implement Flash Error Overlay UI with click-to-copy and auto-expire — `src/lib/components/FlashErrorOverlay.svelte`
-- [ ] T038 [US-Polish] Integrate overlay into shell with non-blocking queue and timeouts — `src/lib/WindowManagerShell.svelte`
-- [ ] T039 [P] Component test: overlay renders, auto-expires, click-to-copy works — `src/lib/components/FlashErrorOverlay.svelte.spec.ts`
-- [ ] T040 [P] Storybook story: flash error scenarios and a11y checks — `src/stories/WindowManagerShell.stories.svelte`
+- [X] T037 [P] Implement Flash Error Overlay UI with click-to-copy and auto-expire — `src/lib/components/FlashErrorOverlay.svelte`
+- [X] T038 [US-Polish] Integrate overlay into shell with non-blocking queue and timeouts — `src/lib/WindowManagerShell.svelte`
+- [X] T039 [P] Component test: overlay renders, auto-expires, click-to-copy works — `src/lib/components/FlashErrorOverlay.svelte.spec.ts`
+- [X] T040 [P] Storybook story: flash error scenarios and a11y checks — `src/stories/WindowManagerShell.stories.svelte`
 
 ---
 

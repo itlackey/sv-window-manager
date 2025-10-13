@@ -9,6 +9,8 @@ node_modules
 /.svelte-kit
 /build
 /dist
+coverage/
+playwright-report/
 
 # OS
 .DS_Store
@@ -26,3 +28,7 @@ vite.config.ts.timestamp-*
 
 *storybook.log
 storybook-static
+
+# IDE
+.vscode/
+.idea/
