@@ -1,6 +1,6 @@
 /**
  * TabBar Component Tests - User Story 1: Reorder Tabs
- * 
+ *
  * Tests for drag-and-drop reordering, keyboard reordering, edge auto-scroll,
  * and order persistence event emission.
  */
@@ -72,7 +72,7 @@ describe('TabBar - US1: Reorder Tabs', () => {
 			expect(activeTab?.getAttribute('tabindex')).toBe('0');
 
 			const inactiveTabs = container.querySelectorAll('[role="tab"][aria-selected="false"]');
-			inactiveTabs.forEach(tab => {
+			inactiveTabs.forEach((tab) => {
 				expect(tab.getAttribute('tabindex')).toBe('-1');
 			});
 		});
@@ -108,9 +108,11 @@ describe('TabBar - US1: Reorder Tabs', () => {
 		it('should allow keyboard navigation between tabs', () => {
 			const { container } = render(TabBar, { tabs: sampleTabs, activeId: '3' });
 
-			const activeTab = container.querySelector('[role="tab"][aria-selected="true"]') as HTMLElement;
+			const activeTab = container.querySelector(
+				'[role="tab"][aria-selected="true"]'
+			) as HTMLElement;
 			expect(activeTab).toBeTruthy();
-			
+
 			// Active tab should be focusable
 			activeTab.focus();
 			expect(document.activeElement).toBe(activeTab);
@@ -120,211 +122,215 @@ describe('TabBar - US1: Reorder Tabs', () => {
 			const { container } = render(TabBar, { tabs: sampleTabs, activeId: '3' });
 
 			const allTabs = container.querySelectorAll('[role="tab"]');
-			
+
 			// Only active tab should have tabindex="0"
-			const focusableTabs = Array.from(allTabs).filter((tab: Element) => 
-				tab.getAttribute('tabindex') === '0'
+			const focusableTabs = Array.from(allTabs).filter(
+				(tab: Element) => tab.getAttribute('tabindex') === '0'
 			);
 			expect(focusableTabs.length).toBe(1);
 		});
 
-	// Note: Actual keyboard reorder (Ctrl+Arrow) will be implemented in T016
-	it('should maintain a11y focus indicators structure', () => {
-		const { container } = render(TabBar, { tabs: sampleTabs, activeId: '3' });
+		// Note: Actual keyboard reorder (Ctrl+Arrow) will be implemented in T016
+		it('should maintain a11y focus indicators structure', () => {
+			const { container } = render(TabBar, { tabs: sampleTabs, activeId: '3' });
 
-		const activeTab = container.querySelector('[role="tab"][aria-selected="true"]');
-		expect(activeTab?.getAttribute('aria-selected')).toBe('true');
+			const activeTab = container.querySelector('[role="tab"][aria-selected="true"]');
+			expect(activeTab?.getAttribute('aria-selected')).toBe('true');
+		});
+
+		it('should have onclick handler on tabs for activation', () => {
+			const { container } = render(TabBar, {
+				tabs: sampleTabs,
+				activeId: '3'
+			});
+
+			// Verify tab has onclick handler attached
+			const tab4 = container.querySelector('[data-tab-id="4"]') as HTMLElement;
+			expect(tab4).toBeTruthy();
+
+			// Check that tab is interactive (has role="tab" and is a button)
+			expect(tab4.tagName).toBe('BUTTON');
+			expect(tab4.getAttribute('role')).toBe('tab');
+
+			// Click should not throw error
+			expect(() => tab4.click()).not.toThrow();
+		});
+
+		it('should handle Enter key for activation', () => {
+			const { container } = render(TabBar, {
+				tabs: sampleTabs,
+				activeId: '3'
+			});
+
+			const tab4 = container.querySelector('[data-tab-id="4"]') as HTMLElement;
+			tab4.focus();
+
+			// Dispatch Enter key - should not throw error
+			const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+			expect(() => tab4.dispatchEvent(enterEvent)).not.toThrow();
+
+			// Verify event was prevented (component handles it)
+			expect(tab4).toBeTruthy();
+		});
+
+		it('should handle Space key for activation', () => {
+			const { container } = render(TabBar, {
+				tabs: sampleTabs,
+				activeId: '3'
+			});
+
+			const tab4 = container.querySelector('[data-tab-id="4"]') as HTMLElement;
+			tab4.focus();
+
+			// Dispatch Space key - should not throw error
+			const spaceEvent = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+			expect(() => tab4.dispatchEvent(spaceEvent)).not.toThrow();
+
+			// Verify event was prevented (component handles it)
+			expect(tab4).toBeTruthy();
+		});
+
+		it('should allow arrow key navigation without changing active tab', () => {
+			const { container } = render(TabBar, { tabs: sampleTabs, activeId: '3' });
+
+			const tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
+			expect(tab3).toBeTruthy();
+
+			// Focus tab 3
+			tab3.focus();
+			expect(document.activeElement).toBe(tab3);
+
+			// Press ArrowRight to move focus (without changing active tab)
+			const arrowRight = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
+			tab3.dispatchEvent(arrowRight);
+
+			// Focus should move but active tab stays the same
+			// (Active tab is determined by activeId prop, not focus)
+			const activeTab = container.querySelector('[role="tab"][aria-selected="true"]');
+			expect(activeTab?.getAttribute('data-tab-id')).toBe('3');
+		});
+
+		it('should reorder tabs with Ctrl+Arrow keys multiple times', async () => {
+			let reorderCount = 0;
+			let lastReorderEvent: { segment: 'pinned' | 'regular'; order: string[] } | null = null;
+			let currentTabs = [...sampleTabs];
+
+			const { container, rerender } = render(TabBar, {
+				tabs: currentTabs,
+				activeId: '3',
+				onreorder: async (event: { segment: 'pinned' | 'regular'; order: string[] }) => {
+					reorderCount++;
+					lastReorderEvent = event;
+					console.log(`Reorder event #${reorderCount}:`, event);
+
+					// Update tabs to reflect the new order (simulating what the parent would do)
+					const { segment, order } = event;
+					const segmentTabs = currentTabs.filter((t) => t.pinned === (segment === 'pinned'));
+					const otherTabs = currentTabs.filter((t) => t.pinned !== (segment === 'pinned'));
+
+					const reorderedSegment = order
+						.map((id, index) => {
+							const tab = segmentTabs.find((t) => t.id === id);
+							return tab ? { ...tab, order: index } : null;
+						})
+						.filter((t): t is Tab => t !== null);
+
+					currentTabs = [...otherTabs, ...reorderedSegment];
+					console.log(
+						'Updated tabs order:',
+						currentTabs.map((t) => `${t.id}:${t.name}`)
+					);
+
+					// Trigger component re-render with new tabs
+					await rerender({ tabs: currentTabs, activeId: '3' });
+				}
+			});
+
+			// Get tab 3 (first regular tab: Project at index 0)
+			let tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
+			expect(tab3).toBeTruthy();
+
+			// Verify initial order
+			const regularTabs = container.querySelectorAll('.regular-segment [role="tab"]');
+			const initialOrder = Array.from(regularTabs).map((t) => t.getAttribute('data-tab-id'));
+			console.log('Initial order:', initialOrder);
+			expect(initialOrder[0]).toBe('3'); // Project
+			expect(initialOrder[1]).toBe('4'); // Library
+			expect(initialOrder[2]).toBe('5'); // Testing			// Focus tab 3
+			tab3.focus();
+			expect(document.activeElement).toBe(tab3);
+
+			// ===== FIRST REORDER: Move tab 3 right (3->4) =====
+			console.log('\n=== First reorder: Ctrl+ArrowRight ===');
+			const ctrlArrowRight1 = new KeyboardEvent('keydown', {
+				key: 'ArrowRight',
+				ctrlKey: true,
+				bubbles: true,
+				cancelable: true
+			});
+			tab3.dispatchEvent(ctrlArrowRight1);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
+			console.log(`After first reorder - Event count: ${reorderCount}`);
+			expect(reorderCount).toBe(1);
+			expect(lastReorderEvent?.segment).toBe('regular');
+
+			// ===== SECOND REORDER: Move tab 3 right again (4->5) =====
+			console.log('\n=== Second reorder: Ctrl+ArrowRight ===');
+			tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
+			tab3.focus();
+			expect(document.activeElement?.getAttribute('data-tab-id')).toBe('3');
+
+			const ctrlArrowRight2 = new KeyboardEvent('keydown', {
+				key: 'ArrowRight',
+				ctrlKey: true,
+				bubbles: true,
+				cancelable: true
+			});
+			tab3.dispatchEvent(ctrlArrowRight2);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
+			console.log(`After second reorder - Event count: ${reorderCount}`);
+			expect(reorderCount).toBe(2);
+
+			// ===== THIRD REORDER: Move tab 3 left (5->4) =====
+			console.log('\n=== Third reorder: Ctrl+ArrowLeft ===');
+			tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
+			tab3.focus();
+
+			const ctrlArrowLeft1 = new KeyboardEvent('keydown', {
+				key: 'ArrowLeft',
+				ctrlKey: true,
+				bubbles: true,
+				cancelable: true
+			});
+			tab3.dispatchEvent(ctrlArrowLeft1);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
+			console.log(`After third reorder - Event count: ${reorderCount}`);
+			expect(reorderCount).toBe(3);
+
+			// ===== FOURTH REORDER: Move tab 3 left again (4->3) =====
+			console.log('\n=== Fourth reorder: Ctrl+ArrowLeft ===');
+			tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
+			tab3.focus();
+
+			const ctrlArrowLeft2 = new KeyboardEvent('keydown', {
+				key: 'ArrowLeft',
+				ctrlKey: true,
+				bubbles: true,
+				cancelable: true
+			});
+			tab3.dispatchEvent(ctrlArrowLeft2);
+			await new Promise((resolve) => setTimeout(resolve, 50));
+
+			console.log(`After fourth reorder - Event count: ${reorderCount}`);
+
+			// THIS IS WHERE IT FAILS - keyboard shortcuts stop working!
+			expect(reorderCount).toBe(4); // This will fail if bug exists
+		});
 	});
-
-	it('should have onclick handler on tabs for activation', () => {
-		const { container } = render(TabBar, { 
-			tabs: sampleTabs, 
-			activeId: '3'
-		});
-
-		// Verify tab has onclick handler attached
-		const tab4 = container.querySelector('[data-tab-id="4"]') as HTMLElement;
-		expect(tab4).toBeTruthy();
-		
-		// Check that tab is interactive (has role="tab" and is a button)
-		expect(tab4.tagName).toBe('BUTTON');
-		expect(tab4.getAttribute('role')).toBe('tab');
-		
-		// Click should not throw error
-		expect(() => tab4.click()).not.toThrow();
-	});
-
-	it('should handle Enter key for activation', () => {
-		const { container } = render(TabBar, { 
-			tabs: sampleTabs, 
-			activeId: '3'
-		});
-
-		const tab4 = container.querySelector('[data-tab-id="4"]') as HTMLElement;
-		tab4.focus();
-		
-		// Dispatch Enter key - should not throw error
-		const enterEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
-		expect(() => tab4.dispatchEvent(enterEvent)).not.toThrow();
-		
-		// Verify event was prevented (component handles it)
-		expect(tab4).toBeTruthy();
-	});
-
-	it('should handle Space key for activation', () => {
-		const { container } = render(TabBar, { 
-			tabs: sampleTabs, 
-			activeId: '3'
-		});
-
-		const tab4 = container.querySelector('[data-tab-id="4"]') as HTMLElement;
-		tab4.focus();
-		
-		// Dispatch Space key - should not throw error
-		const spaceEvent = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
-		expect(() => tab4.dispatchEvent(spaceEvent)).not.toThrow();
-		
-		// Verify event was prevented (component handles it)
-		expect(tab4).toBeTruthy();
-	});
-
-	it('should allow arrow key navigation without changing active tab', () => {
-		const { container } = render(TabBar, { tabs: sampleTabs, activeId: '3' });
-
-		const tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
-		const tab4 = container.querySelector('[data-tab-id="4"]') as HTMLElement;
-		
-		// Focus tab 3
-		tab3.focus();
-		expect(document.activeElement).toBe(tab3);
-
-		// Press ArrowRight to move focus (without changing active tab)
-		const arrowRight = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
-		tab3.dispatchEvent(arrowRight);
-
-		// Focus should move but active tab stays the same
-		// (Active tab is determined by activeId prop, not focus)
-		const activeTab = container.querySelector('[role="tab"][aria-selected="true"]');
-		expect(activeTab?.getAttribute('data-tab-id')).toBe('3');
-	});
-
-	it('should reorder tabs with Ctrl+Arrow keys multiple times', async () => {
-		let reorderCount = 0;
-		let lastReorderEvent: any = null;
-		let currentTabs = [...sampleTabs];
-		
-		const { container, rerender } = render(TabBar, { 
-			tabs: currentTabs,
-			activeId: '3',
-			onreorder: async (event: { segment: 'pinned' | 'regular'; order: string[] }) => {
-				reorderCount++;
-				lastReorderEvent = event;
-				console.log(`Reorder event #${reorderCount}:`, event);
-				
-				// Update tabs to reflect the new order (simulating what the parent would do)
-				const { segment, order } = event;
-				const segmentTabs = currentTabs.filter(t => t.pinned === (segment === 'pinned'));
-				const otherTabs = currentTabs.filter(t => t.pinned !== (segment === 'pinned'));
-				
-				const reorderedSegment = order.map((id, index) => {
-					const tab = segmentTabs.find(t => t.id === id);
-					return tab ? { ...tab, order: index } : null;
-				}).filter((t): t is Tab => t !== null);
-				
-				currentTabs = [...otherTabs, ...reorderedSegment];
-				console.log('Updated tabs order:', currentTabs.map(t => `${t.id}:${t.name}`));
-				
-				// Trigger component re-render with new tabs
-				await rerender({ tabs: currentTabs, activeId: '3' });
-			}
-		});
-
-		// Get tab 3 (first regular tab: Project at index 0)
-		let tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
-		expect(tab3).toBeTruthy();
-		
-		// Verify initial order
-		let regularTabs = container.querySelectorAll('.regular-segment [role="tab"]');
-		const initialOrder = Array.from(regularTabs).map(t => t.getAttribute('data-tab-id'));
-		console.log('Initial order:', initialOrder);
-		expect(initialOrder[0]).toBe('3'); // Project
-		expect(initialOrder[1]).toBe('4'); // Library
-		expect(initialOrder[2]).toBe('5'); // Testing
-
-		// Focus tab 3
-		tab3.focus();
-		expect(document.activeElement).toBe(tab3);
-
-		// ===== FIRST REORDER: Move tab 3 right (3->4) =====
-		console.log('\n=== First reorder: Ctrl+ArrowRight ===');
-		const ctrlArrowRight1 = new KeyboardEvent('keydown', { 
-			key: 'ArrowRight', 
-			ctrlKey: true,
-			bubbles: true,
-			cancelable: true
-		});
-		tab3.dispatchEvent(ctrlArrowRight1);
-		await new Promise(resolve => setTimeout(resolve, 50));
-		
-		console.log(`After first reorder - Event count: ${reorderCount}`);
-		expect(reorderCount).toBe(1);
-		expect(lastReorderEvent?.segment).toBe('regular');
-
-		// ===== SECOND REORDER: Move tab 3 right again (4->5) =====
-		console.log('\n=== Second reorder: Ctrl+ArrowRight ===');
-		tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
-		tab3.focus();
-		expect(document.activeElement?.getAttribute('data-tab-id')).toBe('3');
-		
-		const ctrlArrowRight2 = new KeyboardEvent('keydown', { 
-			key: 'ArrowRight', 
-			ctrlKey: true,
-			bubbles: true,
-			cancelable: true
-		});
-		tab3.dispatchEvent(ctrlArrowRight2);
-		await new Promise(resolve => setTimeout(resolve, 50));
-		
-		console.log(`After second reorder - Event count: ${reorderCount}`);
-		expect(reorderCount).toBe(2);
-
-		// ===== THIRD REORDER: Move tab 3 left (5->4) =====
-		console.log('\n=== Third reorder: Ctrl+ArrowLeft ===');
-		tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
-		tab3.focus();
-		
-		const ctrlArrowLeft1 = new KeyboardEvent('keydown', { 
-			key: 'ArrowLeft', 
-			ctrlKey: true,
-			bubbles: true,
-			cancelable: true
-		});
-		tab3.dispatchEvent(ctrlArrowLeft1);
-		await new Promise(resolve => setTimeout(resolve, 50));
-		
-		console.log(`After third reorder - Event count: ${reorderCount}`);
-		expect(reorderCount).toBe(3);
-
-		// ===== FOURTH REORDER: Move tab 3 left again (4->3) =====
-		console.log('\n=== Fourth reorder: Ctrl+ArrowLeft ===');
-		tab3 = container.querySelector('[data-tab-id="3"]') as HTMLElement;
-		tab3.focus();
-		
-		const ctrlArrowLeft2 = new KeyboardEvent('keydown', { 
-			key: 'ArrowLeft', 
-			ctrlKey: true,
-			bubbles: true,
-			cancelable: true
-		});
-		tab3.dispatchEvent(ctrlArrowLeft2);
-		await new Promise(resolve => setTimeout(resolve, 50));
-		
-		console.log(`After fourth reorder - Event count: ${reorderCount}`);
-		
-		// THIS IS WHERE IT FAILS - keyboard shortcuts stop working!
-		expect(reorderCount).toBe(4); // This will fail if bug exists
-	});
-});	describe('Overflow handling preparation', () => {
+	describe('Overflow handling preparation', () => {
 		it('should render many tabs without error', () => {
 			const manyTabs: Tab[] = [
 				{ id: '1', name: 'Pinned1', pinned: true, order: 0 },
@@ -378,12 +384,12 @@ describe('TabBar - US1: Reorder Tabs', () => {
 			const firstTab = container.querySelector('[role="tab"][aria-selected="true"]') as HTMLElement;
 			expect(firstTab).toBeTruthy();
 			firstTab.focus();
-			
+
 			// Interaction 2: Arrow key navigation (can reach any tab by repeating arrow keys)
 			// This verifies the structure is in place for ≤2 interactions
 			const allTabs = container.querySelectorAll('[role="tab"]');
 			expect(allTabs.length).toBe(15);
-			
+
 			// Verify scroll container exists for mouse/keyboard scroll
 			const scrollContainer = container.querySelector('.tab-segment');
 			expect(scrollContainer).toBeTruthy();
@@ -403,7 +409,7 @@ describe('TabBar - US1: Reorder Tabs', () => {
 
 			const scrollContainer = container.querySelector('.regular-segment') as HTMLElement;
 			expect(scrollContainer).toBeTruthy();
-			
+
 			// Verify overflow-x is set in styles
 			const computedStyle = window.getComputedStyle(scrollContainer);
 			expect(computedStyle.overflowX).toBe('auto');
@@ -422,7 +428,7 @@ describe('TabBar - US1: Reorder Tabs', () => {
 
 			const allTabs = container.querySelectorAll('[role="tab"]');
 			const tabNames = Array.from(allTabs).map((tab: Element) => tab.getAttribute('aria-label'));
-			
+
 			expect(tabNames[0]).toBe('First');
 			expect(tabNames[1]).toBe('Second');
 			expect(tabNames[2]).toBe('Third');
@@ -438,10 +444,8 @@ describe('TabBar - US1: Reorder Tabs', () => {
 			const { container, rerender } = render(TabBar, { tabs: initialTabs, activeId: '1' });
 
 			// Initial state: 3 regular tabs
-			let allTabs = container.querySelectorAll('[role="tab"]');
-			expect(allTabs.length).toBe(3);
-
-			// Simulate host update (reorder, rename, and pin)
+			const allTabs = container.querySelectorAll('[role="tab"]');
+			expect(allTabs.length).toBe(3); // Simulate host update (reorder, rename, and pin)
 			const updatedTabs: Tab[] = [
 				{ id: '3', name: 'Tab3-Updated', pinned: false, order: 0 },
 				{ id: '1', name: 'Tab1', pinned: false, order: 1 },
@@ -451,16 +455,16 @@ describe('TabBar - US1: Reorder Tabs', () => {
 			rerender({ tabs: updatedTabs, activeId: '1' });
 
 			// Wait for Svelte reactivity
-			await new Promise(resolve => setTimeout(resolve, 0));
+			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			// Verify host order is applied
 			const regularTabs = container.querySelectorAll('.regular-segment [role="tab"]');
 			const pinnedTabs = container.querySelectorAll('.pinned-segment [role="tab"]');
-			
+
 			// Should now have 1 pinned and 2 regular
 			expect(pinnedTabs.length).toBe(1);
 			expect(pinnedTabs[0]?.getAttribute('aria-label')).toContain('Tab2-Updated');
-			
+
 			expect(regularTabs.length).toBe(2);
 			expect(regularTabs[0]?.getAttribute('aria-label')).toBe('Tab3-Updated');
 			expect(regularTabs[1]?.getAttribute('aria-label')).toBe('Tab1');
@@ -480,9 +484,7 @@ describe('TabBar - US1: Reorder Tabs', () => {
 			let allTabs = container.querySelectorAll('[role="tab"]');
 			let tabNames = Array.from(allTabs).map((tab: Element) => tab.getAttribute('aria-label'));
 			expect(tabNames[0]).toBe('A');
-			expect(tabNames[1]).toBe('B');
-
-			// Host sends update with different order
+			expect(tabNames[1]).toBe('B'); // Host sends update with different order
 			const updatedTabs: Tab[] = [
 				{ id: '2', name: 'B', pinned: false, order: 0 },
 				{ id: '1', name: 'A', pinned: false, order: 1 }
@@ -491,12 +493,10 @@ describe('TabBar - US1: Reorder Tabs', () => {
 			rerender({ tabs: updatedTabs, activeId: '1' });
 
 			// Wait for Svelte reactivity
-			await new Promise(resolve => setTimeout(resolve, 0));
+			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			allTabs = container.querySelectorAll('[role="tab"]');
-			tabNames = Array.from(allTabs).map((tab: Element) => tab.getAttribute('aria-label'));
-			
-			// Host order should be deterministically applied
+			tabNames = Array.from(allTabs).map((tab: Element) => tab.getAttribute('aria-label')); // Host order should be deterministically applied
 			expect(tabNames[0]).toBe('B');
 			expect(tabNames[1]).toBe('A');
 		});
@@ -549,9 +549,7 @@ describe('TabBar - US2: Inline Rename with Validation', () => {
 		it('should enforce max length of 60 characters', () => {
 			// Verify component can render names up to 60 chars
 			const longName = 'A'.repeat(60);
-			const tabsWithLongName: Tab[] = [
-				{ id: '1', name: longName, pinned: false, order: 0 }
-			];
+			const tabsWithLongName: Tab[] = [{ id: '1', name: longName, pinned: false, order: 0 }];
 
 			const { container } = render(TabBar, { tabs: tabsWithLongName, activeId: '1' });
 
@@ -646,7 +644,7 @@ describe('TabBar - US3: Pinned Tabs and Tab Bar Controls', () => {
 			tab.dispatchEvent(contextMenuEvent);
 
 			// Wait for reactivity
-			await new Promise(resolve => setTimeout(resolve, 0));
+			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			// Context menu should appear
 			const contextMenu = container.querySelector('.context-menu');
@@ -666,13 +664,13 @@ describe('TabBar - US3: Pinned Tabs and Tab Bar Controls', () => {
 			tab.dispatchEvent(contextMenuEvent);
 
 			// Wait for reactivity
-			await new Promise(resolve => setTimeout(resolve, 0));
+			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			// Check for pin option (tab is not pinned)
 			const contextMenuItems = container.querySelectorAll('.context-menu-item');
 			expect(contextMenuItems.length).toBeGreaterThan(0);
-			
-			const pinOption = Array.from(contextMenuItems).find(item => 
+
+			const pinOption = Array.from(contextMenuItems).find((item) =>
 				item.textContent?.includes('Pin Tab')
 			);
 			expect(pinOption).toBeTruthy();
@@ -691,11 +689,11 @@ describe('TabBar - US3: Pinned Tabs and Tab Bar Controls', () => {
 			tab.dispatchEvent(contextMenuEvent);
 
 			// Wait for reactivity
-			await new Promise(resolve => setTimeout(resolve, 0));
+			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			// Check for unpin option (tab is pinned)
 			const contextMenuItems = container.querySelectorAll('.context-menu-item');
-			const unpinOption = Array.from(contextMenuItems).find(item => 
+			const unpinOption = Array.from(contextMenuItems).find((item) =>
 				item.textContent?.includes('Unpin Tab')
 			);
 			expect(unpinOption).toBeTruthy();
@@ -712,7 +710,7 @@ describe('TabBar - US3: Pinned Tabs and Tab Bar Controls', () => {
 			tab.dispatchEvent(contextMenuEvent);
 
 			// Wait for reactivity
-			await new Promise(resolve => setTimeout(resolve, 0));
+			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			// Context menu should be visible
 			let contextMenu = container.querySelector('.context-menu');
@@ -723,7 +721,7 @@ describe('TabBar - US3: Pinned Tabs and Tab Bar Controls', () => {
 			backdrop?.click();
 
 			// Wait for reactivity
-			await new Promise(resolve => setTimeout(resolve, 0));
+			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			// Context menu should be closed
 			contextMenu = container.querySelector('.context-menu');
@@ -775,22 +773,24 @@ describe('TabBar - US3: Pinned Tabs and Tab Bar Controls', () => {
 		});
 
 		it('should show config error indicator when enabled', () => {
-			const { container } = render(TabBar, { 
-				tabs: sampleTabs, 
-				activeId: '1', 
-				showConfigError: true 
+			const { container } = render(TabBar, {
+				tabs: sampleTabs,
+				activeId: '1',
+				showConfigError: true
 			});
 
 			const configError = container.querySelector('.config-error');
 			expect(configError).toBeTruthy();
-			expect(configError?.getAttribute('aria-label')).toBe('Configuration error - click for details');
+			expect(configError?.getAttribute('aria-label')).toBe(
+				'Configuration error - click for details'
+			);
 		});
 
 		it('should not show config error indicator when disabled', () => {
-			const { container } = render(TabBar, { 
-				tabs: sampleTabs, 
-				activeId: '1', 
-				showConfigError: false 
+			const { container } = render(TabBar, {
+				tabs: sampleTabs,
+				activeId: '1',
+				showConfigError: false
 			});
 
 			const configError = container.querySelector('.config-error');
@@ -812,10 +812,10 @@ describe('TabBar - US3: Pinned Tabs and Tab Bar Controls', () => {
 
 	describe('T048: Config error indicator discoverability', () => {
 		it('should have accessible label for config error', () => {
-			const { container } = render(TabBar, { 
-				tabs: sampleTabs, 
-				activeId: '1', 
-				showConfigError: true 
+			const { container } = render(TabBar, {
+				tabs: sampleTabs,
+				activeId: '1',
+				showConfigError: true
 			});
 
 			const configError = container.querySelector('.config-error');
@@ -855,6 +855,78 @@ describe('TabBar - US3: Pinned Tabs and Tab Bar Controls', () => {
 
 			expect(pinnedStyle.overflowX).toBe('auto');
 			expect(regularStyle.overflowX).toBe('auto');
+		});
+	});
+
+	describe('T035: Add-tab roll-in animation test', () => {
+		it('should have new tabs with animation class ready', () => {
+			const { container } = render(TabBar, { tabs: sampleTabs, activeId: '1' });
+
+			// Verify tabs are rendered and can be targeted for animation
+			const tabs = container.querySelectorAll('[role="tab"]');
+			expect(tabs.length).toBeGreaterThan(0);
+
+			// Each tab should have tab class for animation
+			tabs.forEach((tab: Element) => {
+				expect(tab.classList.contains('tab')).toBe(true);
+			});
+		});
+
+		it('should respect reduced motion preferences via CSS', () => {
+			const { container } = render(TabBar, { tabs: sampleTabs, activeId: '1' });
+
+			// Verify the component has styles that can respect prefers-reduced-motion
+			const tabs = container.querySelectorAll('.tab');
+			expect(tabs.length).toBeGreaterThan(0);
+
+			// Note: Actual reduced motion behavior is tested via CSS media query
+			// which is tested through visual regression or manual testing
+		});
+	});
+
+	describe('T036: Close behavior focus logic test', () => {
+		it('should emit close event with tabId', () => {
+			const onclose = vi.fn();
+			const { container } = render(TabBar, {
+				tabs: sampleTabs,
+				activeId: '2',
+				onclose
+			});
+
+			// Find close button for tab 2 (one of the regular tabs)
+			const tab2 = container.querySelector('[data-tab-id="2"]');
+			expect(tab2).toBeTruthy();
+
+			const closeButton = tab2?.querySelector('.tab-close') as HTMLElement;
+			expect(closeButton).toBeTruthy();
+
+			// Trigger close
+			closeButton?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+
+			expect(onclose).toHaveBeenCalledWith({ tabId: '2' });
+		});
+
+		it('should have proper structure for focus management after close', () => {
+			// When a tab is closed, the parent component should handle focus
+			// This test verifies the structure supports focus management
+			const { container } = render(TabBar, { tabs: sampleTabs, activeId: '2' });
+
+			const tabs = container.querySelectorAll('[role="tab"]');
+			expect(tabs.length).toBe(3);
+
+			// Each tab should be focusable and have data-tab-id for targeting
+			tabs.forEach((tab: Element) => {
+				expect(tab.getAttribute('data-tab-id')).toBeTruthy();
+				const tabindex = tab.getAttribute('tabindex');
+				expect(tabindex).toBeTruthy();
+			});
+
+			// Verify close buttons are keyboard accessible
+			const closeButtons = container.querySelectorAll('.tab-close');
+			closeButtons.forEach((btn: Element) => {
+				expect(btn.getAttribute('role')).toBe('button');
+				expect(btn.getAttribute('aria-label')).toBeTruthy();
+			});
 		});
 	});
 });

@@ -11,6 +11,7 @@ The Window Manager Shell provides the initial layout scaffold (toolbar, main wor
 ### TabBar
 
 The TabBar component provides a reusable tab bar with:
+
 - **Drag-and-drop reordering** within segments (pinned/regular)
 - **Keyboard navigation** (Arrow keys to navigate, Ctrl+Arrow to reorder)
 - **Inline rename** (double-click to edit, Enter to save, Escape to cancel)
@@ -159,11 +160,11 @@ A reusable tab bar supporting drag-and-drop reordering, keyboard navigation, pin
 
 ### Implementation Status
 
-| User Story | Status | Tests |
-|------------|--------|-------|
+| User Story                         | Status      | Tests         |
+| ---------------------------------- | ----------- | ------------- |
 | US1: Reorder Tabs with Persistence | ✅ Complete | 16/16 passing |
-| US2: Inline Rename with Validation | ✅ Complete | 6/6 passing |
-| US3: Pinned Tabs and Controls | ✅ Complete | 11/11 passing |
+| US2: Inline Rename with Validation | ✅ Complete | 6/6 passing   |
+| US3: Pinned Tabs and Controls      | ✅ Complete | 11/11 passing |
 
 **Total Tests**: 45 passing (34 component tests + 11 US3 tests)
 
@@ -181,6 +182,7 @@ A reusable tab bar supporting drag-and-drop reordering, keyboard navigation, pin
 - **Tab Controls**: AI toggle, workspace switcher, add-tab button
 - **Config Error Indicator**: Shows when configuration errors are present
 - **Focus Management**: Close tab moves focus to left/right neighbor
+
 3. **US3: Controls** — AI toggle, workspace switcher, add-tab button
 4. **Polish** — Performance profiling, a11y audit, documentation
 

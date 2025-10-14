@@ -1,7 +1,6 @@
 <script lang="ts">
-	import WindowManagerShell from "$lib/WindowManagerShell.svelte";
-	import TabBar from "$lib/components/TabBar.svelte";
-	import type { Tab } from "$lib/types.js";
+	import TabBar from '$lib/components/TabBar.svelte';
+	import type { Tab } from '$lib/types.js';
 
 	// Sample tabs for demo (T051)
 	let tabs = $state<Tab[]>([
@@ -21,15 +20,18 @@
 
 	// Event log for demo (T052)
 	type EventLog = {
+		id: string;
 		timestamp: string;
 		type: string;
-		data: any;
+		data: Record<string, unknown>;
 	};
 	let eventLog = $state<EventLog[]>([]);
+	let eventCounter = 0;
 
-	function logEvent(type: string, data: any) {
+	function logEvent(type: string, data: Record<string, unknown>) {
 		const timestamp = new Date().toLocaleTimeString();
-		eventLog = [{ timestamp, type, data }, ...eventLog].slice(0, 20); // Keep last 20 events
+		const id = `${Date.now()}-${eventCounter++}`; // Unique ID combining timestamp + counter
+		eventLog = [{ id, timestamp, type, data }, ...eventLog].slice(0, 20); // Keep last 20 events
 	}
 
 	// Event handlers
@@ -40,32 +42,32 @@
 
 	function handleReorder(event: { segment: 'pinned' | 'regular'; order: string[] }) {
 		logEvent('reorder', event);
-		
+
 		// Apply reorder to tabs
 		const { segment, order } = event;
-		const segmentTabs = tabs.filter(t => t.pinned === (segment === 'pinned'));
-		const otherTabs = tabs.filter(t => t.pinned !== (segment === 'pinned'));
-		
+		const segmentTabs = tabs.filter((t) => t.pinned === (segment === 'pinned'));
+		const otherTabs = tabs.filter((t) => t.pinned !== (segment === 'pinned'));
+
 		// Reorder segment tabs according to new order
-		const reorderedSegment = order.map((id, index) => {
-			const tab = segmentTabs.find(t => t.id === id);
-			return tab ? { ...tab, order: index } : null;
-		}).filter((t): t is Tab => t !== null);
-		
+		const reorderedSegment = order
+			.map((id, index) => {
+				const tab = segmentTabs.find((t) => t.id === id);
+				return tab ? { ...tab, order: index } : null;
+			})
+			.filter((t): t is Tab => t !== null);
+
 		tabs = [...otherTabs, ...reorderedSegment];
 	}
 
 	function handlePin(event: { tabId: string; pinned: boolean }) {
 		logEvent('pin', event);
-		
+
 		// Apply pin/unpin to tabs (US3: T027)
 		const { tabId, pinned } = event;
-		tabs = tabs.map(t => {
+		tabs = tabs.map((t) => {
 			if (t.id === tabId) {
 				// When pinning/unpinning, update order within the new segment
-				const targetSegmentTabs = tabs.filter(tab => 
-					tab.id !== tabId && tab.pinned === pinned
-				);
+				const targetSegmentTabs = tabs.filter((tab) => tab.id !== tabId && tab.pinned === pinned);
 				const newOrder = targetSegmentTabs.length;
 				return { ...t, pinned, order: newOrder };
 			}
@@ -75,11 +77,11 @@
 
 	function handleRename(event: { tabId: string; name: string }) {
 		logEvent('rename', event);
-		
+
 		// Apply rename to tabs (US2: T023 - title sync hook)
 		const { tabId, name } = event;
-		tabs = tabs.map(t => t.id === tabId ? { ...t, name } : t);
-		
+		tabs = tabs.map((t) => (t.id === tabId ? { ...t, name } : t));
+
 		// Simulate title sync timing (would be handled by host in real implementation)
 		setTimeout(() => {
 			// Title sync complete
@@ -89,8 +91,8 @@
 
 	function handleAddTab() {
 		logEvent('addTab', {});
-		const newId = String(Math.max(...tabs.map(t => Number(t.id))) + 1);
-		const regularTabs = tabs.filter(t => !t.pinned);
+		const newId = String(Math.max(...tabs.map((t) => Number(t.id))) + 1);
+		const regularTabs = tabs.filter((t) => !t.pinned);
 		const newOrder = regularTabs.length;
 		tabs = [...tabs, { id: newId, name: `New Tab ${newId}`, pinned: false, order: newOrder }];
 	}
@@ -110,20 +112,20 @@
 
 	function handleClose(event: { tabId: string }) {
 		logEvent('close', event);
-		
+
 		// Remove tab and update active if needed (US3: T038)
 		const { tabId } = event;
-		const closingTab = tabs.find(t => t.id === tabId);
+		const closingTab = tabs.find((t) => t.id === tabId);
 		if (!closingTab) return;
-		
+
 		// Remove the tab
-		const newTabs = tabs.filter(t => t.id !== tabId);
-		
+		const newTabs = tabs.filter((t) => t.id !== tabId);
+
 		// If closing active tab, move focus to left neighbor or right if none
 		if (tabId === activeTabId && newTabs.length > 0) {
-			const segment = tabs.filter(t => t.pinned === closingTab.pinned);
-			const closingIndex = segment.findIndex(t => t.id === tabId);
-			
+			const segment = tabs.filter((t) => t.pinned === closingTab.pinned);
+			const closingIndex = segment.findIndex((t) => t.id === tabId);
+
 			// Try left neighbor first
 			if (closingIndex > 0) {
 				activeTabId = segment[closingIndex - 1].id;
@@ -135,12 +137,29 @@
 				activeTabId = newTabs[0].id;
 			}
 		}
-		
+
 		tabs = newTabs;
+	}
+
+	function handleBackgroundPreset(event: { tabId: string; preset: string }) {
+		logEvent('backgroundPreset', event);
+		// In real implementation, host would apply the preset to the tab's content
 	}
 
 	// Demo controls (T053)
 	let useMany = $state(false);
+
+	// Animation demo (T066)
+	let simulateReducedMotion = $state(false);
+
+	$effect(() => {
+		// Apply/remove data attribute to simulate reduced motion
+		if (simulateReducedMotion) {
+			document.documentElement.setAttribute('data-reduced-motion', 'true');
+		} else {
+			document.documentElement.removeAttribute('data-reduced-motion');
+		}
+	});
 
 	function toggleTabCount() {
 		useMany = !useMany;
@@ -175,7 +194,9 @@
 <div class="demo-page">
 	<header>
 		<h1>Tab Bar Demo</h1>
-		<p>Interactive demonstration of tab bar reordering, keyboard navigation, and overflow handling</p>
+		<p>
+			Interactive demonstration of tab bar reordering, keyboard navigation, and overflow handling
+		</p>
 	</header>
 
 	<!-- TabBar Component -->
@@ -194,6 +215,7 @@
 			onswitchWorkspace={handleSwitchWorkspace}
 			onopenConfigDetails={handleOpenConfigDetails}
 			onclose={handleClose}
+			onbackgroundPreset={handleBackgroundPreset}
 		/>
 	</div>
 
@@ -205,17 +227,17 @@
 				<button onclick={toggleTabCount}>
 					{useMany ? 'Show Few Tabs (8)' : 'Show Many Tabs (20+)'}
 				</button>
-				<button onclick={() => showConfigError = !showConfigError}>
+				<button onclick={() => (showConfigError = !showConfigError)}>
 					{showConfigError ? 'Hide' : 'Show'} Config Error
 				</button>
-				<button onclick={() => aiEnabled = !aiEnabled}>
+				<button onclick={() => (aiEnabled = !aiEnabled)}>
 					{aiEnabled ? 'Disable' : 'Enable'} AI
 				</button>
 			</div>
 			<p class="control-hint">
-				<strong>Rename:</strong> Double-click any tab to edit its name. 
-				Press <kbd>Enter</kbd> to save or <kbd>Esc</kbd> to cancel.<br/>
-				<strong>Close:</strong> Hover over a tab and click the × button to close it.<br/>
+				<strong>Rename:</strong> Double-click any tab to edit its name. Press <kbd>Enter</kbd> to
+				save or <kbd>Esc</kbd> to cancel.<br />
+				<strong>Close:</strong> Hover over a tab and click the × button to close it.<br />
 				<strong>Pin:</strong> Right-click a tab for the context menu (pin/unpin coming soon).
 			</p>
 		</div>
@@ -226,23 +248,29 @@
 			<div class="state-display">
 				<div class="state-item">
 					<strong>Active Tab:</strong>
-					{tabs.find(t => t.id === activeTabId)?.name || 'None'}
+					{tabs.find((t) => t.id === activeTabId)?.name || 'None'}
 				</div>
 				<div class="state-item">
 					<strong>Pinned Tabs:</strong>
-					{tabs.filter(t => t.pinned).length}
+					{tabs.filter((t) => t.pinned).length}
 				</div>
 				<div class="state-item">
 					<strong>Regular Tabs:</strong>
-					{tabs.filter(t => !t.pinned).length}
+					{tabs.filter((t) => !t.pinned).length}
 				</div>
 				<div class="state-item">
 					<strong>Tab Order (Pinned):</strong>
-					{tabs.filter(t => t.pinned).map(t => t.name).join(', ')}
+					{tabs
+						.filter((t) => t.pinned)
+						.map((t) => t.name)
+						.join(', ')}
 				</div>
 				<div class="state-item">
 					<strong>Tab Order (Regular):</strong>
-					{tabs.filter(t => !t.pinned).map(t => t.name).join(', ')}
+					{tabs
+						.filter((t) => !t.pinned)
+						.map((t) => t.name)
+						.join(', ')}
 				</div>
 			</div>
 		</div>
@@ -310,6 +338,63 @@
 			</div>
 		</div>
 
+		<!-- Context Menu Demo (T065) -->
+		<div class="demo-section">
+			<h2>Context Menu Features</h2>
+			<div class="validation-info">
+				<div class="info-item">
+					<strong>Available Actions:</strong>
+					<ul>
+						<li><strong>Pin/Unpin Tab:</strong> Move tab between pinned and regular segments</li>
+						<li><strong>Copy Tab ID:</strong> Copy the tab's unique identifier to clipboard</li>
+						<li>
+							<strong>Background Presets:</strong> Choose from preset background themes (Default, Dark,
+							Light, Ocean, Forest)
+						</li>
+						<li><strong>Close Tab:</strong> Remove the tab and update focus accordingly</li>
+					</ul>
+				</div>
+				<div class="info-item">
+					<strong>How to Use:</strong>
+					<ul>
+						<li>Right-click any tab to open the context menu</li>
+						<li>Hover over "Background Presets" to see the submenu</li>
+						<li>All actions are keyboard accessible</li>
+						<li>Click outside the menu or on an action to close it</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- Animation Demo (T066) -->
+		<div class="demo-section">
+			<h2>Animation & Accessibility</h2>
+			<div class="validation-info">
+				<div class="info-item">
+					<strong>Add-Tab Roll-In Animation:</strong>
+					<ul>
+						<li>Normal: 200ms ease-out with slide and fade</li>
+						<li>Reduced Motion: 100ms fade-only (respects prefers-reduced-motion)</li>
+						<li>Click "Add Tab" (+) to see the animation</li>
+					</ul>
+				</div>
+				<div class="info-item">
+					<strong>Try It:</strong>
+					<div class="controls" style="margin-top: 10px;">
+						<button onclick={() => (simulateReducedMotion = !simulateReducedMotion)}>
+							{simulateReducedMotion ? 'Disable' : 'Enable'} Reduced Motion Mode
+						</button>
+						<button onclick={handleAddTab}> Add Tab (See Animation) </button>
+					</div>
+					<p style="margin-top: 10px; color: #666; font-size: 13px;">
+						{simulateReducedMotion
+							? '✓ Reduced motion enabled: Animations are simplified'
+							: '○ Normal animations active'}
+					</p>
+				</div>
+			</div>
+		</div>
+
 		<!-- Event Log (T052) -->
 		<div class="demo-section">
 			<h2>Event Log</h2>
@@ -317,7 +402,7 @@
 				{#if eventLog.length === 0}
 					<div class="no-events">No events yet. Try reordering tabs!</div>
 				{:else}
-					{#each eventLog as event}
+					{#each eventLog as event (event.id)}
 						<div class="event-entry">
 							<span class="event-time">{event.timestamp}</span>
 							<span class="event-type">{event.type}</span>

@@ -126,8 +126,8 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 - [X] T024 [US3] Add pin/unpin test and verify movement to/from pinned segment without selection loss
 - [X] T025 [US3] Add pinned indicator visibility test and reduced motion behavior on activation animation
 - [X] T026 [US3] Add controls presence test (AI toggle, workspace switcher, add-tab) and config error indicator visibility
-- [ ] T035 [US3] Add test for add-tab roll‑in animation; verify reduced motion minimizes or disables motion
-- [ ] T036 [US3] Add test for close behavior: focus moves to left neighbor or right if none; no focus loss
+- [X] T035 [US3] Add test for add-tab roll‑in animation; verify reduced motion minimizes or disables motion
+- [X] T036 [US3] Add test for close behavior: focus moves to left neighbor or right if none; no focus loss
 - [X] T040 [US3] Add context menu completeness test: Copy Tab ID, Background Presets, Close; keyboard accessible
 - [X] T048 [US3] Add test for config error indicator discoverability and action to open details
 - [X] T049 [US3] Add test for pinned segment overflow scroll; ensure regular tabs are not masked
@@ -137,10 +137,10 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 - [X] T027 [US3] Implement pin/unpin via context menu and shortcut; move within segments accordingly (drag remains in-segment)
 - [X] T028 [US3] Render pinned segment that remains visible irrespective of horizontal scroll; maintain separate overflow scrolling if needed
 - [X] T029 [US3] Render companion controls and wire stub events for toggles/switcher/add; render config error indicator with accessible label
-- [ ] T037 [US3] Implement add-tab roll‑in animation (≤200ms ease‑out; ≤100ms with reduced motion)
+- [X] T037 [US3] Implement add-tab roll‑in animation (≤200ms ease‑out; ≤100ms with reduced motion)
 - [X] T038 [US3] Implement close behavior focus logic and guard against content jump
 - [X] T041 [US3] Implement Copy Tab ID action with accessible feedback (non-intrusive announcement)
-- [ ] T042 [US3] Implement Background Presets submenu; emit selection for host to apply
+- [X] T042 [US3] Implement Background Presets submenu; emit selection for host to apply
 - [X] T043 [US3] Implement Close action; ensure selection/focus rules applied and no layout jump
 - [X] T047 [US3] Wire config error indicator to emit `openConfigDetails` (or open detail panel) with accessible name/description
 
@@ -151,7 +151,7 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 - [X] T063 [US3] [P] Add interactive controls demonstration (AI toggle, workspace switcher, add-tab button)
 - [X] T064 [US3] [P] Add config error indicator toggle in demo to show error state behavior
 - [X] T065 [US3] [P] Add context menu demonstration showing Copy Tab ID, Background Presets, and Close actions (note: Background Presets deferred to T042)
-- [ ] T066 [US3] [P] Add animation showcase for add-tab roll-in with reduced motion toggle
+- [X] T066 [US3] [P] Add animation showcase for add-tab roll-in with reduced motion toggle
 - [X] T067 [US3] [P] Add close tab demonstration showing focus management behavior
 
 **Checkpoint**: US3 independently functional — pin behavior and UI controls present

@@ -1,338 +1,352 @@
 <script lang="ts">
-/**
- * TabBar Component
- * 
- * A reusable tab bar that supports:
- * - Reordering (drag-and-drop + keyboard) with edge auto-scroll
- * - Pinned segment behavior and pin/unpin actions
- * - Inline rename with validation (1-60 chars, trimmed non-empty)
- * - Overflow management with horizontal scroll
- * - Tab bar companion controls (AI toggle, workspace switcher, add-tab)
- * - Configuration error indicator
- * 
- * @component
- * @events
- * - activate - Emitted when a tab is clicked or activated via keyboard { tabId: string }
- * - reorder - Emitted when tabs are reordered within a segment { segment: 'pinned' | 'regular', order: string[] }
- * - pin - Emitted when a tab is pinned/unpinned { tabId: string, pinned: boolean }
- * - rename - Emitted when a tab is renamed { tabId: string, name: string }
- * - addTab - Emitted when add-tab control is activated
- * - toggleAI - Emitted when AI toggle is activated { enabled: boolean }
- * - switchWorkspace - Emitted when workspace switcher is activated
- * - openConfigDetails - Emitted when config error indicator is clicked
- * - close - Emitted when a tab is closed { tabId: string }
- */
+	/**
+	 * TabBar Component
+	 *
+	 * A reusable tab bar that supports:
+	 * - Reordering (drag-and-drop + keyboard) with edge auto-scroll
+	 * - Pinned segment behavior and pin/unpin actions
+	 * - Inline rename with validation (1-60 chars, trimmed non-empty)
+	 * - Overflow management with horizontal scroll
+	 * - Tab bar companion controls (AI toggle, workspace switcher, add-tab)
+	 * - Configuration error indicator
+	 *
+	 * @component
+	 * @events
+	 * - activate - Emitted when a tab is clicked or activated via keyboard { tabId: string }
+	 * - reorder - Emitted when tabs are reordered within a segment { segment: 'pinned' | 'regular', order: string[] }
+	 * - pin - Emitted when a tab is pinned/unpinned { tabId: string, pinned: boolean }
+	 * - rename - Emitted when a tab is renamed { tabId: string, name: string }
+	 * - addTab - Emitted when add-tab control is activated
+	 * - toggleAI - Emitted when AI toggle is activated { enabled: boolean }
+	 * - switchWorkspace - Emitted when workspace switcher is activated
+	 * - openConfigDetails - Emitted when config error indicator is clicked
+	 * - close - Emitted when a tab is closed { tabId: string }
+	 */
 
-import type { Tab } from '../types.js';
+	import type { Tab } from '../types.js';
 
-interface Props {
-	/** Array of all tabs (both pinned and regular) */
-	tabs: Tab[];
-	/** ID of the currently active tab */
-	activeId: string;
-	/** Whether to show the config error indicator */
-	showConfigError?: boolean;
-	/** Whether AI is enabled (for toggle state) */
-	aiEnabled?: boolean;
-	/** Event callback when a tab is activated */
-	onactivate?: (event: { tabId: string }) => void;
-	/** Event callback when tabs are reordered */
-	onreorder?: (event: { segment: 'pinned' | 'regular'; order: string[] }) => void;
-	/** Event callback when a tab is pinned/unpinned */
-	onpin?: (event: { tabId: string; pinned: boolean }) => void;
-	/** Event callback when a tab is renamed */
-	onrename?: (event: { tabId: string; name: string }) => void;
-	/** Event callback when add-tab is clicked */
-	onaddTab?: () => void;
-	/** Event callback when AI toggle is clicked */
-	ontoggleAI?: (event: { enabled: boolean }) => void;
-	/** Event callback when workspace switcher is clicked */
-	onswitchWorkspace?: () => void;
-	/** Event callback when config error indicator is clicked */
-	onopenConfigDetails?: () => void;
-	/** Event callback when a tab is closed */
-	onclose?: (event: { tabId: string }) => void;
-}
+	interface Props {
+		/** Array of all tabs (both pinned and regular) */
+		tabs: Tab[];
+		/** ID of the currently active tab */
+		activeId: string;
+		/** Whether to show the config error indicator */
+		showConfigError?: boolean;
+		/** Whether AI is enabled (for toggle state) */
+		aiEnabled?: boolean;
+		/** Event callback when a tab is activated */
+		onactivate?: (event: { tabId: string }) => void;
+		/** Event callback when tabs are reordered */
+		onreorder?: (event: { segment: 'pinned' | 'regular'; order: string[] }) => void;
+		/** Event callback when a tab is pinned/unpinned */
+		onpin?: (event: { tabId: string; pinned: boolean }) => void;
+		/** Event callback when a tab is renamed */
+		onrename?: (event: { tabId: string; name: string }) => void;
+		/** Event callback when add-tab is clicked */
+		onaddTab?: () => void;
+		/** Event callback when AI toggle is clicked */
+		ontoggleAI?: (event: { enabled: boolean }) => void;
+		/** Event callback when workspace switcher is clicked */
+		onswitchWorkspace?: () => void;
+		/** Event callback when config error indicator is clicked */
+		onopenConfigDetails?: () => void;
+		/** Event callback when a tab is closed */
+		onclose?: (event: { tabId: string }) => void;
+		/** Event callback when background preset is selected */
+		onbackgroundPreset?: (event: { tabId: string; preset: string }) => void;
+	}
 
-const { 
-	tabs = [], 
-	activeId = '', 
-	showConfigError = false, 
-	aiEnabled = false,
-	onactivate,
-	onreorder,
-	onpin,
-	onrename,
-	onaddTab,
-	ontoggleAI,
-	onswitchWorkspace,
-	onopenConfigDetails,
-	onclose
-}: Props = $props();
+	const {
+		tabs = [],
+		activeId = '',
+		showConfigError = false,
+		aiEnabled = false,
+		onactivate,
+		onreorder,
+		onpin,
+		onrename,
+		onaddTab,
+		ontoggleAI,
+		onswitchWorkspace,
+		onopenConfigDetails,
+		onclose,
+		onbackgroundPreset
+	}: Props = $props();
 
-// Derived state: separate tabs into pinned and regular segments
-let pinnedTabs = $derived(tabs.filter(tab => tab.pinned).sort((a, b) => a.order - b.order));
-let regularTabs = $derived(tabs.filter(tab => !tab.pinned).sort((a, b) => a.order - b.order));
+	// Derived state: separate tabs into pinned and regular segments
+	let pinnedTabs = $derived(tabs.filter((tab) => tab.pinned).sort((a, b) => a.order - b.order));
+	let regularTabs = $derived(tabs.filter((tab) => !tab.pinned).sort((a, b) => a.order - b.order));
 
-// Drag state
-let draggedTab: Tab | null = $state(null);
-let draggedFromSegment: 'pinned' | 'regular' | null = $state(null);
-let dragOverIndex = $state(-1);
+	// Drag state
+	let draggedTab: Tab | null = $state(null);
+	let draggedFromSegment: 'pinned' | 'regular' | null = $state(null); // Rename state (US2)
+	let editingTabId: string | null = $state(null);
+	let editingValue: string = $state('');
+	let validationError: string | null = $state(null);
 
-// Rename state (US2)
-let editingTabId: string | null = $state(null);
-let editingValue: string = $state('');
-let validationError: string | null = $state(null);
+	// Context menu state (US3)
+	let contextMenuTab: Tab | null = $state(null);
+	let contextMenuX: number = $state(0);
+	let contextMenuY: number = $state(0);
+	let showBackgroundPresetsSubmenu: boolean = $state(false);
 
-// Context menu state (US3)
-let contextMenuTab: Tab | null = $state(null);
-let contextMenuX: number = $state(0);
-let contextMenuY: number = $state(0);
+	// Focus management after reorder
+	let tabToRefocus: string | null = $state(null);
 
-// Focus management after reorder
-let tabToRefocus: string | null = $state(null);
-
-// Effect to refocus tab after reorder
-$effect(() => {
-	if (tabToRefocus) {
-		const element = document.querySelector(`[data-tab-id="${tabToRefocus}"]`) as HTMLElement;
-		if (element) {
-			element.focus();
-			tabToRefocus = null;
+	// Effect to refocus tab after reorder
+	$effect(() => {
+		if (tabToRefocus) {
+			const element = document.querySelector(`[data-tab-id="${tabToRefocus}"]`) as HTMLElement;
+			if (element) {
+				element.focus();
+				tabToRefocus = null;
+			}
 		}
-	}
-});
+	});
 
-// Tab activation handler
-function handleTabClick(tab: Tab) {
-	onactivate?.({ tabId: tab.id });
-}
-
-// Keyboard navigation
-function handleTabKeydown(event: KeyboardEvent, tab: Tab, segment: 'pinned' | 'regular') {
-	const segmentTabs = segment === 'pinned' ? pinnedTabs : regularTabs;
-	const currentIndex = segmentTabs.findIndex(t => t.id === tab.id);
-	// Reorder with Ctrl/Cmd+Arrow (check this FIRST before plain arrows)
-	if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowLeft' && currentIndex > 0) {
-		event.preventDefault();
-		// Reorder left
-		const newOrder = [...segmentTabs];
-		[newOrder[currentIndex], newOrder[currentIndex - 1]] = [newOrder[currentIndex - 1], newOrder[currentIndex]];
-		tabToRefocus = tab.id; // Mark for refocus after parent updates tabs
-		onreorder?.({ segment, order: newOrder.map(t => t.id) });
-	} else if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowRight' && currentIndex < segmentTabs.length - 1) {
-		event.preventDefault();
-		// Reorder right
-		const newOrder = [...segmentTabs];
-		[newOrder[currentIndex], newOrder[currentIndex + 1]] = [newOrder[currentIndex + 1], newOrder[currentIndex]];
-		tabToRefocus = tab.id; // Mark for refocus after parent updates tabs
-		onreorder?.({ segment, order: newOrder.map(t => t.id) });
-	}
-	// Navigate with arrow keys (move focus without activating)
-	else if (event.key === 'ArrowLeft' && currentIndex > 0) {
-		event.preventDefault();
-		const prevTab = segmentTabs[currentIndex - 1];
-		(event.target as HTMLElement).parentElement?.querySelector<HTMLButtonElement>(
-			`[data-tab-id="${prevTab.id}"]`
-		)?.focus();
-	} else if (event.key === 'ArrowRight' && currentIndex < segmentTabs.length - 1) {
-		event.preventDefault();
-		const nextTab = segmentTabs[currentIndex + 1];
-		(event.target as HTMLElement).parentElement?.querySelector<HTMLButtonElement>(
-			`[data-tab-id="${nextTab.id}"]`
-		)?.focus();
-	}
-	// Activate tab with Enter or Space
-	else if (event.key === 'Enter' || event.key === ' ') {
-		event.preventDefault();
+	// Tab activation handler
+	function handleTabClick(tab: Tab) {
 		onactivate?.({ tabId: tab.id });
 	}
-}
 
-// Drag-and-drop handlers
-function handleDragStart(event: DragEvent, tab: Tab, segment: 'pinned' | 'regular') {
-	draggedTab = tab;
-	draggedFromSegment = segment;
-	if (event.dataTransfer) {
-		event.dataTransfer.effectAllowed = 'move';
-		event.dataTransfer.setData('text/plain', tab.id);
+	// Keyboard navigation
+	function handleTabKeydown(event: KeyboardEvent, tab: Tab, segment: 'pinned' | 'regular') {
+		const segmentTabs = segment === 'pinned' ? pinnedTabs : regularTabs;
+		const currentIndex = segmentTabs.findIndex((t) => t.id === tab.id);
+		// Reorder with Ctrl/Cmd+Arrow (check this FIRST before plain arrows)
+		if ((event.ctrlKey || event.metaKey) && event.key === 'ArrowLeft' && currentIndex > 0) {
+			event.preventDefault();
+			// Reorder left
+			const newOrder = [...segmentTabs];
+			[newOrder[currentIndex], newOrder[currentIndex - 1]] = [
+				newOrder[currentIndex - 1],
+				newOrder[currentIndex]
+			];
+			tabToRefocus = tab.id; // Mark for refocus after parent updates tabs
+			onreorder?.({ segment, order: newOrder.map((t) => t.id) });
+		} else if (
+			(event.ctrlKey || event.metaKey) &&
+			event.key === 'ArrowRight' &&
+			currentIndex < segmentTabs.length - 1
+		) {
+			event.preventDefault();
+			// Reorder right
+			const newOrder = [...segmentTabs];
+			[newOrder[currentIndex], newOrder[currentIndex + 1]] = [
+				newOrder[currentIndex + 1],
+				newOrder[currentIndex]
+			];
+			tabToRefocus = tab.id; // Mark for refocus after parent updates tabs
+			onreorder?.({ segment, order: newOrder.map((t) => t.id) });
+		}
+		// Navigate with arrow keys (move focus without activating)
+		else if (event.key === 'ArrowLeft' && currentIndex > 0) {
+			event.preventDefault();
+			const prevTab = segmentTabs[currentIndex - 1];
+			(event.target as HTMLElement).parentElement
+				?.querySelector<HTMLButtonElement>(`[data-tab-id="${prevTab.id}"]`)
+				?.focus();
+		} else if (event.key === 'ArrowRight' && currentIndex < segmentTabs.length - 1) {
+			event.preventDefault();
+			const nextTab = segmentTabs[currentIndex + 1];
+			(event.target as HTMLElement).parentElement
+				?.querySelector<HTMLButtonElement>(`[data-tab-id="${nextTab.id}"]`)
+				?.focus();
+		}
+		// Activate tab with Enter or Space
+		else if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			onactivate?.({ tabId: tab.id });
+		}
 	}
-}
 
-function handleDragOver(event: DragEvent, index: number) {
-	event.preventDefault();
-	dragOverIndex = index;
-	if (event.dataTransfer) {
-		event.dataTransfer.dropEffect = 'move';
+	// Drag-and-drop handlers
+	function handleDragStart(event: DragEvent, tab: Tab, segment: 'pinned' | 'regular') {
+		draggedTab = tab;
+		draggedFromSegment = segment;
+		if (event.dataTransfer) {
+			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.setData('text/plain', tab.id);
+		}
 	}
-}
 
-function handleDrop(event: DragEvent, dropTab: Tab, segment: 'pinned' | 'regular') {
-	event.preventDefault();
-	
-	if (!draggedTab || draggedFromSegment !== segment) {
-		// Cross-segment drag not allowed
+	function handleDragOver(event: DragEvent) {
+		event.preventDefault();
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = 'move';
+		}
+	}
+
+	function handleDrop(event: DragEvent, dropTab: Tab, segment: 'pinned' | 'regular') {
+		event.preventDefault();
+
+		if (!draggedTab || draggedFromSegment !== segment) {
+			// Cross-segment drag not allowed
+			draggedTab = null;
+			draggedFromSegment = null;
+			return;
+		}
+
+		const segmentTabs = segment === 'pinned' ? pinnedTabs : regularTabs;
+		const draggedIndex = segmentTabs.findIndex((t) => t.id === draggedTab!.id);
+		const dropIndex = segmentTabs.findIndex((t) => t.id === dropTab.id);
+
+		if (draggedIndex !== dropIndex) {
+			const newOrder = [...segmentTabs];
+			const [removed] = newOrder.splice(draggedIndex, 1);
+			newOrder.splice(dropIndex, 0, removed);
+			onreorder?.({ segment, order: newOrder.map((t) => t.id) });
+		}
+
 		draggedTab = null;
 		draggedFromSegment = null;
-		dragOverIndex = -1;
-		return;
 	}
-	
-	const segmentTabs = segment === 'pinned' ? pinnedTabs : regularTabs;
-	const draggedIndex = segmentTabs.findIndex(t => t.id === draggedTab!.id);
-	const dropIndex = segmentTabs.findIndex(t => t.id === dropTab.id);
-	
-	if (draggedIndex !== dropIndex) {
-		const newOrder = [...segmentTabs];
-		const [removed] = newOrder.splice(draggedIndex, 1);
-		newOrder.splice(dropIndex, 0, removed);
-		onreorder?.({ segment, order: newOrder.map(t => t.id) });
+
+	function handleDragEnd() {
+		draggedTab = null;
+		draggedFromSegment = null;
+	} // Rename handlers (US2: T021-T023)
+	function startRename(tab: Tab) {
+		editingTabId = tab.id;
+		editingValue = tab.name;
+		validationError = null;
+
+		// Focus and select the input after render
+		setTimeout(() => {
+			const input = document.querySelector(`[data-rename-id="${tab.id}"]`) as HTMLInputElement;
+			if (input) {
+				input.focus();
+				input.select();
+			}
+		}, 0);
 	}
-	
-	draggedTab = null;
-	draggedFromSegment = null;
-	dragOverIndex = -1;
-}
 
-function handleDragEnd() {
-	draggedTab = null;
-	draggedFromSegment = null;
-	dragOverIndex = -1;
-}
+	function validateName(name: string): string | null {
+		const trimmed = name.trim();
 
-// Rename handlers (US2: T021-T023)
-function startRename(tab: Tab) {
-	editingTabId = tab.id;
-	editingValue = tab.name;
-	validationError = null;
-	
-	// Focus and select the input after render
-	setTimeout(() => {
-		const input = document.querySelector(`[data-rename-id="${tab.id}"]`) as HTMLInputElement;
-		if (input) {
-			input.focus();
-			input.select();
+		if (trimmed.length === 0) {
+			return 'Tab name cannot be empty';
 		}
-	}, 0);
-}
 
-function validateName(name: string): string | null {
-	const trimmed = name.trim();
-	
-	if (trimmed.length === 0) {
-		return 'Tab name cannot be empty';
+		if (trimmed.length > 60) {
+			return 'Tab name must be 60 characters or less';
+		}
+
+		return null;
 	}
-	
-	if (trimmed.length > 60) {
-		return 'Tab name must be 60 characters or less';
+
+	function commitRename() {
+		if (!editingTabId) return;
+
+		const trimmed = editingValue.trim();
+		const error = validateName(trimmed);
+
+		if (error) {
+			validationError = error;
+			return; // Stay in edit mode with error
+		}
+
+		// Emit rename event with title sync hook
+		onrename?.({ tabId: editingTabId, name: trimmed });
+
+		// Exit edit mode
+		editingTabId = null;
+		editingValue = '';
+		validationError = null;
 	}
-	
-	return null;
-}
 
-function commitRename() {
-	if (!editingTabId) return;
-	
-	const trimmed = editingValue.trim();
-	const error = validateName(trimmed);
-	
-	if (error) {
-		validationError = error;
-		return; // Stay in edit mode with error
+	function cancelRename() {
+		editingTabId = null;
+		editingValue = '';
+		validationError = null;
 	}
-	
-	// Emit rename event with title sync hook
-	onrename?.({ tabId: editingTabId, name: trimmed });
-	
-	// Exit edit mode
-	editingTabId = null;
-	editingValue = '';
-	validationError = null;
-}
 
-function cancelRename() {
-	editingTabId = null;
-	editingValue = '';
-	validationError = null;
-}
+	function handleRenameKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			commitRename();
+		} else if (event.key === 'Escape') {
+			event.preventDefault();
+			cancelRename();
+		}
+	}
 
-function handleRenameKeydown(event: KeyboardEvent) {
-	if (event.key === 'Enter') {
+	function handleRenameBlur() {
+		// Commit on blur (unless there's a validation error)
+		if (!validationError) {
+			commitRename();
+		}
+	}
+
+	// Pin/unpin handlers (US3: T027)
+	function togglePin(tab: Tab) {
+		onpin?.({ tabId: tab.id, pinned: !tab.pinned });
+	}
+
+	// Control button handlers (US3: T029)
+	function handleAddTabClick() {
+		onaddTab?.();
+	}
+
+	function handleToggleAIClick() {
+		ontoggleAI?.({ enabled: !aiEnabled });
+	}
+
+	function handleSwitchWorkspaceClick() {
+		onswitchWorkspace?.();
+	}
+
+	function handleOpenConfigDetailsClick() {
+		onopenConfigDetails?.();
+	}
+
+	// Close handler (US3: T038)
+	function handleCloseTab(tab: Tab) {
+		onclose?.({ tabId: tab.id });
+	} // Context menu handler (US3: T041-T043)
+	function handleContextMenu(event: MouseEvent, tab: Tab) {
 		event.preventDefault();
-		commitRename();
-	} else if (event.key === 'Escape') {
-		event.preventDefault();
-		cancelRename();
+		contextMenuTab = tab;
+		contextMenuX = event.clientX;
+		contextMenuY = event.clientY;
 	}
-}
 
-function handleRenameBlur() {
-	// Commit on blur (unless there's a validation error)
-	if (!validationError) {
-		commitRename();
+	function closeContextMenu() {
+		contextMenuTab = null;
+		showBackgroundPresetsSubmenu = false;
 	}
-}
 
-// Pin/unpin handlers (US3: T027)
-function togglePin(tab: Tab) {
-	onpin?.({ tabId: tab.id, pinned: !tab.pinned });
-}
-
-// Control button handlers (US3: T029)
-function handleAddTabClick() {
-	onaddTab?.();
-}
-
-function handleToggleAIClick() {
-	ontoggleAI?.({ enabled: !aiEnabled });
-}
-
-function handleSwitchWorkspaceClick() {
-	onswitchWorkspace?.();
-}
-
-function handleOpenConfigDetailsClick() {
-	onopenConfigDetails?.();
-}
-
-// Close handler (US3: T038)
-function handleCloseTab(tab: Tab, segment: 'pinned' | 'regular') {
-	onclose?.({ tabId: tab.id });
-}
-
-// Context menu handler (US3: T041-T043)
-function handleContextMenu(event: MouseEvent, tab: Tab) {
-	event.preventDefault();
-	contextMenuTab = tab;
-	contextMenuX = event.clientX;
-	contextMenuY = event.clientY;
-}
-
-function closeContextMenu() {
-	contextMenuTab = null;
-}
-
-function handlePinFromMenu() {
-	if (contextMenuTab) {
-		togglePin(contextMenuTab);
-		closeContextMenu();
+	function toggleBackgroundPresetsSubmenu() {
+		showBackgroundPresetsSubmenu = !showBackgroundPresetsSubmenu;
 	}
-}
 
-function handleCopyTabId() {
-	if (contextMenuTab) {
-		navigator.clipboard.writeText(contextMenuTab.id);
-		closeContextMenu();
+	function handleBackgroundPreset(preset: string) {
+		if (contextMenuTab) {
+			onbackgroundPreset?.({ tabId: contextMenuTab.id, preset });
+			closeContextMenu();
+		}
 	}
-}
 
-function handleCloseFromMenu() {
-	if (contextMenuTab) {
-		const segment = contextMenuTab.pinned ? 'pinned' : 'regular';
-		handleCloseTab(contextMenuTab, segment);
-		closeContextMenu();
+	function handlePinFromMenu() {
+		if (contextMenuTab) {
+			togglePin(contextMenuTab);
+			closeContextMenu();
+		}
 	}
-}
+
+	function handleCopyTabId() {
+		if (contextMenuTab) {
+			navigator.clipboard.writeText(contextMenuTab.id);
+			closeContextMenu();
+		}
+	}
+
+	function handleCloseFromMenu() {
+		if (contextMenuTab) {
+			handleCloseTab(contextMenuTab);
+			closeContextMenu();
+		}
+	}
 </script>
 
 <nav class="tab-bar" aria-label="Tab navigation">
@@ -351,7 +365,7 @@ function handleCloseFromMenu() {
 						aria-label="{tab.name} (pinned)"
 						tabindex={tab.id === activeId ? 0 : -1}
 						data-tab-id={tab.id}
-						draggable={editingTabId !== tab.id ? "true" : "false"}
+						draggable={editingTabId !== tab.id ? 'true' : 'false'}
 						ondragstart={(e) => handleDragStart(e, tab, 'pinned')}
 						ondragover={(e) => handleDragOver(e, index)}
 						ondrop={(e) => handleDrop(e, tab, 'pinned')}
@@ -390,13 +404,13 @@ function handleCloseFromMenu() {
 								title="Close tab"
 								onmousedown={(e) => {
 									e.stopPropagation();
-									handleCloseTab(tab, 'pinned');
+									handleCloseTab(tab);
 								}}
 								onkeydown={(e) => {
 									if (e.key === 'Enter' || e.key === ' ') {
 										e.stopPropagation();
 										e.preventDefault();
-										handleCloseTab(tab, 'pinned');
+										handleCloseTab(tab);
 									}
 								}}
 							>
@@ -411,26 +425,26 @@ function handleCloseFromMenu() {
 		<!-- Regular tabs segment -->
 		<div class="tab-segment regular-segment" role="tablist" aria-label="Regular tabs">
 			{#each regularTabs as tab, index (tab.id)}
-			<button
-				class="tab"
-				class:active={tab.id === activeId}
-				class:dragging={draggedTab?.id === tab.id}
-				class:editing={editingTabId === tab.id}
-				role="tab"
-				aria-selected={tab.id === activeId}
-				aria-label={tab.name}
-				tabindex={tab.id === activeId ? 0 : -1}
-				data-tab-id={tab.id}
-				draggable={editingTabId !== tab.id ? "true" : "false"}
-				onclick={() => handleTabClick(tab)}
-				ondragstart={(e) => handleDragStart(e, tab, 'regular')}
-				ondragover={(e) => handleDragOver(e, index)}
-				ondrop={(e) => handleDrop(e, tab, 'regular')}
-				ondragend={handleDragEnd}
-				onkeydown={(e) => handleTabKeydown(e, tab, 'regular')}
-				ondblclick={() => startRename(tab)}
-				oncontextmenu={(e) => handleContextMenu(e, tab)}
-			>
+				<button
+					class="tab"
+					class:active={tab.id === activeId}
+					class:dragging={draggedTab?.id === tab.id}
+					class:editing={editingTabId === tab.id}
+					role="tab"
+					aria-selected={tab.id === activeId}
+					aria-label={tab.name}
+					tabindex={tab.id === activeId ? 0 : -1}
+					data-tab-id={tab.id}
+					draggable={editingTabId !== tab.id ? 'true' : 'false'}
+					onclick={() => handleTabClick(tab)}
+					ondragstart={(e) => handleDragStart(e, tab, 'regular')}
+					ondragover={(e) => handleDragOver(e, index)}
+					ondrop={(e) => handleDrop(e, tab, 'regular')}
+					ondragend={handleDragEnd}
+					onkeydown={(e) => handleTabKeydown(e, tab, 'regular')}
+					ondblclick={() => startRename(tab)}
+					oncontextmenu={(e) => handleContextMenu(e, tab)}
+				>
 					{#if editingTabId === tab.id}
 						<input
 							type="text"
@@ -460,13 +474,13 @@ function handleCloseFromMenu() {
 							title="Close tab"
 							onmousedown={(e) => {
 								e.stopPropagation();
-								handleCloseTab(tab, 'regular');
+								handleCloseTab(tab);
 							}}
 							onkeydown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ') {
 									e.stopPropagation();
 									e.preventDefault();
-									handleCloseTab(tab, 'regular');
+									handleCloseTab(tab);
 								}
 							}}
 						>
@@ -489,26 +503,26 @@ function handleCloseFromMenu() {
 					⚠️
 				</button>
 			{/if}
-			<button 
-				class="control-button ai-toggle" 
+			<button
+				class="control-button ai-toggle"
 				class:active={aiEnabled}
-				aria-label="Toggle AI" 
+				aria-label="Toggle AI"
 				title="Toggle AI"
 				onclick={handleToggleAIClick}
 			>
 				🤖
 			</button>
-			<button 
-				class="control-button workspace-switcher" 
-				aria-label="Switch workspace" 
+			<button
+				class="control-button workspace-switcher"
+				aria-label="Switch workspace"
 				title="Switch workspace"
 				onclick={handleSwitchWorkspaceClick}
 			>
 				🔄
 			</button>
-			<button 
-				class="control-button add-tab" 
-				aria-label="Add tab" 
+			<button
+				class="control-button add-tab"
+				aria-label="Add tab"
 				title="Add tab"
 				onclick={handleAddTabClick}
 			>
@@ -523,32 +537,70 @@ function handleCloseFromMenu() {
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="context-menu-backdrop" onclick={closeContextMenu}></div>
-		<div 
-			class="context-menu" 
+		<div
+			class="context-menu"
 			style="left: {contextMenuX}px; top: {contextMenuY}px;"
 			role="menu"
 			aria-label="Tab actions"
 		>
-			<button 
-				class="context-menu-item" 
-				role="menuitem"
-				onclick={handlePinFromMenu}
-			>
+			<button class="context-menu-item" role="menuitem" onclick={handlePinFromMenu}>
 				{contextMenuTab.pinned ? '📌 Unpin Tab' : '📌 Pin Tab'}
 			</button>
-			<button 
-				class="context-menu-item" 
-				role="menuitem"
-				onclick={handleCopyTabId}
-			>
+			<button class="context-menu-item" role="menuitem" onclick={handleCopyTabId}>
 				📋 Copy Tab ID
 			</button>
+			<div class="context-menu-item-parent">
+				<button
+					class="context-menu-item"
+					role="menuitem"
+					aria-haspopup="true"
+					aria-expanded={showBackgroundPresetsSubmenu}
+					onclick={toggleBackgroundPresetsSubmenu}
+				>
+					🎨 Background Presets ›
+				</button>
+				{#if showBackgroundPresetsSubmenu}
+					<div class="context-submenu" role="menu" aria-label="Background presets">
+						<button
+							class="context-menu-item"
+							role="menuitem"
+							onclick={() => handleBackgroundPreset('default')}
+						>
+							Default
+						</button>
+						<button
+							class="context-menu-item"
+							role="menuitem"
+							onclick={() => handleBackgroundPreset('dark')}
+						>
+							Dark
+						</button>
+						<button
+							class="context-menu-item"
+							role="menuitem"
+							onclick={() => handleBackgroundPreset('light')}
+						>
+							Light
+						</button>
+						<button
+							class="context-menu-item"
+							role="menuitem"
+							onclick={() => handleBackgroundPreset('ocean')}
+						>
+							Ocean
+						</button>
+						<button
+							class="context-menu-item"
+							role="menuitem"
+							onclick={() => handleBackgroundPreset('forest')}
+						>
+							Forest
+						</button>
+					</div>
+				{/if}
+			</div>
 			<div class="context-menu-separator"></div>
-			<button 
-				class="context-menu-item danger" 
-				role="menuitem"
-				onclick={handleCloseFromMenu}
-			>
+			<button class="context-menu-item danger" role="menuitem" onclick={handleCloseFromMenu}>
 				✕ Close Tab
 			</button>
 		</div>
@@ -614,6 +666,18 @@ function handleCloseFromMenu() {
 		font-family: inherit;
 		font-size: inherit;
 		height: 100%;
+		animation: tab-roll-in 200ms ease-out;
+	}
+
+	@keyframes tab-roll-in {
+		from {
+			opacity: 0;
+			transform: translateX(-20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
 	}
 
 	.tab:hover {
@@ -738,7 +802,9 @@ function handleCloseFromMenu() {
 		font-size: 18px;
 		line-height: 1;
 		opacity: 0.6;
-		transition: opacity 0.15s ease, background 0.15s ease;
+		transition:
+			opacity 0.15s ease,
+			background 0.15s ease;
 		user-select: none;
 	}
 
@@ -800,11 +866,51 @@ function handleCloseFromMenu() {
 		margin: 4px 0;
 	}
 
+	.context-menu-item-parent {
+		position: relative;
+	}
+
+	.context-submenu {
+		position: absolute;
+		left: 100%;
+		top: 0;
+		background: var(--context-menu-bg, #2a2a2a);
+		border: 1px solid var(--context-menu-border, #444);
+		border-radius: 6px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+		padding: 4px 0;
+		min-width: 140px;
+		margin-left: 4px;
+	}
+
 	/* Respect reduced motion preferences */
 	@media (prefers-reduced-motion: reduce) {
 		.tab,
 		.control-button {
 			transition: none;
+		}
+
+		.tab {
+			animation: tab-roll-in-reduced 100ms ease-out;
+		}
+	}
+
+	/* Also respect data attribute for demo purposes */
+	:global([data-reduced-motion='true']) .tab {
+		animation: tab-roll-in-reduced 100ms ease-out !important;
+	}
+
+	:global([data-reduced-motion='true']) .tab,
+	:global([data-reduced-motion='true']) .control-button {
+		transition: none !important;
+	}
+
+	@keyframes tab-roll-in-reduced {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
 		}
 	}
 </style>
