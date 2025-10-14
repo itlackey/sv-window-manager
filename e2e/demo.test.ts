@@ -16,9 +16,13 @@ test('reveal then toggle side panel (button and keyboard)', async ({ page }) => 
 	await page.evaluate(() => {
 		(window as any).__svwm_ready = false;
 		const el = document.querySelector('.wm-root');
-		el?.addEventListener('ready', () => {
-			(window as any).__svwm_ready = true;
-		}, { once: true });
+		el?.addEventListener(
+			'ready',
+			() => {
+				(window as any).__svwm_ready = true;
+			},
+			{ once: true }
+		);
 	});
 	await page.waitForFunction(() => (window as any).__svwm_ready === true);
 

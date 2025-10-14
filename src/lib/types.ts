@@ -45,3 +45,11 @@ export interface FlashItem {
 	message: string;
 	expiresInMs?: number;
 }
+
+// Tab Bar types
+export interface Tab {
+	id: string;
+	name: string;
+	pinned: boolean;
+	order: number;
+}
