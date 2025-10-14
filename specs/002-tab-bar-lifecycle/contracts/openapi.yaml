@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: Tab Bar Contracts
+  version: 0.1.0
+  description: API contracts derived from Tab Bar Lifecycle & Customization spec
+paths:
+  /tabs/reorder:
+    post:
+      summary: Reorder tabs within a segment
+      description: Updates the order of tabs in the specified segment (pinned or regular).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                segment:
+                  type: string
+                  enum: [pinned, regular]
+                order:
+                  type: array
+                  items:
+                    type: string
+              required: [segment, order]
+      responses:
+        '200':
+          description: Reorder applied
+  /tabs/pin:
+    post:
+      summary: Pin or unpin a tab
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tabId:
+                  type: string
+                pinned:
+                  type: boolean
+              required: [tabId, pinned]
+      responses:
+        '200':
+          description: Pin state updated
+  /tabs/rename:
+    post:
+      summary: Rename a tab
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tabId:
+                  type: string
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+              required: [tabId, name]
+      responses:
+        '200':
+          description: Name updated
+  /tabs/list:
+    get:
+      summary: List tabs by segment
+      parameters:
+        - in: query
+          name: segment
+          schema:
+            type: string
+            enum: [pinned, regular]
+          required: false
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pinned:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tab'
+                  regular:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tab'
+components:
+  schemas:
+    Tab:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          minLength: 1
+          maxLength: 60
+        pinned:
+          type: boolean
+        order:
+          type: integer
+      required: [id, name, pinned, order]
