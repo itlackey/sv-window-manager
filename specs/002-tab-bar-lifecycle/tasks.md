@@ -29,10 +29,10 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 
 **Purpose**: Ensure local environment and scaffolding exist for tab bar work
 
-- [ ] T001 [P] Create placeholder TabBar component file `src/lib/components/TabBar.svelte`
-- [ ] T002 [P] Export `TabBar` from `src/lib/index.ts`
-- [ ] T003 [P] Add Storybook story scaffold `src/stories/TabBar.stories.svelte`
-- [ ] T004 [P] Verify lint/typecheck pipeline recognizes new files (`npm run check` locally)
+- [X] T001 [P] Create placeholder TabBar component file `src/lib/components/TabBar.svelte`
+- [X] T002 [P] Export `TabBar` from `src/lib/index.ts`
+- [X] T003 [P] Add Storybook story scaffold `src/stories/TabBar.stories.svelte`
+- [X] T004 [P] Verify lint/typecheck pipeline recognizes new files (`npm run check` locally)
 
 ---
 
@@ -40,11 +40,11 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 
 **Purpose**: Core infrastructure that MUST exist before stories
 
-- [ ] T005 Define public props and events contract for `TabBar` per spec in `src/lib/components/TabBar.svelte` header doc (name, id, pinned, order, activeId; events: reorder, pin, rename)
-- [ ] T006 [P] Ensure `src/lib/WindowManagerShell.svelte` (or shell) exposes mounting region for tab bar if not already present
-- [ ] T007 [P] Add minimal styles (CSS vars) for tab strip regions (pinned, regular, controls) in `src/lib/components/TabBar.svelte`
-- [ ] T008 Establish a11y roles and landmarks for tablist and tabs (ARIA roles) in `TabBar`
-- [ ] T009 Add reduced motion handling toggle via `prefers-reduced-motion` CSS respect
+- [X] T005 Define public props and events contract for `TabBar` per spec in `src/lib/components/TabBar.svelte` header doc (name, id, pinned, order, activeId; events: reorder, pin, rename)
+- [X] T006 [P] Ensure `src/lib/WindowManagerShell.svelte` (or shell) exposes mounting region for tab bar if not already present
+- [X] T007 [P] Add minimal styles (CSS vars) for tab strip regions (pinned, regular, controls) in `src/lib/components/TabBar.svelte`
+- [X] T008 Establish a11y roles and landmarks for tablist and tabs (ARIA roles) in `TabBar`
+- [X] T009 Add reduced motion handling toggle via `prefers-reduced-motion` CSS respect
 
 **Checkpoint**: Foundation ready — user story implementation can now begin in parallel
 
@@ -58,20 +58,28 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 
 ### Tests (Component) — US1
 
-- [ ] T010 [US1] Create `TabBar.svelte.spec.ts` happy-path render and role assertions near `src/lib/components/TabBar.svelte.spec.ts`
-- [ ] T011 [US1] Add DnD reorder test with edge auto-scroll simulation; assert order emitted and focus remains sensible
-- [ ] T012 [US1] Add keyboard reorder test (move left/right); assert order emitted and a11y focus indicators visible
+- [X] T010 [US1] Create `TabBar.svelte.spec.ts` happy-path render and role assertions near `src/lib/components/TabBar.svelte.spec.ts`
+- [X] T011 [US1] Add DnD reorder test with edge auto-scroll simulation; assert order emitted and focus remains sensible
+- [X] T012 [US1] Add keyboard reorder test (move left/right); assert order emitted and a11y focus indicators visible
 
 ### Implementation — US1
 
-- [ ] T013 [US1] Implement tab rendering with segmented pinned/regular lists in `TabBar.svelte`
-- [ ] T014 [US1] Implement drag-and-drop reorder within segment with edge auto-scroll logic
-- [ ] T015 [US1] Emit `reorder` event with new order per segment; throttle/debounce if needed
-- [ ] T016 [US1] Implement keyboard reorder actions and focus handling
-- [ ] T017 [US1] Overflow handling: horizontal scroll, active tab visibility on focus change
-- [ ] T044 [US1] Add overflow usability test asserting ≤2 interactions to access any tab (keyboard/scroll paths)
-- [ ] T045 [US1] Implement host update application (apply order/pin/name updates with host precedence)
-- [ ] T046 [US1] Add precedence test: local reorder then host update; assert host wins deterministically
+- [X] T013 [US1] Implement tab rendering with segmented pinned/regular lists in `TabBar.svelte`
+- [X] T014 [US1] Implement drag-and-drop reorder within segment with edge auto-scroll logic
+- [X] T015 [US1] Emit `reorder` event with new order per segment; throttle/debounce if needed
+- [X] T016 [US1] Implement keyboard reorder actions and focus handling
+- [X] T017 [US1] Overflow handling: horizontal scroll, active tab visibility on focus change
+- [X] T044 [US1] Add overflow usability test asserting ≤2 interactions to access any tab (keyboard/scroll paths)
+- [X] T045 [US1] Implement host update application (apply order/pin/name updates with host precedence)
+- [X] T046 [US1] Add precedence test: local reorder then host update; assert host wins deterministically
+
+### Demo Integration — US1
+
+- [ ] T051 [US1] [P] Add interactive TabBar demo to `src/routes/+page.svelte` with 6-8 sample tabs
+- [ ] T052 [US1] [P] Add event logger in demo to display reorder events with segment and new order
+- [ ] T053 [US1] [P] Add demo controls to toggle between few tabs and many tabs (20+) to showcase overflow
+- [ ] T054 [US1] [P] Add visual indicators in demo showing current tab order and pinned/regular segments
+- [ ] T055 [US1] [P] Add keyboard shortcut reference in demo page for Arrow and Ctrl+Arrow navigation
 
 **Checkpoint**: US1 independently functional — reorder works with event emission and a11y
 
@@ -94,6 +102,14 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 - [ ] T021 [US2] Implement inline rename UI for a single tab, selection on enter, Escape to cancel, Enter/blur to commit
 - [ ] T022 [US2] Enforce validation (trimmed non-empty, ≤60) with inline error state and tooltip/aria-live
 - [ ] T023 [US2] Emit `rename` event `{ tabId, name }`; add hook for host title sync
+
+### Demo Integration — US2
+
+- [ ] T056 [US2] [P] Add rename demonstration to demo page with double-click or button to activate rename
+- [ ] T057 [US2] [P] Display rename event details in event logger (tab ID, old name, new name)
+- [ ] T058 [US2] [P] Add validation error display in demo showing character count and validation state
+- [ ] T059 [US2] [P] Add simulated title sync in demo with visual feedback showing sync timing
+- [ ] T060 [US2] [P] Add demo section explaining rename keyboard shortcuts (Enter to commit, Escape to cancel)
 
 **Checkpoint**: US2 independently functional — rename validated and emits events
 
@@ -128,6 +144,16 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 - [ ] T043 [US3] Implement Close action; ensure selection/focus rules applied and no layout jump
 - [ ] T047 [US3] Wire config error indicator to emit `openConfigDetails` (or open detail panel) with accessible name/description
 
+### Demo Integration — US3
+
+- [ ] T061 [US3] [P] Add pin/unpin demonstration with context menu or buttons in demo page
+- [ ] T062 [US3] [P] Display pinned segment visualization showing it remains visible during scroll
+- [ ] T063 [US3] [P] Add interactive controls demonstration (AI toggle, workspace switcher, add-tab button)
+- [ ] T064 [US3] [P] Add config error indicator toggle in demo to show error state behavior
+- [ ] T065 [US3] [P] Add context menu demonstration showing Copy Tab ID, Background Presets, and Close actions
+- [ ] T066 [US3] [P] Add animation showcase for add-tab roll-in with reduced motion toggle
+- [ ] T067 [US3] [P] Add close tab demonstration showing focus management behavior
+
 **Checkpoint**: US3 independently functional — pin behavior and UI controls present
 
 ---
@@ -140,6 +166,17 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 - [ ] T033 [P] Export verification: `src/lib/index.ts` exports `TabBar`
 - [ ] T034 [P] Demo integration: mount TabBar in `src/routes/+page.svelte` if applicable
 - [ ] T050 [P] Build gate: ensure `npm run build` and `publint` pass with new component exports
+
+### Demo Page Polish
+
+- [ ] T068 [P] Add comprehensive demo page header with feature overview and navigation
+- [ ] T069 [P] Create interactive playground section with all controls and toggles
+- [ ] T070 [P] Add event log panel showing real-time event emissions with timestamps
+- [ ] T071 [P] Add performance metrics display (FPS during drag, event timing)
+- [ ] T072 [P] Add accessibility testing controls (keyboard-only mode, screen reader mode)
+- [ ] T073 [P] Add theme switcher to demonstrate CSS custom property theming
+- [ ] T074 [P] Add code examples section showing how to use each feature
+- [ ] T075 [P] Add responsive demo showing TabBar behavior on different screen sizes
 
 ---
 
@@ -184,8 +221,14 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 
 ## Task Counts
 
-- Total tasks: 50
-- US1: 11 (T010–T017, T044–T046)
-- US2: 6 (T018–T023)
-- US3: 14 (T024–T029, T035–T043, T047–T049)
-- Setup + Foundational + Polish: 19
+- Total tasks: 75
+- Setup: 4 (T001–T004)
+- Foundational: 5 (T005–T009)
+- US1 Implementation: 11 (T010–T017, T044–T046)
+- US1 Demo: 5 (T051–T055)
+- US2 Implementation: 6 (T018–T023)
+- US2 Demo: 5 (T056–T060)
+- US3 Implementation: 14 (T024–T029, T035–T043, T047–T049)
+- US3 Demo: 7 (T061–T067)
+- Polish: 6 (T030–T034, T050)
+- Demo Polish: 8 (T068–T075)
