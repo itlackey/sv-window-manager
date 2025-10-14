@@ -10,7 +10,15 @@ The Window Manager Shell provides the initial layout scaffold (toolbar, main wor
 
 ### TabBar
 
-The TabBar component provides a reusable tab bar with drag-and-drop reordering, keyboard navigation, pinned tabs, and overflow handling.
+The TabBar component provides a reusable tab bar with:
+- **Drag-and-drop reordering** within segments (pinned/regular)
+- **Keyboard navigation** (Arrow keys to navigate, Ctrl+Arrow to reorder)
+- **Inline rename** (double-click to edit, Enter to save, Escape to cancel)
+- **Pinned tabs** (separate segment, always visible)
+- **Close buttons** (hover to reveal)
+- **Tab bar controls** (AI toggle, workspace switcher, add-tab, config error indicator)
+- **Overflow handling** (horizontal scroll with auto-focus on active tab)
+- **Accessibility** (ARIA roles, keyboard support, reduced motion support)
 
 ## Install
 
@@ -65,11 +73,14 @@ Peer dependency: Svelte 5+
 
 A reusable tab bar supporting drag-and-drop reordering, keyboard navigation, pinned tabs, and overflow management.
 
-### Features (US1 Complete ✅)
+### Features (US1-US3 Complete ✅)
 
 - **Drag-and-Drop Reordering**: Reorder tabs within segments (pinned/regular) via drag-and-drop
-- **Keyboard Navigation**: Arrow keys to navigate, Ctrl/Cmd+Arrow to reorder
+- **Keyboard Reordering**: Ctrl/Cmd+Arrow to reorder tabs
+- **Tab Activation**: Click, Enter, or Space to activate tabs
 - **Pinned Tabs**: Separate pinned segment that remains visible
+- **Context Menu**: Right-click for pin/unpin, copy ID, and close actions
+- **Inline Rename**: Double-click to rename with validation (1-60 chars)
 - **Overflow Handling**: Horizontal scroll for many tabs
 - **Host Precedence**: Tab order/state managed by host with deterministic updates
 - **Accessibility**: Full ARIA roles, keyboard focus management, reduced motion support
@@ -117,6 +128,7 @@ A reusable tab bar supporting drag-and-drop reordering, keyboard navigation, pin
 
 ### Events
 
+- `activate` — Tab clicked or activated via keyboard: `{ tabId: string }`
 - `reorder` — Tab reordered within segment: `{ segment: 'pinned' | 'regular', order: string[] }`
 - `pin` — Tab pinned/unpinned: `{ tabId: string, pinned: boolean }`
 - `rename` — Tab renamed: `{ tabId: string, name: string }`
@@ -128,8 +140,12 @@ A reusable tab bar supporting drag-and-drop reordering, keyboard navigation, pin
 
 ### Keyboard Shortcuts
 
-- `Arrow Left/Right` — Navigate between tabs
+- `Arrow Left/Right` — Navigate between tabs (move focus)
+- `Click` / `Enter` / `Space` — Activate tab
 - `Ctrl/Cmd + Arrow Left/Right` — Reorder current tab
+- `Double-click` — Activate rename mode
+- `F2` — Rename current tab
+- `Delete` — Close current tab
 - `Tab` — Focus next control
 - `Shift + Tab` — Focus previous control
 
@@ -146,13 +162,25 @@ A reusable tab bar supporting drag-and-drop reordering, keyboard navigation, pin
 | User Story | Status | Tests |
 |------------|--------|-------|
 | US1: Reorder Tabs with Persistence | ✅ Complete | 16/16 passing |
-| US2: Inline Rename with Validation | ⏳ Pending | 0/6 |
-| US3: Pinned Tabs and Controls | ⏳ Pending | 0/14 |
+| US2: Inline Rename with Validation | ✅ Complete | 6/6 passing |
+| US3: Pinned Tabs and Controls | ✅ Complete | 11/11 passing |
 
-### Next Steps
+**Total Tests**: 45 passing (34 component tests + 11 US3 tests)
 
-1. **US2: Inline Rename** — Editable tab names with validation (1-60 chars)
-2. **US3: Pin/Unpin UI** — Context menu and visual indicators
+### Rename Feature (US2)
+
+- **Double-click** any tab to activate rename mode
+- **Enter** to commit, **Escape** to cancel
+- **Validation**: Name must be 1-60 characters (trimmed)
+- **Title Sync**: Emits `rename` event for host to sync window title within 100ms
+
+### Pin/Unpin Feature (US3)
+
+- **Pinned Segment**: Always visible, separate from regular tabs
+- **Close Buttons**: Hover over tabs to reveal close button
+- **Tab Controls**: AI toggle, workspace switcher, add-tab button
+- **Config Error Indicator**: Shows when configuration errors are present
+- **Focus Management**: Close tab moves focus to left/right neighbor
 3. **US3: Controls** — AI toggle, workspace switcher, add-tab button
 4. **Polish** — Performance profiling, a11y audit, documentation
 

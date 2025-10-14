@@ -75,11 +75,11 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 
 ### Demo Integration — US1
 
-- [ ] T051 [US1] [P] Add interactive TabBar demo to `src/routes/+page.svelte` with 6-8 sample tabs
-- [ ] T052 [US1] [P] Add event logger in demo to display reorder events with segment and new order
-- [ ] T053 [US1] [P] Add demo controls to toggle between few tabs and many tabs (20+) to showcase overflow
-- [ ] T054 [US1] [P] Add visual indicators in demo showing current tab order and pinned/regular segments
-- [ ] T055 [US1] [P] Add keyboard shortcut reference in demo page for Arrow and Ctrl+Arrow navigation
+- [X] T051 [US1] [P] Add interactive TabBar demo to `src/routes/+page.svelte` with 6-8 sample tabs
+- [X] T052 [US1] [P] Add event logger in demo to display reorder events with segment and new order
+- [X] T053 [US1] [P] Add demo controls to toggle between few tabs and many tabs (20+) to showcase overflow
+- [X] T054 [US1] [P] Add visual indicators in demo showing current tab order and pinned/regular segments
+- [X] T055 [US1] [P] Add keyboard shortcut reference in demo page for Arrow and Ctrl+Arrow navigation
 
 **Checkpoint**: US1 independently functional — reorder works with event emission and a11y
 
@@ -93,23 +93,23 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 
 ### Tests (Component) — US2
 
-- [ ] T018 [US2] Add rename activation test (context menu or direct affordance); verify editable state and selection
-- [ ] T019 [US2] Add validation tests: empty → error stays in edit; >60 chars → error; valid → emits rename, exits edit
-- [ ] T020 [US2] Add title sync timing assertion (rename → title update within 100ms via mock)
+- [X] T018 [US2] Add rename activation test (context menu or direct affordance); verify editable state and selection
+- [X] T019 [US2] Add validation tests: empty → error stays in edit; >60 chars → error; valid → emits rename, exits edit
+- [X] T020 [US2] Add title sync timing assertion (rename → title update within 100ms via mock)
 
 ### Implementation — US2
 
-- [ ] T021 [US2] Implement inline rename UI for a single tab, selection on enter, Escape to cancel, Enter/blur to commit
-- [ ] T022 [US2] Enforce validation (trimmed non-empty, ≤60) with inline error state and tooltip/aria-live
-- [ ] T023 [US2] Emit `rename` event `{ tabId, name }`; add hook for host title sync
+- [X] T021 [US2] Implement inline rename UI for a single tab, selection on enter, Escape to cancel, Enter/blur to commit
+- [X] T022 [US2] Enforce validation (trimmed non-empty, ≤60) with inline error state and tooltip/aria-live
+- [X] T023 [US2] Emit `rename` event `{ tabId, name }`; add hook for host title sync
 
 ### Demo Integration — US2
 
-- [ ] T056 [US2] [P] Add rename demonstration to demo page with double-click or button to activate rename
-- [ ] T057 [US2] [P] Display rename event details in event logger (tab ID, old name, new name)
-- [ ] T058 [US2] [P] Add validation error display in demo showing character count and validation state
-- [ ] T059 [US2] [P] Add simulated title sync in demo with visual feedback showing sync timing
-- [ ] T060 [US2] [P] Add demo section explaining rename keyboard shortcuts (Enter to commit, Escape to cancel)
+- [X] T056 [US2] [P] Add rename demonstration to demo page with double-click or button to activate rename
+- [X] T057 [US2] [P] Display rename event details in event logger (tab ID, old name, new name)
+- [X] T058 [US2] [P] Add validation error display in demo showing character count and validation state
+- [X] T059 [US2] [P] Add simulated title sync in demo with visual feedback showing sync timing
+- [X] T060 [US2] [P] Add demo section explaining rename keyboard shortcuts (Enter to commit, Escape to cancel)
 
 **Checkpoint**: US2 independently functional — rename validated and emits events
 
@@ -123,36 +123,36 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 
 ### Tests (Component) — US3
 
-- [ ] T024 [US3] Add pin/unpin test and verify movement to/from pinned segment without selection loss
-- [ ] T025 [US3] Add pinned indicator visibility test and reduced motion behavior on activation animation
-- [ ] T026 [US3] Add controls presence test (AI toggle, workspace switcher, add-tab) and config error indicator visibility
+- [X] T024 [US3] Add pin/unpin test and verify movement to/from pinned segment without selection loss
+- [X] T025 [US3] Add pinned indicator visibility test and reduced motion behavior on activation animation
+- [X] T026 [US3] Add controls presence test (AI toggle, workspace switcher, add-tab) and config error indicator visibility
 - [ ] T035 [US3] Add test for add-tab roll‑in animation; verify reduced motion minimizes or disables motion
 - [ ] T036 [US3] Add test for close behavior: focus moves to left neighbor or right if none; no focus loss
-- [ ] T040 [US3] Add context menu completeness test: Copy Tab ID, Background Presets, Close; keyboard accessible
-- [ ] T048 [US3] Add test for config error indicator discoverability and action to open details
-- [ ] T049 [US3] Add test for pinned segment overflow scroll; ensure regular tabs are not masked
+- [X] T040 [US3] Add context menu completeness test: Copy Tab ID, Background Presets, Close; keyboard accessible
+- [X] T048 [US3] Add test for config error indicator discoverability and action to open details
+- [X] T049 [US3] Add test for pinned segment overflow scroll; ensure regular tabs are not masked
 
 ### Implementation — US3
 
-- [ ] T027 [US3] Implement pin/unpin via context menu and shortcut; move within segments accordingly (drag remains in-segment)
-- [ ] T028 [US3] Render pinned segment that remains visible irrespective of horizontal scroll; maintain separate overflow scrolling if needed
-- [ ] T029 [US3] Render companion controls and wire stub events for toggles/switcher/add; render config error indicator with accessible label
+- [X] T027 [US3] Implement pin/unpin via context menu and shortcut; move within segments accordingly (drag remains in-segment)
+- [X] T028 [US3] Render pinned segment that remains visible irrespective of horizontal scroll; maintain separate overflow scrolling if needed
+- [X] T029 [US3] Render companion controls and wire stub events for toggles/switcher/add; render config error indicator with accessible label
 - [ ] T037 [US3] Implement add-tab roll‑in animation (≤200ms ease‑out; ≤100ms with reduced motion)
-- [ ] T038 [US3] Implement close behavior focus logic and guard against content jump
-- [ ] T041 [US3] Implement Copy Tab ID action with accessible feedback (non-intrusive announcement)
+- [X] T038 [US3] Implement close behavior focus logic and guard against content jump
+- [X] T041 [US3] Implement Copy Tab ID action with accessible feedback (non-intrusive announcement)
 - [ ] T042 [US3] Implement Background Presets submenu; emit selection for host to apply
-- [ ] T043 [US3] Implement Close action; ensure selection/focus rules applied and no layout jump
-- [ ] T047 [US3] Wire config error indicator to emit `openConfigDetails` (or open detail panel) with accessible name/description
+- [X] T043 [US3] Implement Close action; ensure selection/focus rules applied and no layout jump
+- [X] T047 [US3] Wire config error indicator to emit `openConfigDetails` (or open detail panel) with accessible name/description
 
 ### Demo Integration — US3
 
-- [ ] T061 [US3] [P] Add pin/unpin demonstration with context menu or buttons in demo page
-- [ ] T062 [US3] [P] Display pinned segment visualization showing it remains visible during scroll
-- [ ] T063 [US3] [P] Add interactive controls demonstration (AI toggle, workspace switcher, add-tab button)
-- [ ] T064 [US3] [P] Add config error indicator toggle in demo to show error state behavior
-- [ ] T065 [US3] [P] Add context menu demonstration showing Copy Tab ID, Background Presets, and Close actions
+- [X] T061 [US3] [P] Add pin/unpin demonstration with context menu or buttons in demo page
+- [X] T062 [US3] [P] Display pinned segment visualization showing it remains visible during scroll
+- [X] T063 [US3] [P] Add interactive controls demonstration (AI toggle, workspace switcher, add-tab button)
+- [X] T064 [US3] [P] Add config error indicator toggle in demo to show error state behavior
+- [X] T065 [US3] [P] Add context menu demonstration showing Copy Tab ID, Background Presets, and Close actions (note: Background Presets deferred to T042)
 - [ ] T066 [US3] [P] Add animation showcase for add-tab roll-in with reduced motion toggle
-- [ ] T067 [US3] [P] Add close tab demonstration showing focus management behavior
+- [X] T067 [US3] [P] Add close tab demonstration showing focus management behavior
 
 **Checkpoint**: US3 independently functional — pin behavior and UI controls present
 
@@ -160,12 +160,12 @@ description: "Tasks for implementing Tab Bar Lifecycle & Customization"
 
 ## Final Phase: Polish & Cross‑Cutting
 
-- [ ] T030 [P] Performance profiling pass: ensure ≥45 FPS during drag; auto-scroll engage ≤150ms
-- [ ] T031 [P] A11y audit pass in Storybook (roles, labels, focus order, reduced motion)
-- [ ] T032 [P] Documentation: Update `src/lib/README.md` and `src/stories/TabBar.stories.svelte` with usage and a11y notes
-- [ ] T033 [P] Export verification: `src/lib/index.ts` exports `TabBar`
-- [ ] T034 [P] Demo integration: mount TabBar in `src/routes/+page.svelte` if applicable
-- [ ] T050 [P] Build gate: ensure `npm run build` and `publint` pass with new component exports
+- [X] T030 [P] Performance profiling pass: ensure ≥45 FPS during drag; auto-scroll engage ≤150ms
+- [X] T031 [P] A11y audit pass in Storybook (roles, labels, focus order, reduced motion)
+- [X] T032 [P] Documentation: Update `src/lib/README.md` and `src/stories/TabBar.stories.svelte` with usage and a11y notes
+- [X] T033 [P] Export verification: `src/lib/index.ts` exports `TabBar`
+- [X] T034 [P] Demo integration: mount TabBar in `src/routes/+page.svelte` if applicable
+- [X] T050 [P] Build gate: ensure `npm run build` and `publint` pass with new component exports
 
 ### Demo Page Polish
 
