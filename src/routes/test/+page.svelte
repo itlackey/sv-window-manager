@@ -1,15 +1,12 @@
 <script lang="ts">
 	let { data }: PageProps = $props();
-	import ChatSession from './ChatSession.svelte';
-	import TerminalSession from './TerminalSession.svelte';
-	import FileBrowserSession from './FileBrowserSession.svelte';
-	import FileEditorSession from './FileEditorSession.svelte';
 	import type { PageProps } from '../$types.js';
 	import { BinaryWindow } from './bwin.js';
-    import './bwin.css';
+	import './bwin.css';
 
-	import { mount } from 'svelte';
 	import { onMount } from 'svelte';
+	import { getSessionComponent } from './SessionComponentFactory.svelte';
+	
 
 	// Reactive state for the input value (session ID)
 	let sessionId = $state(''); // $state makes this reactive:contentReference[oaicite:4]{index=4}
@@ -17,55 +14,10 @@
 	let bwinContainer = $state<HTMLElement>(); // will hold reference to the container DOM element
 	let manager: BinaryWindow | undefined = $state(); // BWIN manager instance
 
-	// Mock API data for sessions (sessionId -> {type, data})
-	const sessionData = {
-		abc123: { type: 'chat', data: { welcome: 'Hello Chat!' } },
-		term42: { type: 'terminal', data: { initCommand: "echo 'Hello'" } },
-		files99: { type: 'filebrowser', data: { rootPath: '/home/user' } },
-		edit77: { type: 'fileeditor', data: { filename: 'notes.txt', content: 'Sample text' } }
-	};
-
-	async function fetchSessionInfo(id) {
-		// Simulate an API call with a delay
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				resolve(sessionData[id] || { type: 'chat', data: {} });
-			}, 500);
-		});
-	}
-
 	async function openSession() {
 		if (!sessionId) return;
-		const info = await fetchSessionInfo(sessionId);
-		const type = info.type;
-		const data = info.data;
 
-		// Choose the appropriate Svelte component for this session type
-		let Component;
-		switch (type) {
-			case 'chat':
-				Component = ChatSession;
-				break;
-			case 'terminal':
-				Component = TerminalSession;
-				break;
-			case 'filebrowser':
-				Component = FileBrowserSession;
-				break;
-			case 'fileeditor':
-				Component = FileEditorSession;
-				break;
-			default:
-				Component = ChatSession;
-		}
-
-
-		// Create a DOM element and mount the chosen Svelte component into it using Svelte 5's imperative API
-		const contentElem = document.createElement('div');
-		mount(Component, {
-			target: contentElem,
-			props: { sessionId, data }
-		});
+		const contentElem = await getSessionComponent(sessionId);
 
 		// Add the new element as a pane in the BWIN window manager
 		if (manager && manager.rootSash) {
@@ -76,6 +28,8 @@
 			}
 			// Add to the right of the rightmost leaf
 			manager.addPane(node.id, {
+                title: sessionId,
+                id: sessionId + '-' + Date.now(),
 				position: 'right',
 				content: contentElem
 				// Optionally, add id/size/title here
@@ -88,7 +42,7 @@
 		if (!manager && bwinContainer) {
 			manager = new BinaryWindow({
 				/* options if any */
-                fitContainer: true
+				fitContainer: true
 			});
 			// (Optional) If desired, could add an initial pane or welcome message here.
 			manager.mount(document.querySelector('.bwin-container'));
