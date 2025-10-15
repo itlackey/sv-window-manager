@@ -11,6 +11,7 @@
         ".specify/scripts/powershell/": true
     },
     "cSpell.words": [
+        "bwin",
         "onready"
     ]
 }

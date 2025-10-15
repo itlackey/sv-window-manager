@@ -1,18 +1,39 @@
 :root {
+    /* Typography */
     --bw-font-family: system-ui;
     --bw-font-size: 14px;
+
+    /* Colors */
     --bw-drop-area-bg-color: hsl(0, 0%, 0%, .05);
-    --bw-glass-clearance: 2px;
-    --bw-glass-border-radius: 2px;
+    --bw-pane-bg-color: #f2f2f2;
+    --bw-muntin-bg-color: #fff;
+    --bw-glass-bg-color: #fff;
     --bw-glass-border-color: hsl(0, 0%, 10%);
     --bw-glass-border-color-disabled: hsl(0, 0%, 80%);
     --bw-glass-bg-color-disabled: hsl(0, 0%, 97%);
+    --bw-glass-header-bg-color: hsl(0, 0%, 97%);
+    --bw-glass-tab-hover-bg: #fff;
+    --bw-glass-action-hover-bg: #fff;
+    --bw-minimized-glass-hover-bg: #fff;
+
+    /* Sizing & Spacing */
+    --bw-container-width: stretch;
+    --bw-container-height: 600px;
+    --bw-glass-clearance: 2px;
+    --bw-glass-border-radius: 2px;
     --bw-glass-header-height: 30px;
     --bw-glass-header-gap: 4px;
-    --bw-glass-header-bg-color: hsl(0, 0%, 97%);
-    --bw-sill-gap: 6px
+    --bw-sill-gap: 6px;
+    --bw-action-gap: 2px;
+    --bw-minimized-glass-height: 10px;
+    --bw-minimized-glass-basis: 10%;
 }
 
+.bwin-container{
+    width: var(--bw-container-width);
+    height: var(--bw-container-height);
+    margin-bottom: calc(var(--bw-minimized-glass-height) + var(--bw-sill-gap) * 2);
+}
 .body--bw-resize-x {
     -webkit-user-select: none;
     user-select: none;
@@ -39,7 +60,7 @@ bw-pane {
     position: absolute;
     overflow: auto;
     box-sizing: border-box;
-    background-color: #f2f2f2
+    background-color: var(--bw-pane-bg-color);
 }
 
 bw-pane[drop-area]:before {
@@ -86,7 +107,7 @@ bw-pane[drop-area=center]:before {
 bw-muntin {
     box-sizing: border-box;
     position: absolute;
-    background-color: #fff
+    background-color: var(--bw-muntin-bg-color);
 }
 
 bw-muntin[horizontal] {
@@ -152,7 +173,7 @@ bw-glass {
     flex-direction: column;
     border: 1px solid var(--bw-glass-border-color);
     border-radius: var(--bw-glass-border-radius);
-    background-color: #fff;
+    background-color: var(--bw-glass-bg-color);
     font-family: var(--bw-font-family);
     font-size: var(--bw-font-size);
     box-sizing: border-box
@@ -200,7 +221,7 @@ bw-glass-tab-container {
 }
 
 .bw-glass-tab:hover {
-    background-color: #fff
+    background-color: var(--bw-glass-tab-hover-bg);
 }
 
 .bw-glass-tab:active {
@@ -211,7 +232,7 @@ bw-glass-action-container {
     margin-left: auto;
     display: flex;
     flex-shrink: 0;
-    gap: 2px
+    gap: var(--bw-action-gap);
 }
 
 .bw-glass-action {
@@ -222,7 +243,7 @@ bw-glass-action-container {
 }
 
 .bw-glass-action:hover {
-    background-color: #fff
+    background-color: var(--bw-glass-action-hover-bg);
 }
 
 .bw-glass-action:active {
@@ -279,8 +300,8 @@ bw-sill {
 
 .bw-minimized-glass {
     display: block;
-    flex-basis: 10%;
-    height: 10px;
+    flex-basis: var(--bw-minimized-glass-basis);
+    height: var(--bw-minimized-glass-height);
     border: 1px solid var(--bw-glass-border-color);
     border-radius: var(--bw-glass-border-radius);
     cursor: pointer;
@@ -288,7 +309,7 @@ bw-sill {
 }
 
 .bw-minimized-glass:hover {
-    background-color: #fff
+    background-color: var(--bw-minimized-glass-hover-bg);
 }
 
 .bw-minimized-glass:active {
