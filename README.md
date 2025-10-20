@@ -1,62 +1,120 @@
 # SV Window Manager
 
-**Early Proof of Concept (POC):** This project is an early POC of a Svelte-based tiling window manager component. It is built using Svelte 5 runes and is inspired by Wave Terminal. https://bhjsdev.github.io/bwin-docs/
+A modern Svelte 5 component library that provides tiling window management for web applications. Built on top of [bwin.js](https://bhjsdev.github.io/bwin-docs/), it enables dynamic, resizable layouts with a simple, type-safe API.
 
-# Svelte library
+## Features
 
-Everything you need to build a Svelte library, powered by [`sv`](https://npmjs.com/package/sv).
+- **Svelte 5 Native**: Built with modern Svelte 5 runes and patterns
+- **Type-Safe**: TypeScript definitions included
+- **Dynamic Layouts**: Create tiling window layouts programmatically
+- **Resizable Panes**: Drag dividers to resize panes
+- **Flexible Positioning**: Add panes in any direction (top, right, bottom, left)
+- **Component Integration**: Mount any Svelte component as pane content
 
-Read more about creating a library [in the docs](https://svelte.dev/docs/kit/packaging).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
+## Installation
 
 ```sh
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+npm install sv-window-manager
 ```
 
-## Developing
+**Requirements:**
+- Svelte 5 or later
+- SvelteKit (recommended) or Vite
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Quick Start
+
+```svelte
+<script lang="ts">
+  import BwinHost from 'sv-window-manager';
+  import type { BwinConfig, PaneConfig } from 'sv-window-manager';
+  import YourComponent from './YourComponent.svelte';
+
+  let bwinHost = $state<BwinHost | undefined>();
+
+  const config: BwinConfig = {
+    fitContainer: true
+  };
+
+  function addPane() {
+    if (!bwinHost) return;
+
+    const paneConfig: PaneConfig = {
+      position: 'right'
+    };
+
+    bwinHost.addPane(
+      'pane-1',
+      paneConfig,
+      YourComponent,
+      { sessionId: 'session-1', data: { title: 'My Pane' } }
+    );
+  }
+</script>
+
+<BwinHost bind:this={bwinHost} {config} />
+<button onclick={addPane}>Add Pane</button>
+```
+## API Reference
+
+### BwinHost Component
+
+**Props:**
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `config` | `BwinConfig` | Configuration for the window manager |
+
+**Methods:**
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `addPane` | `addPane(sessionId: string, paneConfig: PaneConfig, Component: Component<any>, componentProps?: Record<string, any>): void` | Add a new pane with a Svelte component |
+| `getInfo` | `getInfo(): any` | Get current window manager state |
+
+## Customization
+
+Customize the appearance using CSS custom properties:
+
+```css
+:root {
+  /* Colors */
+  --bw-glass-bg-color: #ffffff;
+  --bw-glass-border-color: #667eea;
+  --bw-glass-header-bg-color: #667eea;
+  --bw-muntin-bg-color: #4c5fd5;
+  --bw-pane-bg-color: #333333;
+
+  /* Sizing */
+  --bw-container-height: 100vh;
+  --bw-glass-header-height: 30px;
+  --bw-glass-border-radius: 5px;
+}
+```
+
+[View all CSS variables →](https://bhjsdev.github.io/bwin-docs/)
+
+## Development
 
 ```sh
+# Start development server with demo app
 npm run dev
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+# Run type checking
+npm run check
 
-Everything inside `src/lib` is part of your library, everything inside `src/routes` can be used as a showcase or preview app.
-
-## Building
-
-To build your library:
-
-```sh
+# Build library
 npm pack
+
+# Run tests
+npm test
 ```
 
-To create a production version of your showcase app:
+## Resources
 
-```sh
-npm run build
-```
+- [bwin.js Documentation](https://bhjsdev.github.io/bwin-docs/)
+- [Svelte 5 Documentation](https://svelte.dev/docs/svelte/overview)
+- [Example Implementation](./src/routes/+page.svelte)
 
-You can preview the production build with `npm run preview`.
+## License
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
-
-## Publishing
-
-Go into the `package.json` and give your package the desired name through the `"name"` option. Also consider adding a `"license"` field and point it to a `LICENSE` file which you can create from a template (one popular option is the [MIT license](https://opensource.org/license/mit/)).
-
-To publish your library to [npm](https://www.npmjs.com):
-
-```sh
-npm publish
-```
+CC-BY

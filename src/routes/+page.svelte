@@ -14,7 +14,10 @@
 		chat1: { type: 'chat', data: { welcome: 'Welcome to Chat Session!' } },
 		terminal1: { type: 'terminal', data: { initCommand: "echo 'Terminal Ready'" } },
 		files1: { type: 'filebrowser', data: { rootPath: '/home/user/projects' } },
-		editor1: { type: 'fileeditor', data: { filename: 'README.md', content: '# Welcome\n\nStart editing...' } }
+		editor1: {
+			type: 'fileeditor',
+			data: { filename: 'README.md', content: '# Welcome\n\nStart editing...' }
+		}
 	};
 
 	async function fetchSessionInfo(id: string) {
@@ -63,7 +66,10 @@
 
 <svelte:head>
 	<title>SV BWIN - Window Manager Component Library</title>
-	<meta name="description" content="A Svelte 5 component library providing tiling window management for web applications" />
+	<meta
+		name="description"
+		content="A Svelte 5 component library providing tiling window management for web applications"
+	/>
 </svelte:head>
 
 <div class="page-container">
@@ -74,13 +80,12 @@
 			<p class="subtitle">Tiling Window Manager for Svelte 5</p>
 			<p class="description">
 				A modern Svelte 5 component library that wraps bwin.js to provide powerful tiling window
-				management in your web applications. Create dynamic, resizable layouts with ease.
+				management in your web applications. Create dynamic, resizable layouts with ease using
+				familiar Svelte components syntax and a simple API.
 			</p>
 			<div class="hero-actions">
-				<button class="btn-primary" onclick={() => activeSection = 'demo'}>
-					Try the Demo
-				</button>
-				<button class="btn-secondary" onclick={() => activeSection = 'installation'}>
+				<button class="btn-primary" onclick={() => (activeSection = 'demo')}> Try the Demo </button>
+				<button class="btn-secondary" onclick={() => (activeSection = 'usage')}>
 					Get Started
 				</button>
 			</div>
@@ -89,29 +94,17 @@
 
 	<!-- Navigation -->
 	<nav class="nav-tabs">
-		<button
-			class={{ active: activeSection === 'demo' }}
-			onclick={() => activeSection = 'demo'}
-		>
+		<button class={{ active: activeSection === 'demo' }} onclick={() => (activeSection = 'demo')}>
 			Live Demo
 		</button>
-		<button
-			class={{ active: activeSection === 'installation' }}
-			onclick={() => activeSection = 'installation'}
-		>
-			Installation
+		<button class={{ active: activeSection === 'usage' }} onclick={() => (activeSection = 'usage')}>
+			Installation & Usage
 		</button>
 		<button
-			class={{ active: activeSection === 'usage' }}
-			onclick={() => activeSection = 'usage'}
+			class={{ active: activeSection === 'styling' }}
+			onclick={() => (activeSection = 'styling')}
 		>
-			Usage
-		</button>
-		<button
-			class={{ active: activeSection === 'customization' }}
-			onclick={() => activeSection = 'customization'}
-		>
-			Customization
+			Styling
 		</button>
 	</nav>
 
@@ -124,13 +117,9 @@
 
 				<div class="demo-controls">
 					{#if !demoStarted}
-						<button class="btn-primary" onclick={startDemo}>
-							Start Demo
-						</button>
+						<button class="btn-primary" onclick={startDemo}> Start Demo </button>
 					{:else}
-						<button class="btn-secondary" onclick={resetDemo}>
-							Reset Demo
-						</button>
+						<button class="btn-secondary" onclick={resetDemo}> Reset Demo </button>
 						<div class="demo-actions">
 							<button onclick={() => addSession('chat1')}>Add Chat</button>
 							<button onclick={() => addSession('terminal1')}>Add Terminal</button>
@@ -141,10 +130,7 @@
 				</div>
 
 				<div class="demo-container">
-					<BwinHost
-						bind:this={bwinHostRef}
-						config={{ fitContainer: true }}
-					/>
+					<BwinHost bind:this={bwinHostRef} config={{ fitContainer: true }} />
 				</div>
 
 				<div class="demo-instructions">
@@ -159,18 +145,12 @@
 			</section>
 		{/if}
 
-		{#if activeSection === 'installation'}
+		{#if activeSection === 'usage'}
 			<section class="section">
-				<h2>Installation</h2>
+				<h2>Installation & Usage</h2>
 
-				<h3>Using npm</h3>
+				<h3>Installation</h3>
 				<pre><code>npm install sv-window-manager</code></pre>
-
-				<h3>Using pnpm</h3>
-				<pre><code>pnpm add sv-window-manager</code></pre>
-
-				<h3>Using yarn</h3>
-				<pre><code>yarn add sv-window-manager</code></pre>
 
 				<div class="info-box">
 					<strong>Requirements:</strong>
@@ -179,44 +159,98 @@
 						<li>SvelteKit (recommended) or Vite</li>
 					</ul>
 				</div>
-			</section>
-		{/if}
 
-		{#if activeSection === 'usage'}
-			<section class="section">
-				<h2>Basic Usage</h2>
-
-				<h3>1. Import the Component</h3>
-				<pre><code>&lt;script lang="ts"&gt;
+				<h3>1. Import the Component and Types</h3>
+				<pre><code
+						>&lt;script lang="ts"&gt;
   import BwinHost from 'sv-window-manager';
+  import type {'{'}
+    BwinConfig,
+    PaneConfig,
+    SessionComponentProps
+  {'}'} from 'sv-window-manager';
   import YourComponent from './YourComponent.svelte';
 
   let bwinHost = $state&lt;BwinHost | undefined&gt;();
-&lt;/script&gt;</code></pre>
+&lt;/script&gt;</code
+					></pre>
 
 				<h3>2. Add BwinHost to Your Page</h3>
-				<pre><code>&lt;BwinHost
+				<pre><code
+						>&lt;BwinHost
   bind:this={'{bwinHost}'}
   config={'{{'} fitContainer: true {'}}'}
-/&gt;</code></pre>
+/&gt;</code
+					></pre>
 
 				<h3>3. Dynamically Add Panes</h3>
-				<pre><code>async function addPane() {'{'}
+				<pre><code
+						>async function addPane() {'{'}
   if (!bwinHost) return;
+
+  const paneConfig: PaneConfig = {'{'}
+    position: 'right',  // 'top' | 'right' | 'bottom' | 'left'
+  {'}'};
+
+  const componentProps: SessionComponentProps = {'{'}
+    sessionId: 'session-1',
+    data: {'{'}
+      title: 'My Pane'
+    {'}'}
+  {'}'};
 
   // Add a pane with your component
   bwinHost.addPane(
-    'unique-pane-id',
-    {'{}'},                    // bwin.js options
-    YourComponent,        // Svelte component
-    {'{'}                     // Component props
-      sessionId: 'session-1',
-      data: {'{'}
-        title: 'My Pane'
-      {'}'}
-    {'}'}
+    'unique-pane-id',     // Unique identifier for the pane
+    paneConfig,           // Pane configuration
+    YourComponent,        // Svelte component to render
+    componentProps        // Props to pass to the component
   );
-{'}'}</code></pre>
+{'}'}</code
+					></pre>
+
+				<h3>Complete Example</h3>
+				<pre><code
+						>&lt;script lang="ts"&gt;
+  import BwinHost from 'sv-window-manager';
+  import type {'{'}
+    BwinConfig,
+    PaneConfig,
+    SessionComponentProps
+  {'}'} from 'sv-window-manager';
+  import ChatComponent from './ChatComponent.svelte';
+
+  let bwinHost = $state&lt;BwinHost | undefined&gt;();
+
+  const config: BwinConfig = {'{'}
+    fitContainer: true
+  {'}'};
+
+  function addChatSession(id: string, title: string) {'{'}
+    if (!bwinHost) return;
+
+    const paneConfig: PaneConfig = {'{'}
+      position: 'right'
+    {'}'};
+
+    const props: SessionComponentProps = {'{'}
+      sessionId: id,
+      data: {'{'}
+        title,
+        timestamp: new Date()
+      {'}'}
+    {'}'};
+
+    bwinHost.addPane(id, paneConfig, ChatComponent, props);
+  {'}'}
+&lt;/script&gt;
+
+&lt;BwinHost bind:this={'{bwinHost}'} {'{config}'} /&gt;
+
+&lt;button onclick={'{() => addChatSession("chat-1", "Chat Session")}'}&gt;
+  Add Chat
+&lt;/button&gt;</code
+					></pre>
 
 				<h3>Component Props</h3>
 				<div class="props-table">
@@ -231,18 +265,8 @@
 						<tbody>
 							<tr>
 								<td><code>config</code></td>
-								<td><code>object</code></td>
-								<td>Configuration for bwin.js (e.g., <code>fitContainer: true</code>)</td>
-							</tr>
-							<tr>
-								<td><code>oncreated</code></td>
-								<td><code>function</code></td>
-								<td>Callback when the BinaryWindow instance is created</td>
-							</tr>
-							<tr>
-								<td><code>onupdated</code></td>
-								<td><code>function</code></td>
-								<td>Callback when the window layout is updated</td>
+								<td><code>BwinConfig</code></td>
+								<td>Configuration for bwin.js (e.g., <code>{'{'}fitContainer: true{'}'}</code>)</td>
 							</tr>
 						</tbody>
 					</table>
@@ -254,35 +278,85 @@
 						<thead>
 							<tr>
 								<th>Method</th>
-								<th>Parameters</th>
+								<th>Signature</th>
 								<th>Description</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
 								<td><code>addPane</code></td>
-								<td><code>(id, options, Component, props)</code></td>
-								<td>Add a new pane with a Svelte component</td>
+								<td>
+									<code
+										>addPane(sessionId: string, paneConfig: PaneConfig, Component:
+										Component&lt;any&gt;, componentProps?: Record&lt;string, any&gt;): void</code
+									>
+								</td>
+								<td
+									>Add a new pane with a Svelte component. The component will be mounted and
+									rendered within the pane.</td
+								>
 							</tr>
 							<tr>
 								<td><code>getInfo</code></td>
-								<td><code>()</code></td>
-								<td>Get current window manager state</td>
+								<td><code>getInfo(): any</code></td>
+								<td
+									>Get information about the current window manager state (returns root sash node)</td
+								>
 							</tr>
 						</tbody>
 					</table>
 				</div>
+
+				<h3>TypeScript Interfaces</h3>
+				<div class="info-box">
+					<p>The library provides comprehensive TypeScript types for type-safe integration:</p>
+				</div>
+
+				<h4>BwinConfig</h4>
+				<pre><code
+						>interface BwinConfig {'{'}
+  /** Whether the window manager should fit its container */
+  fitContainer?: boolean;
+  /** Additional bwin.js configuration options */
+  [key: string]: any;
+{'}'}</code
+					></pre>
+
+				<h4>PaneConfig</h4>
+				<pre><code
+						>interface PaneConfig {'{'}
+  /** Position where the pane should be added relative to the target node */
+  position?: 'top' | 'right' | 'bottom' | 'left';
+  /** The content element to display in the pane */
+  content?: HTMLElement;
+  /** Additional pane configuration options */
+  [key: string]: any;
+{'}'}</code
+					></pre>
+
+				<h4>SessionComponentProps</h4>
+				<pre><code
+						>interface SessionComponentProps {'{'}
+  /** Unique identifier for the session */
+  sessionId: string;
+  /** Additional data for the session component */
+  data?: Record&lt;string, any&gt;;
+  /** Additional props */
+  [key: string]: any;
+{'}'}</code
+					></pre>
 			</section>
 		{/if}
 
-		{#if activeSection === 'customization'}
+		{#if activeSection === 'styling'}
 			<section class="section">
-				<h2>Customization</h2>
+				<h2>Styling</h2>
 
 				<p>Customize the appearance using CSS custom properties:</p>
 
 				<h3>Available CSS Variables</h3>
-				<pre><code>:root {'{'}
+				<pre><code
+						>:root {'{'}
   /* Colors */
   --bw-drop-area-bg-color: hsla(226, 50%, 75%, 0.6);
   --bw-pane-bg-color: hsla(0, 0%, 20%, 1);
@@ -304,16 +378,19 @@
   /* Typography */
   --bw-font-family: inherit;
   --bw-font-size: inherit;
-{'}'}</code></pre>
+{'}'}</code
+					></pre>
 
 				<h3>Example: Dark Theme</h3>
-				<pre><code>:root {'{'}
+				<pre><code
+						>:root {'{'}
   --bw-glass-bg-color: #1e1e1e;
   --bw-glass-border-color: #3a3a3a;
   --bw-glass-header-bg-color: #252526;
   --bw-muntin-bg-color: #2d2d30;
   --bw-pane-bg-color: #1e1e1e;
-{'}'}</code></pre>
+{'}'}</code
+					></pre>
 			</section>
 		{/if}
 	</main>
@@ -324,8 +401,13 @@
 			Built with Svelte 5 |
 			<a href="https://bhjsdev.github.io/bwin-docs/" target="_blank" rel="noopener noreferrer">
 				bwin.js Documentation
-			</a> |
-			<a href="https://github.com/itlackey/sv-window-manager" target="_blank" rel="noopener noreferrer">
+			</a>
+			|
+			<a
+				href="https://github.com/itlackey/sv-window-manager"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
 				GitHub
 			</a>
 		</p>
@@ -334,23 +416,46 @@
 
 <style>
 	:root {
-		--accent-color: hsla(125, 97%, 36%, 0.6);
-		--accent-color-strong: hsla(226, 80%, 27%, 0.9);
-		--accent-color-light: hsla(226, 50%, 75%, 0.6);
-		--bg-color: hsla(0, 0%, 95%, 1);
-		--bg-color-dark: hsla(0, 0%, 20%, 1);
-		--disabled-color: hsla(0, 0%, 80%, 0.6);
+		/* Base Colors */
+		--accent-color-base: #0461ad;
+		/* --accent-color-base: #667eea; */
+		/* Accent Color Variations - derived using color-mix */
+		--accent-color: color-mix(in srgb, var(--accent-color-base) 60%, transparent);
+		--accent-color-strong: color-mix(in srgb, var(--accent-color-base) 90%, black 30%);
+		--accent-color-light: color-mix(in srgb, var(--accent-color-base) 60%, white 40%);
+		--accent-gradient-end: color-mix(in srgb, var(--accent-color-base) 70%, #c44569 30%);
+
+		/* Background Colors */
+		--bg-color: #f8f9fa;
+		--bg-color-dark: color-mix(in srgb, black 80%, white);
+		--bg-white: white;
+
+		/* Border Colors */
+		--border-color: #dee2e6;
+		--border-color-light: #e9ecef;
+
+		/* Text Colors */
+		--text-dark: #212529;
+		--text-medium: #495057;
+		--text-muted: #6c757d;
+
+		/* Info Box Colors - derived from accent */
+		--info-bg: color-mix(in srgb, var(--accent-color-base) 8%, white);
+		--info-border: color-mix(in srgb, var(--accent-color-base) 40%, white);
+		--info-text: color-mix(in srgb, var(--accent-color-base) 50%, black 60%);
+
+		/** bwin properties*/
 
 		/* Typography */
 		--bw-font-family: inherit;
 		--bw-font-size: inherit;
 
-		/* Colors */
+		/* Window Manager Colors - using derived accent colors */
 		--bw-drop-area-bg-color: var(--accent-color-light);
 		--bw-pane-bg-color: var(--bg-color-dark);
 		--bw-muntin-bg-color: var(--accent-color-strong);
 		--bw-glass-bg-color: var(--bg-color);
-		--bw-glass-border-color: var(--accent-color-strong);
+		--bw-glass-border-color: var(--accent-color);
 		--bw-glass-border-color-disabled: var(--disabled-color);
 		--bw-glass-bg-color-disabled: var(--accent-color-light);
 		--bw-glass-header-bg-color: var(--accent-color);
@@ -374,23 +479,32 @@
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		font-family:
+			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+		background: linear-gradient(
+			135deg,
+			var(--accent-color-base) 0%,
+			var(--accent-gradient-end) 100%
+		);
 		min-height: 100vh;
 	}
 
 	.page-container {
 		max-width: 1400px;
 		margin: 0 auto;
-		background: white;
+		background: var(--bg-white);
 		min-height: 100vh;
-		box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+		box-shadow: 0 0 50px color-mix(in srgb, black 10%, transparent);
 	}
 
 	/* Hero Section */
 	.hero {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
+		background: linear-gradient(
+			135deg,
+			var(--accent-color-base) 0%,
+			var(--accent-gradient-end) 100%
+		);
+		color: var(--bg-white);
 		padding: 4rem 2rem;
 		text-align: center;
 	}
@@ -434,30 +548,31 @@
 	}
 
 	.btn-primary {
-		background: white;
-		color: #667eea;
+		background: var(--bg-white);
+		color: var(--accent-color-base);
 	}
 
 	.btn-primary:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 4px 12px color-mix(in srgb, black 20%, transparent);
 	}
 
 	.btn-secondary {
-		background: rgba(255, 255, 255, 0.2);
-		color: white;
-		border: 2px solid white;
+		background: color-mix(in srgb, var(--bg-white) 20%, transparent);
+		color: var(--bg-white);
+		border: 2px solid var(--bg-white);
 	}
 
 	.btn-secondary:hover {
-		background: rgba(255, 255, 255, 0.3);
+		background: color-mix(in srgb, var(--bg-white) 30%, transparent);
 	}
 
 	/* Navigation */
 	.nav-tabs {
 		display: flex;
-		background: #f8f9fa;
-		border-bottom: 2px solid #e9ecef;
+		background: var(--bg-color);
+		border-bottom: 2px solid var(--border-color-light);
+
 		overflow-x: auto;
 	}
 
@@ -465,23 +580,25 @@
 		background: transparent;
 		border: none;
 		border-bottom: 3px solid transparent;
+		border-bottom-right-radius: 0;
+		border-bottom-left-radius: 0;
 		padding: 1rem 1.5rem;
 		cursor: pointer;
 		transition: all 0.2s;
-		color: #495057;
+		color: var(--text-medium);
 		font-weight: 500;
 		white-space: nowrap;
 	}
 
 	.nav-tabs button:hover {
-		background: #e9ecef;
-		color: #667eea;
+		background: var(--border-color-light);
+		color: var(--accent-color-base);
 	}
 
 	.nav-tabs button.active {
-		color: #667eea;
-		border-bottom-color: #667eea;
-		background: white;
+		color: var(--accent-color-base);
+		border-bottom-color: var(--accent-color-base);
+		background: var(--bg-white);
 	}
 
 	/* Main Content */
@@ -497,42 +614,42 @@
 	.section h2 {
 		font-size: 2.5rem;
 		margin: 0 0 1rem 0;
-		color: #212529;
+		color: var(--text-dark);
 	}
 
 	.section h3 {
 		font-size: 1.5rem;
 		margin: 2rem 0 1rem 0;
-		color: #495057;
+		color: var(--text-medium);
 	}
 
 	.section p {
 		line-height: 1.8;
-		color: #495057;
+		color: var(--text-medium);
 		margin-bottom: 1.5rem;
 	}
 
 	/* Code blocks */
 	pre {
-		background: #f8f9fa;
+		background: var(--bg-color);
 		padding: 1.5rem;
 		border-radius: 8px;
 		overflow-x: auto;
-		border: 1px solid #dee2e6;
+		border: 1px solid var(--border-color);
 		margin: 1rem 0;
 	}
 
 	code {
 		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 		font-size: 0.9rem;
-		color: #212529;
+		color: var(--text-dark);
 	}
 
 	:not(pre) > code {
-		background: #f8f9fa;
+		background: var(--bg-color);
 		padding: 0.2rem 0.4rem;
 		border-radius: 3px;
-		border: 1px solid #dee2e6;
+		border: 1px solid var(--border-color);
 	}
 
 	/* Demo Section */
@@ -551,37 +668,37 @@
 	}
 
 	.demo-actions button {
-		background: #e9ecef;
-		color: #495057;
+		background: var(--border-color-light);
+		color: var(--text-medium);
 		padding: 0.5rem 1rem;
 		font-size: 0.9rem;
 	}
 
 	.demo-actions button:hover {
-		background: #667eea;
-		color: white;
+		background: var(--accent-color-base);
+		color: var(--bg-white);
 	}
 
 	.demo-container {
 		width: 100%;
 		height: 500px;
-		border: 2px solid #dee2e6;
+		border: 2px solid var(--border-color);
 		border-radius: 8px;
 		overflow: hidden;
 		margin: 2rem 0;
-		background: #f8f9fa;
+		background: var(--bg-color);
 	}
 
 	.demo-instructions {
-		background: #f8f9fa;
+		background: var(--bg-color);
 		padding: 1.5rem;
 		border-radius: 8px;
-		border-left: 4px solid #667eea;
+		border-left: 4px solid var(--accent-color-base);
 	}
 
 	.demo-instructions h3 {
 		margin-top: 0;
-		color: #667eea;
+		color: var(--accent-color-base);
 	}
 
 	.demo-instructions ul {
@@ -592,13 +709,13 @@
 	.demo-instructions li {
 		margin: 0.5rem 0;
 		line-height: 1.6;
-		color: #495057;
+		color: var(--text-medium);
 	}
 
 	/* Info Box */
 	.info-box {
-		background: #e7f3ff;
-		border: 1px solid #b3d9ff;
+		background: var(--info-bg);
+		border: 1px solid var(--info-border);
 		border-radius: 8px;
 		padding: 1.5rem;
 		margin: 1.5rem 0;
@@ -607,7 +724,7 @@
 	.info-box strong {
 		display: block;
 		margin-bottom: 0.5rem;
-		color: #004085;
+		color: var(--info-text);
 	}
 
 	.info-box ul {
@@ -617,7 +734,7 @@
 
 	.info-box li {
 		margin: 0.25rem 0;
-		color: #004085;
+		color: var(--info-text);
 	}
 
 	/* Tables */
@@ -629,41 +746,42 @@
 	table {
 		width: 100%;
 		border-collapse: collapse;
-		background: white;
-		border: 1px solid #dee2e6;
+		background: var(--bg-white);
+		border: 1px solid var(--border-color);
 	}
 
-	th, td {
+	th,
+	td {
 		text-align: left;
 		padding: 0.75rem 1rem;
-		border: 1px solid #dee2e6;
+		border: 1px solid var(--border-color);
 	}
 
 	th {
-		background: #f8f9fa;
+		background: var(--bg-color);
 		font-weight: 600;
-		color: #495057;
+		color: var(--text-medium);
 	}
 
 	td {
-		color: #495057;
+		color: var(--text-medium);
 	}
 
 	tr:hover {
-		background: #f8f9fa;
+		background: var(--bg-color);
 	}
 
 	/* Footer */
 	.footer {
-		background: #f8f9fa;
+		background: var(--bg-color);
 		padding: 2rem;
 		text-align: center;
-		border-top: 1px solid #dee2e6;
-		color: #6c757d;
+		border-top: 1px solid var(--border-color);
+		color: var(--text-muted);
 	}
 
 	.footer a {
-		color: #667eea;
+		color: var(--accent-color-base);
 		text-decoration: none;
 	}
 
