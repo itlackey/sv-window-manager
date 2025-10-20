@@ -20,6 +20,7 @@ jobs:
       - name: Build package
         run: bun run prepack
       - name: Publish to npm
-        run: bun publish --access public
+        run: npm publish --access public
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
