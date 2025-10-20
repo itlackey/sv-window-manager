@@ -5,15 +5,20 @@ import FileBrowserSession from './FileBrowserSession.svelte';
 import FileEditorSession from './FileEditorSession.svelte';
 import { mount } from 'svelte';
 
+type SessionInfo = {
+	type: string;
+	data: Record<string, any>;
+};
+
 // Mock API data for sessions (sessionId -> {type, data})
-const sessionData = {
+const sessionData: Record<string, SessionInfo> = {
 	abc123: { type: 'chat', data: { welcome: 'Hello Chat!' } },
 	term42: { type: 'terminal', data: { initCommand: "echo 'Hello'" } },
 	files99: { type: 'filebrowser', data: { rootPath: '/home/user' } },
 	edit77: { type: 'fileeditor', data: { filename: 'notes.txt', content: 'Sample text' } }
 };
 
-async function fetchSessionInfo(id) {
+async function fetchSessionInfo(id: string): Promise<SessionInfo> {
 	// Simulate an API call with a delay
 	return new Promise((resolve) => {
 		setTimeout(() => {
@@ -21,7 +26,7 @@ async function fetchSessionInfo(id) {
 		}, 500);
 	});
 }
-export async function getSessionComponent(sessionId: String) {
+export async function getSessionComponent(sessionId: string) {
 	const info = await fetchSessionInfo(sessionId);
 	const type = info.type;
 	const data = info.data;
@@ -53,24 +58,4 @@ export async function getSessionComponent(sessionId: String) {
 	});
 
 	return contentElem;
-}
-async function openSession() {
-	if (!sessionId) return;
-
-	const contentElem = await getSessionComponent(sessionId);
-
-	// Add the new element as a pane in the BWIN window manager
-	if (manager && manager.rootSash) {
-		// Find the rightmost leaf pane
-		let node = manager.rootSash;
-		while (node.rightChild) {
-			node = node.rightChild;
-		}
-		// Add to the right of the rightmost leaf
-		manager.addPane(node.id, {
-			position: 'right',
-			content: contentElem
-			// Optionally, add id/size/title here
-		});
-	}
 }

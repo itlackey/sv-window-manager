@@ -1,42 +1,32 @@
 <script lang="ts">
-	import type { PageProps } from './$types.js';
-	import ChatSession from '$lib/components/bwin/ChatSession.svelte';
-	import TerminalSession from '$lib/components/bwin/TerminalSession.svelte';
-	import FileBrowserSession from '$lib/components/bwin/FileBrowserSession.svelte';
-	import FileEditorSession from '$lib/components/bwin/FileEditorSession.svelte';
+	import ChatSession from './ChatSession.svelte';
+	import TerminalSession from './TerminalSession.svelte';
+	import FileBrowserSession from './FileBrowserSession.svelte';
+	import FileEditorSession from './FileEditorSession.svelte';
+	import BwinHost from '$lib/components/BwinHost.svelte';
 
-	let { data }: PageProps = $props();
-
-	import BwinHost from '$lib/components/bwin/BwinHost.svelte';
-	let bwinHostRef: BwinHost = $state<BwinHost | undefined>();
+	let bwinHostRef = $state<BwinHost | undefined>();
+	let activeSection = $state('demo');
+	let demoStarted = $state(false);
 
 	// Mock API data for sessions (sessionId -> {type, data})
-	const sessionData = {
-		abc123: { type: 'chat', data: { welcome: 'Hello Chat!' } },
-		term42: { type: 'terminal', data: { initCommand: "echo 'Hello'" } },
-		files99: { type: 'filebrowser', data: { rootPath: '/home/user' } },
-		edit77: { type: 'fileeditor', data: { filename: 'notes.txt', content: 'Sample text' } }
+	const sessionData: Record<string, { type: string; data: Record<string, any> }> = {
+		chat1: { type: 'chat', data: { welcome: 'Welcome to Chat Session!' } },
+		terminal1: { type: 'terminal', data: { initCommand: "echo 'Terminal Ready'" } },
+		files1: { type: 'filebrowser', data: { rootPath: '/home/user/projects' } },
+		editor1: { type: 'fileeditor', data: { filename: 'README.md', content: '# Welcome\n\nStart editing...' } }
 	};
 
-	async function fetchSessionInfo(id) {
-		return sessionData[id];
-		// // Simulate an API call with a delay
-		// return new Promise((resolve) => {
-		// 	setTimeout(() => {
-		// 		resolve(sessionData[id] || { type: 'chat', data: { welcome: 'Fallback' } });
-		// 	}, 500);
-		// });
+	async function fetchSessionInfo(id: string) {
+		return sessionData[id] || { type: 'chat', data: { welcome: 'Default Session' } };
 	}
 
-	let sessionId = $state('abc123');
-	let bwinInfo = $state();
+	async function addSession(sessionId: string) {
+		if (!bwinHostRef) return;
 
-	async function openSession() {
-		if (!sessionId) return;
 		const info = await fetchSessionInfo(sessionId);
-		console.log('Fetched session info:', { ...info.data });
-		// Choose the appropriate Svelte component for this session type
 		let Component;
+
 		switch (info.type) {
 			case 'chat':
 				Component = ChatSession;
@@ -53,44 +43,298 @@
 			default:
 				Component = ChatSession;
 		}
+
 		bwinHostRef.addPane(sessionId, {}, Component, { sessionId, data: { ...info.data } });
-		bwinInfo = bwinHostRef.getInfo();
 	}
 
-	function refresh() {
-		bwinInfo = bwinHostRef.getInfo();
-		console.log('Refreshed bwinInfo:', bwinInfo);
+	async function startDemo() {
+		demoStarted = true;
+		// Add initial sessions to demonstrate the window manager
+		await addSession('chat1');
+		setTimeout(() => addSession('terminal1'), 200);
+		setTimeout(() => addSession('editor1'), 400);
+	}
+
+	function resetDemo() {
+		// Reload the page to reset
+		window.location.reload();
 	}
 </script>
 
 <svelte:head>
-	<title>Test BWIN Integration</title>
+	<title>SV BWIN - Window Manager Component Library</title>
+	<meta name="description" content="A Svelte 5 component library providing tiling window management for web applications" />
 </svelte:head>
 
-<div class="session-opener">
-	<input type="text" bind:value={sessionId} placeholder="Enter Session ID" />
-	<button onclick={openSession}>Open Session</button>
-	<button onclick={refresh}>Refresh</button>
+<div class="page-container">
+	<!-- Hero Section -->
+	<section class="hero">
+		<div class="hero-content">
+			<h1>SV BWIN</h1>
+			<p class="subtitle">Tiling Window Manager for Svelte 5</p>
+			<p class="description">
+				A modern Svelte 5 component library that wraps bwin.js to provide powerful tiling window
+				management in your web applications. Create dynamic, resizable layouts with ease.
+			</p>
+			<div class="hero-actions">
+				<button class="btn-primary" onclick={() => activeSection = 'demo'}>
+					Try the Demo
+				</button>
+				<button class="btn-secondary" onclick={() => activeSection = 'installation'}>
+					Get Started
+				</button>
+			</div>
+		</div>
+	</section>
+
+	<!-- Navigation -->
+	<nav class="nav-tabs">
+		<button
+			class={{ active: activeSection === 'demo' }}
+			onclick={() => activeSection = 'demo'}
+		>
+			Live Demo
+		</button>
+		<button
+			class={{ active: activeSection === 'installation' }}
+			onclick={() => activeSection = 'installation'}
+		>
+			Installation
+		</button>
+		<button
+			class={{ active: activeSection === 'usage' }}
+			onclick={() => activeSection = 'usage'}
+		>
+			Usage
+		</button>
+		<button
+			class={{ active: activeSection === 'customization' }}
+			onclick={() => activeSection = 'customization'}
+		>
+			Customization
+		</button>
+	</nav>
+
+	<!-- Content Sections -->
+	<main class="main-content">
+		{#if activeSection === 'demo'}
+			<section class="section">
+				<h2>Interactive Demo</h2>
+				<p>Experience the window manager in action. Click "Start Demo" to load sample sessions.</p>
+
+				<div class="demo-controls">
+					{#if !demoStarted}
+						<button class="btn-primary" onclick={startDemo}>
+							Start Demo
+						</button>
+					{:else}
+						<button class="btn-secondary" onclick={resetDemo}>
+							Reset Demo
+						</button>
+						<div class="demo-actions">
+							<button onclick={() => addSession('chat1')}>Add Chat</button>
+							<button onclick={() => addSession('terminal1')}>Add Terminal</button>
+							<button onclick={() => addSession('files1')}>Add File Browser</button>
+							<button onclick={() => addSession('editor1')}>Add Editor</button>
+						</div>
+					{/if}
+				</div>
+
+				<div class="demo-container">
+					<BwinHost
+						bind:this={bwinHostRef}
+						config={{ fitContainer: true }}
+					/>
+				</div>
+
+				<div class="demo-instructions">
+					<h3>Try these interactions:</h3>
+					<ul>
+						<li>Drag window headers to reposition panes</li>
+						<li>Resize panes by dragging the dividers (muntins)</li>
+						<li>Close windows using the × button</li>
+						<li>Add multiple sessions and arrange them as you like</li>
+					</ul>
+				</div>
+			</section>
+		{/if}
+
+		{#if activeSection === 'installation'}
+			<section class="section">
+				<h2>Installation</h2>
+
+				<h3>Using npm</h3>
+				<pre><code>npm install sv-window-manager</code></pre>
+
+				<h3>Using pnpm</h3>
+				<pre><code>pnpm add sv-window-manager</code></pre>
+
+				<h3>Using yarn</h3>
+				<pre><code>yarn add sv-window-manager</code></pre>
+
+				<div class="info-box">
+					<strong>Requirements:</strong>
+					<ul>
+						<li>Svelte 5 or later</li>
+						<li>SvelteKit (recommended) or Vite</li>
+					</ul>
+				</div>
+			</section>
+		{/if}
+
+		{#if activeSection === 'usage'}
+			<section class="section">
+				<h2>Basic Usage</h2>
+
+				<h3>1. Import the Component</h3>
+				<pre><code>&lt;script lang="ts"&gt;
+  import BwinHost from 'sv-window-manager';
+  import YourComponent from './YourComponent.svelte';
+
+  let bwinHost = $state&lt;BwinHost | undefined&gt;();
+&lt;/script&gt;</code></pre>
+
+				<h3>2. Add BwinHost to Your Page</h3>
+				<pre><code>&lt;BwinHost
+  bind:this={'{bwinHost}'}
+  config={'{{'} fitContainer: true {'}}'}
+/&gt;</code></pre>
+
+				<h3>3. Dynamically Add Panes</h3>
+				<pre><code>async function addPane() {'{'}
+  if (!bwinHost) return;
+
+  // Add a pane with your component
+  bwinHost.addPane(
+    'unique-pane-id',
+    {'{}'},                    // bwin.js options
+    YourComponent,        // Svelte component
+    {'{'}                     // Component props
+      sessionId: 'session-1',
+      data: {'{'}
+        title: 'My Pane'
+      {'}'}
+    {'}'}
+  );
+{'}'}</code></pre>
+
+				<h3>Component Props</h3>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Prop</th>
+								<th>Type</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>config</code></td>
+								<td><code>object</code></td>
+								<td>Configuration for bwin.js (e.g., <code>fitContainer: true</code>)</td>
+							</tr>
+							<tr>
+								<td><code>oncreated</code></td>
+								<td><code>function</code></td>
+								<td>Callback when the BinaryWindow instance is created</td>
+							</tr>
+							<tr>
+								<td><code>onupdated</code></td>
+								<td><code>function</code></td>
+								<td>Callback when the window layout is updated</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h3>Methods</h3>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Method</th>
+								<th>Parameters</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>addPane</code></td>
+								<td><code>(id, options, Component, props)</code></td>
+								<td>Add a new pane with a Svelte component</td>
+							</tr>
+							<tr>
+								<td><code>getInfo</code></td>
+								<td><code>()</code></td>
+								<td>Get current window manager state</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+		{/if}
+
+		{#if activeSection === 'customization'}
+			<section class="section">
+				<h2>Customization</h2>
+
+				<p>Customize the appearance using CSS custom properties:</p>
+
+				<h3>Available CSS Variables</h3>
+				<pre><code>:root {'{'}
+  /* Colors */
+  --bw-drop-area-bg-color: hsla(226, 50%, 75%, 0.6);
+  --bw-pane-bg-color: hsla(0, 0%, 20%, 1);
+  --bw-muntin-bg-color: hsla(226, 80%, 27%, 0.9);
+  --bw-glass-bg-color: hsla(0, 0%, 95%, 1);
+  --bw-glass-border-color: hsla(226, 80%, 27%, 0.9);
+  --bw-glass-header-bg-color: hsla(226, 80%, 27%, 0.6);
+  --bw-glass-tab-hover-bg: hsla(226, 50%, 75%, 0.6);
+
+  /* Sizing & Spacing */
+  --bw-container-width: stretch;
+  --bw-container-height: 100vh;
+  --bw-glass-clearance: 2px;
+  --bw-glass-border-radius: 5px;
+  --bw-glass-header-height: 30px;
+  --bw-glass-header-gap: 4px;
+  --bw-sill-gap: 6px;
+
+  /* Typography */
+  --bw-font-family: inherit;
+  --bw-font-size: inherit;
+{'}'}</code></pre>
+
+				<h3>Example: Dark Theme</h3>
+				<pre><code>:root {'{'}
+  --bw-glass-bg-color: #1e1e1e;
+  --bw-glass-border-color: #3a3a3a;
+  --bw-glass-header-bg-color: #252526;
+  --bw-muntin-bg-color: #2d2d30;
+  --bw-pane-bg-color: #1e1e1e;
+{'}'}</code></pre>
+			</section>
+		{/if}
+	</main>
+
+	<!-- Footer -->
+	<footer class="footer">
+		<p>
+			Built with Svelte 5 |
+			<a href="https://bhjsdev.github.io/bwin-docs/" target="_blank" rel="noopener noreferrer">
+				bwin.js Documentation
+			</a> |
+			<a href="https://github.com/itlackey/sv-window-manager" target="_blank" rel="noopener noreferrer">
+				GitHub
+			</a>
+		</p>
+	</footer>
 </div>
-
-<BwinHost
-	bind:this={bwinHostRef}
-	config={{
-		fitContainer: true
-	}}
-/>
-
-{#key bwinInfo}
-	{#if bwinInfo}
-		<pre style="display:none;"><code>
-    {JSON.stringify(bwinInfo, null, 2)}
-</code></pre>
-	{/if}
-{/key}
 
 <style>
 	:root {
-		--accent-color: hsla(226, 80%, 27%, 0.6);
+		--accent-color: hsla(125, 97%, 36%, 0.6);
 		--accent-color-strong: hsla(226, 80%, 27%, 0.9);
 		--accent-color-light: hsla(226, 50%, 75%, 0.6);
 		--bg-color: hsla(0, 0%, 95%, 1);
@@ -116,7 +360,7 @@
 
 		/* Sizing & Spacing */
 		--bw-container-width: stretch;
-		--bw-container-height: calc(100svh - 50px);
+		--bw-container-height: 500px;
 		--bw-glass-clearance: 2px;
 		--bw-glass-border-radius: 5px;
 		--bw-glass-header-height: 30px;
@@ -125,5 +369,328 @@
 		--bw-action-gap: 2px;
 		--bw-minimized-glass-height: 10px;
 		--bw-minimized-glass-basis: 10%;
+	}
+
+	:global(body) {
+		margin: 0;
+		padding: 0;
+		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		min-height: 100vh;
+	}
+
+	.page-container {
+		max-width: 1400px;
+		margin: 0 auto;
+		background: white;
+		min-height: 100vh;
+		box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+	}
+
+	/* Hero Section */
+	.hero {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+		padding: 4rem 2rem;
+		text-align: center;
+	}
+
+	.hero-content h1 {
+		font-size: 3.5rem;
+		margin: 0 0 1rem 0;
+		font-weight: 700;
+	}
+
+	.subtitle {
+		font-size: 1.5rem;
+		margin: 0 0 1.5rem 0;
+		opacity: 0.9;
+	}
+
+	.description {
+		font-size: 1.1rem;
+		max-width: 700px;
+		margin: 0 auto 2rem auto;
+		line-height: 1.6;
+		opacity: 0.95;
+	}
+
+	.hero-actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	/* Buttons */
+	button {
+		padding: 0.75rem 1.5rem;
+		border: none;
+		border-radius: 6px;
+		font-size: 1rem;
+		cursor: pointer;
+		transition: all 0.2s;
+		font-weight: 500;
+	}
+
+	.btn-primary {
+		background: white;
+		color: #667eea;
+	}
+
+	.btn-primary:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	}
+
+	.btn-secondary {
+		background: rgba(255, 255, 255, 0.2);
+		color: white;
+		border: 2px solid white;
+	}
+
+	.btn-secondary:hover {
+		background: rgba(255, 255, 255, 0.3);
+	}
+
+	/* Navigation */
+	.nav-tabs {
+		display: flex;
+		background: #f8f9fa;
+		border-bottom: 2px solid #e9ecef;
+		overflow-x: auto;
+	}
+
+	.nav-tabs button {
+		background: transparent;
+		border: none;
+		border-bottom: 3px solid transparent;
+		padding: 1rem 1.5rem;
+		cursor: pointer;
+		transition: all 0.2s;
+		color: #495057;
+		font-weight: 500;
+		white-space: nowrap;
+	}
+
+	.nav-tabs button:hover {
+		background: #e9ecef;
+		color: #667eea;
+	}
+
+	.nav-tabs button.active {
+		color: #667eea;
+		border-bottom-color: #667eea;
+		background: white;
+	}
+
+	/* Main Content */
+	.main-content {
+		padding: 2rem;
+	}
+
+	.section {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.section h2 {
+		font-size: 2.5rem;
+		margin: 0 0 1rem 0;
+		color: #212529;
+	}
+
+	.section h3 {
+		font-size: 1.5rem;
+		margin: 2rem 0 1rem 0;
+		color: #495057;
+	}
+
+	.section p {
+		line-height: 1.8;
+		color: #495057;
+		margin-bottom: 1.5rem;
+	}
+
+	/* Code blocks */
+	pre {
+		background: #f8f9fa;
+		padding: 1.5rem;
+		border-radius: 8px;
+		overflow-x: auto;
+		border: 1px solid #dee2e6;
+		margin: 1rem 0;
+	}
+
+	code {
+		font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+		font-size: 0.9rem;
+		color: #212529;
+	}
+
+	:not(pre) > code {
+		background: #f8f9fa;
+		padding: 0.2rem 0.4rem;
+		border-radius: 3px;
+		border: 1px solid #dee2e6;
+	}
+
+	/* Demo Section */
+	.demo-controls {
+		margin: 2rem 0;
+		display: flex;
+		gap: 1rem;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.demo-actions {
+		display: flex;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.demo-actions button {
+		background: #e9ecef;
+		color: #495057;
+		padding: 0.5rem 1rem;
+		font-size: 0.9rem;
+	}
+
+	.demo-actions button:hover {
+		background: #667eea;
+		color: white;
+	}
+
+	.demo-container {
+		width: 100%;
+		height: 500px;
+		border: 2px solid #dee2e6;
+		border-radius: 8px;
+		overflow: hidden;
+		margin: 2rem 0;
+		background: #f8f9fa;
+	}
+
+	.demo-instructions {
+		background: #f8f9fa;
+		padding: 1.5rem;
+		border-radius: 8px;
+		border-left: 4px solid #667eea;
+	}
+
+	.demo-instructions h3 {
+		margin-top: 0;
+		color: #667eea;
+	}
+
+	.demo-instructions ul {
+		margin: 0;
+		padding-left: 1.5rem;
+	}
+
+	.demo-instructions li {
+		margin: 0.5rem 0;
+		line-height: 1.6;
+		color: #495057;
+	}
+
+	/* Info Box */
+	.info-box {
+		background: #e7f3ff;
+		border: 1px solid #b3d9ff;
+		border-radius: 8px;
+		padding: 1.5rem;
+		margin: 1.5rem 0;
+	}
+
+	.info-box strong {
+		display: block;
+		margin-bottom: 0.5rem;
+		color: #004085;
+	}
+
+	.info-box ul {
+		margin: 0;
+		padding-left: 1.5rem;
+	}
+
+	.info-box li {
+		margin: 0.25rem 0;
+		color: #004085;
+	}
+
+	/* Tables */
+	.props-table {
+		overflow-x: auto;
+		margin: 1.5rem 0;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		background: white;
+		border: 1px solid #dee2e6;
+	}
+
+	th, td {
+		text-align: left;
+		padding: 0.75rem 1rem;
+		border: 1px solid #dee2e6;
+	}
+
+	th {
+		background: #f8f9fa;
+		font-weight: 600;
+		color: #495057;
+	}
+
+	td {
+		color: #495057;
+	}
+
+	tr:hover {
+		background: #f8f9fa;
+	}
+
+	/* Footer */
+	.footer {
+		background: #f8f9fa;
+		padding: 2rem;
+		text-align: center;
+		border-top: 1px solid #dee2e6;
+		color: #6c757d;
+	}
+
+	.footer a {
+		color: #667eea;
+		text-decoration: none;
+	}
+
+	.footer a:hover {
+		text-decoration: underline;
+	}
+
+	/* Responsive */
+	@media (max-width: 768px) {
+		.hero-content h1 {
+			font-size: 2.5rem;
+		}
+
+		.subtitle {
+			font-size: 1.2rem;
+		}
+
+		.section h2 {
+			font-size: 2rem;
+		}
+
+		.main-content {
+			padding: 1rem;
+		}
+
+		.demo-container {
+			height: 400px;
+		}
 	}
 </style>

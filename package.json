@@ -74,5 +74,8 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"bwin": "^0.2.8"
+	}
 }

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { mount } from 'svelte';
-	import { BinaryWindow } from './bwin.js';
+	import { BinaryWindow } from 'bwin';
 	import './bwin.css';
 
 	let { config = {}, oncreated = () => {}, onupdated = () => {} } = $props();
 
 	let bwinContainer = $state<HTMLElement>();
-	let manager = $state<undefined | BinaryWindow>();
+	let manager = $state<BinaryWindow | undefined>();
 
 	export function addPane(
 		sessionId: string,
