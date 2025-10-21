@@ -8,9 +8,13 @@
 	interface Props {
 		/** Configuration for the BinaryWindow instance */
 		config?: BwinConfig;
+		/** Callback when a pane is added */
+		onpaneadded?: (sessionId: string) => void;
+		/** Callback when a pane is removed */
+		onpaneremoved?: (sessionId: string) => void;
 	}
 
-	let { config = {} }: Props = $props();
+	let { config = {}, onpaneadded = (sessionId) => {}, onpaneremoved = (sessionId) => {} }: Props = $props();
 
 	let bwinContainer = $state<HTMLElement>();
 	let manager = $state<BinaryWindow | undefined>();
@@ -47,8 +51,13 @@
 			content: contentElem,
 			...paneConfig
 		});
+		onpaneadded(sessionId);
 	}
-
+	export function removePane(sessionId: string): void {
+		if (!manager) return;
+		manager.removePane(sessionId);
+		onpaneremoved(sessionId);
+	}
 	/**
 	 * Get information about the current window manager state
 	 * @returns The root sash node or null if manager is not initialized

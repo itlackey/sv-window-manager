@@ -13,6 +13,8 @@
     "cSpell.words": [
         "bwin",
         "oncreated",
+        "onpaneadded",
+        "onpaneremoved",
         "onready",
         "onupdated"
     ]
