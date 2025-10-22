@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { mount } from 'svelte';
-	import { BinaryWindow } from 'bwin';
+	import { BinaryWindow } from '../bwin/binary-window/binary-window.js';
 	import type { Component } from 'svelte';
 	import type { BwinConfig, PaneConfig } from '../types.js';
 	import './bwin.css';
