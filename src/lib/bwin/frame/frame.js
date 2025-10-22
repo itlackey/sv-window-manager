@@ -18,10 +18,15 @@ const DEBUG = import.meta.env.VITE_DEBUG == 'true' ? true : false;
  *
  */
 export class Frame {
+  /** @type {HTMLElement | null} */
   windowElement = null;
+  /** @type {HTMLElement | null} */
   containerElement = null;
   debug = DEBUG;
 
+  /**
+   * @param {{ fitContainer: boolean; width: number; height: number; } | import("../../types.js").BwinConfig | undefined} settings
+   */
   constructor(settings) {
     let config = null;
 

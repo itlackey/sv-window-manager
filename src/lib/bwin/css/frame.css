@@ -1,55 +1,55 @@
-bw-window {
+.window {
   position: absolute;
   display: block;
   box-sizing: border-box;
 
   /* When one pane maximized, hide all other panes and muntins */
-  &:has(> bw-pane[maximized]) > :is(bw-pane, bw-muntin):not([maximized]) {
+  &:has(> .pane[data-maximized]) > :is(.pane, .muntin):not([data-maximized]) {
     display: none;
   }
 }
 
-bw-pane {
+.pane {
   position: absolute;
   overflow: auto;
   box-sizing: border-box;
   background-color: hsl(0, 0%, 95%);
 
-  &[drop-area]::before {
+  &[data-drop-area]::before {
     content: '';
     position: absolute;
     background-color: var(--bw-drop-area-bg-color);
   }
 
-  &[drop-area='top']::before {
+  &[data-drop-area='top']::before {
     top: 0;
     left: 0;
     right: 0;
     height: 50%;
   }
 
-  &[drop-area='right']::before {
+  &[data-drop-area='right']::before {
     top: 0;
     right: 0;
     bottom: 0;
     width: 50%;
   }
 
-  &[drop-area='bottom']::before {
+  &[data-drop-area='bottom']::before {
     bottom: 0;
     left: 0;
     right: 0;
     height: 50%;
   }
 
-  &[drop-area='left']::before {
+  &[data-drop-area='left']::before {
     top: 0;
     left: 0;
     bottom: 0;
     width: 50%;
   }
 
-  &[drop-area='center']::before {
+  &[data-drop-area='center']::before {
     top: 0;
     left: 0;
     right: 0;
@@ -57,20 +57,20 @@ bw-pane {
   }
 }
 
-bw-muntin {
+.muntin {
   box-sizing: border-box;
   position: absolute;
-  background-color: white;
+  background-color: var(--bw-muntin-bg-color, white);
 
-  &[horizontal] {
+  &.horizontal {
     cursor: ns-resize;
   }
 
-  &[vertical] {
+  &.vertical {
     cursor: ew-resize;
   }
 
-  &[resizable='false'] {
+  &[data-resizable='false'] {
     cursor: auto;
   }
 }

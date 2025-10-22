@@ -2,19 +2,20 @@ import { getMetricsFromElement } from '../utils.js';
 
 export default {
   label: '',
-  className: 'bw-glass-action--maximize',
+  className: 'glass-action glass-action--maximize',
   onClick: (event) => {
-    const paneEl = event.target.closest('bw-pane');
+    const paneEl = event.target.closest('.pane');
+    if (!paneEl) return;
 
-    if (paneEl.hasAttribute('maximized')) {
-      paneEl.removeAttribute('maximized');
+    if (paneEl.hasAttribute('data-maximized')) {
+      paneEl.removeAttribute('data-maximized');
       paneEl.style.left = `${paneEl.bwOriginalBoundingRect.left}px`;
       paneEl.style.top = `${paneEl.bwOriginalBoundingRect.top}px`;
       paneEl.style.width = `${paneEl.bwOriginalBoundingRect.width}px`;
       paneEl.style.height = `${paneEl.bwOriginalBoundingRect.height}px`;
     }
     else {
-      paneEl.setAttribute('maximized', '');
+      paneEl.setAttribute('data-maximized', '');
       paneEl.bwOriginalBoundingRect = getMetricsFromElement(paneEl);
       paneEl.style.left = '0';
       paneEl.style.top = '0';

@@ -1,68 +1,68 @@
-bw-window:has(bw-glass) {
-  bw-pane {
+.window:has(.glass) {
+  .pane {
     background-color: transparent;
 
-    &[drop-area]::before {
+    &[data-drop-area]::before {
       z-index: 1;
     }
 
-    &[drop-area='top']::before {
+    &[data-drop-area='top']::before {
       top: var(--bw-glass-clearance);
       left: var(--bw-glass-clearance);
       right: var(--bw-glass-clearance);
       height: 50%;
     }
 
-    &[drop-area='right']::before {
+    &[data-drop-area='right']::before {
       top: var(--bw-glass-clearance);
       right: var(--bw-glass-clearance);
       bottom: var(--bw-glass-clearance);
       width: 50%;
     }
 
-    &[drop-area='bottom']::before {
+    &[data-drop-area='bottom']::before {
       bottom: var(--bw-glass-clearance);
       left: var(--bw-glass-clearance);
       right: var(--bw-glass-clearance);
       height: 50%;
     }
 
-    &[drop-area='left']::before {
+    &[data-drop-area='left']::before {
       top: var(--bw-glass-clearance);
       left: var(--bw-glass-clearance);
       bottom: var(--bw-glass-clearance);
       width: 50%;
     }
 
-    &[drop-area='center']::before {
+    &[data-drop-area='center']::before {
       inset: var(--bw-glass-clearance);
     }
   }
 
-  bw-muntin {
+  .muntin {
     background-color: transparent;
   }
 }
 
-bw-glass {
+.glass {
   position: absolute;
   inset: var(--bw-glass-clearance);
   display: flex;
   flex-direction: column;
   border: 1px solid var(--bw-glass-border-color);
   border-radius: var(--bw-glass-border-radius);
-  background-color: white;
+  background-color: var(--bw-glass-bg-color, white);
   font-family: var(--bw-font-family);
   font-size: var(--bw-font-size);
   box-sizing: border-box;
 
-  &[draggable='true']:active {
+  &[data-draggable='true']:active {
     cursor: move;
     opacity: 0.4;
   }
 }
 
-bw-glass-header {
+.glass-header {
   box-sizing: border-box;
   flex-basis: var(--bw-glass-header-height);
   flex-shrink: 0;
@@ -77,28 +77,30 @@ bw-glass-header {
   background-color: var(--bw-glass-header-bg-color);
 }
 
-bw-glass-title {
+.glass-title {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-bw-glass-tab-container {
+.glass-tabs {
   align-self: flex-end;
   display: flex;
   gap: var(--bw-glass-header-gap);
 }
 
-.bw-glass-tab {
+.glass-tab {
   font-family: var(--bw-font-family);
   border: 1px solid var(--bw-glass-border-color);
   border-bottom: none;
   border-top-left-radius: var(--bw-glass-border-radius);
   border-top-right-radius: var(--bw-glass-border-radius);
   cursor: pointer;
+  background: transparent;
+  padding: 0.25rem 0.5rem;
 
   &:hover {
-    background-color: white;
+    background-color: var(--bw-glass-tab-hover-bg, white);
   }
 
   &:active {
@@ -106,22 +108,25 @@ bw-glass-tab-container {
   }
 }
 
-bw-glass-action-container {
+.glass-actions {
   /* always on the right */
   margin-left: auto;
   display: flex;
   flex-shrink: 0;
-  gap: 2px;
+  gap: var(--bw-action-gap, 2px);
 }
 
-.bw-glass-action {
+.glass-action {
   font-family: var(--bw-font-family);
   border: 1px solid var(--bw-glass-border-color);
   border-radius: var(--bw-glass-border-radius);
   cursor: pointer;
+  background: transparent;
+  padding: 0.25rem 0.5rem;
+  min-width: 24px;
 
   &:hover {
-    background-color: white;
+    background-color: var(--bw-glass-action-hover-bg, white);
   }
 
   &:active {
@@ -143,34 +148,35 @@ bw-glass-action-container {
   }
 }
 
-.bw-glass-action--close {
+.glass-action--close {
   &::before {
     content: '✕';
   }
 }
 
-.bw-glass-action--maximize {
+.glass-action--maximize {
   &::before {
     /* 🗖 🗗 ◫ □ ☐ */
     content: '☐';
   }
 }
 
-bw-pane[maximized] .bw-glass-action--maximize {
+.pane[data-maximized] .glass-action--maximize {
   &::before {
     content: '□';
   }
 }
 
-.bw-glass-action--minimize {
+.glass-action--minimize {
   &::before {
     content: '−';
   }
 }
 
-bw-glass-content {
+.glass-content {
   display: block;
   box-sizing: border-box;
   overflow: auto;
   flex-grow: 1;
+  padding: 1rem;
 }

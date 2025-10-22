@@ -2,18 +2,18 @@ import { createDomNode, getMetricsFromElement } from '../utils.js';
 
 export default {
   label: '',
-  className: 'bw-glass-action--minimize',
+  className: 'glass-action glass-action--minimize',
   onClick: (event, binaryWindow) => {
-    const sillEl = binaryWindow.sillElement;
+    const sillEl = binaryWindow.getSillElement?.();
     if (!sillEl) throw new Error(`[bwin] Sill element not found when minimizing`);
 
     const minimizedGlassEl = createDomNode('<button class="bw-minimized-glass" />');
     sillEl.append(minimizedGlassEl);
 
-    const paneEl = event.target.closest('bw-pane');
-    const glassEl = event.target.closest('bw-glass');
-    const paneSashId = paneEl.getAttribute('sash-id');
-    const panePosition = paneEl.getAttribute('position');
+    const paneEl = event.target.closest('.pane');
+    const glassEl = event.target.closest('.glass');
+    const paneSashId = paneEl?.getAttribute('data-sash-id');
+    const panePosition = paneEl?.getAttribute('data-position');
 
     minimizedGlassEl.bwGlassElement = glassEl;
     minimizedGlassEl.bwOriginalPosition = panePosition;

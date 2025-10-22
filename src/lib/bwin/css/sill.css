@@ -1,4 +1,4 @@
-bw-sill {
+.sill {
   position: absolute;
   top: 100%;
   margin-top: calc(var(--bw-sill-gap) - var(--bw-glass-clearance));

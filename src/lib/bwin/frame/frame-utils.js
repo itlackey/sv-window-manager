@@ -1,19 +1,19 @@
 /**
- * Read `sash-id` attribute from the pane element
+ * Read `data-sash-id` attribute from the pane element
  *
  * @param {Element} innerElement - Element inside the pane element
  * @returns {string} - Sash ID
  */
 export function getSashIdFromPane(innerElement) {
-  if (innerElement.tagName === 'BW-PANE') {
-    return innerElement.getAttribute('sash-id');
+  if (innerElement.classList?.contains('pane')) {
+    return innerElement.getAttribute('data-sash-id');
   }
 
-  const paneEl = innerElement.closest('bw-pane');
+  const paneEl = innerElement.closest('.pane');
 
   if (!paneEl) {
     throw new Error('[bwin] Pane element not found');
   }
 
-  return paneEl.getAttribute('sash-id');
+  return paneEl.getAttribute('data-sash-id');
 }
