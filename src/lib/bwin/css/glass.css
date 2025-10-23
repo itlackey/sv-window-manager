@@ -81,6 +81,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0; /* Allow flex item to shrink below content size */
 }
 
 .glass-tabs {
@@ -176,7 +177,7 @@
 .glass-content {
   display: block;
   box-sizing: border-box;
-  overflow: auto;
+  overflow: hidden;
   flex-grow: 1;
   padding: 1rem;
 }

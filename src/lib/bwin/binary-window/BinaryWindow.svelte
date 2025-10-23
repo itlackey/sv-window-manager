@@ -15,6 +15,7 @@
   interface BinaryWindowProps {
     settings: any;
     debug?: boolean;
+    fitContainer?: boolean;
     oncreated?: () => void;
     onupdated?: () => void;
   }
@@ -22,16 +23,25 @@
   let {
     settings,
     debug = DEBUG,
+    fitContainer = true, // Default to true for responsive behavior
     oncreated = () => {},
     onupdated = () => {}
   }: BinaryWindowProps = $props();
 
+  // Support fitContainer from settings object (like bwin.js) or from prop
+  const shouldFitContainer = $derived(settings?.fitContainer ?? fitContainer);
+
   // Frame component binding
   let frameComponent = $state<any>();
   let sillElement = $state<HTMLElement | undefined>();
+  let rootElement = $state<HTMLElement | undefined>();
 
   // State for muntin size (needed for trim)
   const muntinSize = 8;
+
+  // Tree version counter - increments whenever panes are added/removed
+  // This allows parent components to reactively track tree changes
+  let treeVersion = $state(0);
 
   // Track glasses by sash ID
   let glassesBySashId = $state(new Map<string, { container: HTMLElement; instance: any }>());
@@ -43,6 +53,7 @@
   const bwinContext = {
     get windowElement() { return frameComponent?.windowElement; },
     get sillElement() { return sillElement; },
+    getSillElement: () => sillElement,
     get rootSash() { return frameComponent?.rootSash; },
     removePane,
     addPane,
@@ -54,6 +65,14 @@
   // Create glass component for a pane
   function createGlassForPane(paneEl: HTMLElement, sash: Sash) {
     if (!paneEl) return;
+
+    // Cleanup existing glass instance for this sash if it exists
+    // This happens when Frame re-renders and recreates pane elements
+    const existingGlass = glassesBySashId.get(sash.id);
+    if (existingGlass) {
+      unmount(existingGlass.instance);
+      glassesBySashId.delete(sash.id);
+    }
 
     const glassProps = sash.store;
     const container = document.createElement('div');
@@ -122,12 +141,25 @@
     // Add the pane of glass next to the current pane, vertically or horizontally
     else {
       const oldSashId = getSashIdFromPane(activeDragGlassEl);
+
+      // Preserve the store (title, content, etc.) before removing the pane
+      const oldSash = frameComponent.rootSash?.getById(oldSashId);
+      const oldStore = oldSash?.store || {};
+
+      // Save reference to the glass element before removing the pane
+      const glassToMove = activeDragGlassEl;
+
       removePane(oldSashId);
 
-      const newPaneSash = addPane(sash.id, { position: actualDropArea, id: oldSashId });
-      if (newPaneSash.domNode) {
-        newPaneSash.domNode.append(activeDragGlassEl);
-      }
+      // Add new pane with preserved store
+      const newPaneSash = addPane(sash.id, {
+        position: actualDropArea,
+        id: oldSashId,
+        ...oldStore  // Preserve title, content, and other Glass props
+      });
+
+      // The new pane already has a Glass component created by addPane
+      // No need to append the old glass element - the new one has the correct store
     }
   }
 
@@ -148,10 +180,16 @@
 
     const newPaneSash = frameComponent.addPane(targetPaneSashId, { position, size, id });
 
+    // Store glass props (title, content, etc.) in the sash's store
+    newPaneSash.store = glassProps;
+
     // Create and mount Glass component
     if (newPaneSash.domNode) {
       createGlassForPane(newPaneSash.domNode, newPaneSash);
     }
+
+    // Increment tree version to trigger reactive updates
+    treeVersion++;
 
     return newPaneSash;
   }
@@ -170,6 +208,9 @@
       }
 
       frameComponent.removePane(sashId);
+
+      // Increment tree version to trigger reactive updates
+      treeVersion++;
       return;
     }
 
@@ -177,6 +218,8 @@
     const minimizedGlassEl = getMinimizedGlassElementBySashId(sashId);
     if (minimizedGlassEl) {
       (minimizedGlassEl as HTMLElement).remove();
+      // Increment tree version to trigger reactive updates
+      treeVersion++;
     }
   }
 
@@ -190,7 +233,20 @@
 
   // Restore minimized glass
   function restoreGlass(minimizedGlassEl: any) {
-    if (!frameComponent?.windowElement || !frameComponent?.rootSash) return;
+    console.log('[restoreGlass] Starting restore:', {
+      minimizedGlassEl,
+      hasWindowElement: !!frameComponent?.windowElement,
+      hasRootSash: !!frameComponent?.rootSash,
+      originalBoundingRect: minimizedGlassEl.bwOriginalBoundingRect,
+      originalSashId: minimizedGlassEl.bwOriginalSashId,
+      originalPosition: minimizedGlassEl.bwOriginalPosition,
+      glassElement: minimizedGlassEl.bwGlassElement
+    });
+
+    if (!frameComponent?.windowElement || !frameComponent?.rootSash) {
+      console.error('[restoreGlass] Missing required components');
+      return;
+    }
 
     const originalRect = minimizedGlassEl.bwOriginalBoundingRect;
     let biggestIntersectArea = 0;
@@ -210,11 +266,22 @@
       }
     });
 
+    console.log('[restoreGlass] Target pane found:', {
+      targetPaneEl,
+      biggestIntersectArea
+    });
+
     if (targetPaneEl && frameComponent?.rootSash) {
       const newPosition = minimizedGlassEl.bwOriginalPosition;
       const targetRect = getMetricsFromElement(targetPaneEl);
       const targetPaneSashId = (targetPaneEl as HTMLElement).getAttribute('data-sash-id');
       const targetPaneSash = frameComponent.rootSash.getById(targetPaneSashId);
+
+      console.log('[restoreGlass] Restoring to pane:', {
+        targetPaneSashId,
+        newPosition,
+        targetRect
+      });
 
       let newSize = 0;
 
@@ -233,14 +300,15 @@
       }
 
       const originalSashId = minimizedGlassEl.bwOriginalSashId;
-      const newSashPane = addPane((targetPaneEl as HTMLElement).getAttribute('data-sash-id')!, {
+      const originalStore = minimizedGlassEl.bwOriginalStore || {};
+
+      // addPane will create a new Glass component with the preserved store
+      addPane((targetPaneEl as HTMLElement).getAttribute('data-sash-id')!, {
         id: originalSashId,
         position: newPosition,
-        size: newSize
+        size: newSize,
+        ...originalStore  // Preserve title, content, and other Glass props
       });
-      if (newSashPane.domNode) {
-        newSashPane.domNode.append(minimizedGlassEl.bwGlassElement);
-      }
     }
   }
 
@@ -296,32 +364,55 @@
     };
   });
 
-  // Create and append sill element
+  // Create and append sill element inside window element
   $effect(() => {
     if (frameComponent?.windowElement && !sillElement) {
       const sillEl = document.createElement('div');
       sillEl.className = 'sill';
       frameComponent.windowElement.append(sillEl);
       sillElement = sillEl;
+      console.log('[Sill] Created and appended sill element:', {
+        sillEl,
+        parent: frameComponent.windowElement,
+        computedStyles: window.getComputedStyle(sillEl)
+      });
     }
   });
 
   // Handle sill click for minimized glasses
   $effect(() => {
-    if (!sillElement) return;
+    if (!sillElement) {
+      console.warn('[Sill Click Handler] No sill element, skipping click handler setup');
+      return;
+    }
+
+    console.log('[Sill Click Handler] Setting up click handler on sill:', sillElement);
 
     function handleClick(event: MouseEvent) {
-      if (!(event.target as HTMLElement).matches('.bw-minimized-glass')) return;
+      console.log('[Sill Click] Click detected on sill:', {
+        target: event.target,
+        targetMatches: (event.target as HTMLElement).matches('.bw-minimized-glass'),
+        targetClassName: (event.target as HTMLElement).className
+      });
 
+      if (!(event.target as HTMLElement).matches('.bw-minimized-glass')) {
+        console.log('[Sill Click] Target is not a minimized glass, ignoring');
+        return;
+      }
+
+      console.log('[Sill Click] Restoring minimized glass...');
       const minimizedGlassEl = event.target;
       restoreGlass(minimizedGlassEl);
       (minimizedGlassEl as HTMLElement).remove();
+      console.log('[Sill Click] Minimized glass removed from sill');
     }
 
     sillElement.addEventListener('click', handleClick);
+    console.log('[Sill Click Handler] Click listener attached to sill');
 
     return () => {
       sillElement?.removeEventListener('click', handleClick);
+      console.log('[Sill Click Handler] Click listener removed from sill');
     };
   });
 
@@ -332,6 +423,78 @@
         unmount(glassData.instance);
       });
       glassesBySashId.clear();
+    };
+  });
+
+  // Observe parent container size changes and update rootSash dimensions
+  // This matches the bwin.js fitContainer feature implementation
+  $effect(() => {
+    if (!shouldFitContainer || !rootElement || !frameComponent?.rootSash) return;
+
+    const containerElement = rootElement.parentElement;
+    if (!containerElement) return;
+
+    // Mount the container element so fit() can work properly
+    frameComponent.mount(containerElement);
+
+    // Use requestAnimationFrame to ensure container has rendered and has final dimensions
+    // This fixes the initial load issue where clientWidth/Height might be 0
+    requestAnimationFrame(() => {
+      if (!frameComponent?.rootSash) return;
+
+      // Set initial dimensions from container (matches bwin.js fit() method)
+      const width = containerElement.clientWidth;
+      const height = containerElement.clientHeight;
+
+      console.log('[fitContainer] Initial setup:', {
+        containerElement: containerElement,
+        width,
+        height,
+        rootElementParent: rootElement?.parentElement,
+        frameComponentWindowElement: frameComponent?.windowElement,
+        currentRootSashDimensions: {
+          width: frameComponent.rootSash.width,
+          height: frameComponent.rootSash.height
+        }
+      });
+
+      if (width > 0 && height > 0) {
+        // Set defaults if not provided
+        if (!settings.width) settings.width = width;
+        if (!settings.height) settings.height = height;
+
+        frameComponent.rootSash.width = width;
+        frameComponent.rootSash.height = height;
+        frameComponent.fit();
+
+        console.log('[fitContainer] Set dimensions:', { width, height });
+      } else {
+        console.warn('[fitContainer] Invalid dimensions, skipping fit');
+      }
+    });
+
+    // Watch for container size changes (matches bwin.js enableFitContainer)
+    const resizeObserver = new ResizeObserver((entries) => {
+      requestAnimationFrame(() => {
+        for (const entry of entries) {
+          if (entry.target === containerElement && shouldFitContainer && frameComponent?.rootSash) {
+            const width = containerElement.clientWidth;
+            const height = containerElement.clientHeight;
+
+            if (width > 0 && height > 0) {
+              frameComponent.rootSash.width = width;
+              frameComponent.rootSash.height = height;
+              frameComponent.fit();
+            }
+          }
+        }
+      });
+    });
+
+    resizeObserver.observe(containerElement);
+
+    return () => {
+      resizeObserver.disconnect();
     };
   });
 
@@ -355,9 +518,15 @@
   export function getDebug() {
     return debug;
   }
+
+  export function getTreeVersion() {
+    return treeVersion;
+  }
 </script>
 
 <div
+  bind:this={rootElement}
+  class="bw-container"
   use:drag={{
     onDragStart: handleDragStart,
     onDragEnd: handleDragEnd
@@ -376,5 +545,11 @@
 </div>
 
 <style>
-  /* Styles are handled by the global CSS files */
+  .bw-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    /* Allow sill to overflow below the window without being clipped */
+    overflow: visible;
+  }
 </style>

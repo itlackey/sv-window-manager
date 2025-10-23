@@ -52,6 +52,7 @@ function addPaneSashToLeft(targetPaneSash, { size, id }) {
     height: targetPaneSash.height,
     position: Position.Right,
     domNode: targetPaneSash.domNode,
+    store: targetPaneSash.store,
   });
 
   targetPaneSash.addChild(newLeftSash);
@@ -81,6 +82,7 @@ function addPaneSashToRight(targetPaneSash, { size, id }) {
     height: targetPaneSash.height,
     position: Position.Left,
     domNode: targetPaneSash.domNode,
+    store: targetPaneSash.store,
   });
 
   const newRightSash = new Sash({
@@ -127,6 +129,7 @@ function addPaneSashToTop(targetPaneSash, { size, id }) {
     height: targetPaneSash.height - newTopSashHeight,
     position: Position.Bottom,
     domNode: targetPaneSash.domNode,
+    store: targetPaneSash.store,
   });
 
   targetPaneSash.addChild(newTopSash);
@@ -155,6 +158,7 @@ function addPaneSashToBottom(targetPaneSash, { size, id }) {
     height: targetPaneSash.height - newBottomSashHeight,
     position: Position.Top,
     domNode: targetPaneSash.domNode,
+    store: targetPaneSash.store,
   });
 
   const newBottomSash = new Sash({

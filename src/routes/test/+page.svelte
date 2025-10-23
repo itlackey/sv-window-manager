@@ -15,24 +15,20 @@
 			{
 				position: Position.Left,
 				size: 400,
-				store: {
-					title: 'Left Pane',
-					content:
-						'<p style="padding: 1rem;">This is the left pane content. The Frame component positions this pane on the left side.</p>',
-					droppable: true,
-					resizable: true
-				}
+				title: 'Left Pane',
+				content:
+					'<p style="padding: 1rem;">This is the left pane content. The Frame component positions this pane on the left side.</p>',
+				droppable: true,
+				resizable: true
 			},
 			{
 				position: Position.Right,
 				size: 400,
-				store: {
-					title: 'Right Pane',
-					content:
-						'<p style="padding: 1rem;">This is the right pane content. Frame handles the layout declaratively using Svelte 5 runes.</p>',
-					droppable: true,
-					resizable: true
-				}
+				title: 'Right Pane',
+				content:
+					'<p style="padding: 1rem;">This is the right pane content. Frame handles the layout declaratively using Svelte 5 runes.</p>',
+				droppable: true,
+				resizable: true
 			}
 		]
 	};
@@ -45,11 +41,9 @@
 			{
 				position: Position.Top,
 				size: 200,
-				store: {
-					title: 'Top Pane',
-					content:
-						'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Top Pane</h3><p style="margin: 0;">This is a top pane with nested children below.</p></div>'
-				}
+				title: 'Top Pane',
+				content:
+					'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Top Pane</h3><p style="margin: 0;">This is a top pane with nested children below.</p></div>'
 			},
 			{
 				position: Position.Bottom,
@@ -58,20 +52,16 @@
 					{
 						position: Position.Left,
 						size: 400,
-						store: {
-							title: 'Bottom Left',
-							content:
-								'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Bottom Left</h3><p style="margin: 0;">Nested pane demonstrating complex layouts.</p></div>'
-						}
+						title: 'Bottom Left',
+						content:
+							'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Bottom Left</h3><p style="margin: 0;">Nested pane demonstrating complex layouts.</p></div>'
 					},
 					{
 						position: Position.Right,
 						size: 400,
-						store: {
-							title: 'Bottom Right',
-							content:
-								'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Bottom Right</h3><p style="margin: 0;">Try dragging the muntins (dividers) to resize!</p></div>'
-						}
+						title: 'Bottom Right',
+						content:
+							'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Bottom Right</h3><p style="margin: 0;">Try dragging the muntins (dividers) to resize!</p></div>'
 					}
 				]
 			}
@@ -117,7 +107,13 @@
 		return panes;
 	}
 
-	const availablePanes = $derived(getAvailablePanes());
+	// Track tree version to make availablePanes reactive to add/remove operations
+	const treeVersion = $derived(binaryWindowComponent?.getTreeVersion?.() ?? 0);
+	const availablePanes = $derived.by(() => {
+		// Access treeVersion to create reactive dependency
+		treeVersion;
+		return getAvailablePanes();
+	});
 
 	// Set default target when panes change
 	$effect(() => {

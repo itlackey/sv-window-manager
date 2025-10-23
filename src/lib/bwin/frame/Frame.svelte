@@ -101,6 +101,7 @@
     if (siblingSash.children.length === 0) {
       parentSash.id = siblingSash.id;
       parentSash.domNode = siblingSash.domNode;
+      parentSash.store = siblingSash.store;
       parentSash.children = [];
     } else {
       parentSash.id = genId();
@@ -123,13 +124,26 @@
   }
 
   export function swapPanes(sourcePaneEl: HTMLElement | Element | null, targetPaneEl: HTMLElement | Element | null) {
-    if (!sourcePaneEl || !targetPaneEl) return;
+    if (!sourcePaneEl || !targetPaneEl || !rootSash) return;
 
-    const sourceContent = sourcePaneEl.innerHTML;
-    const targetContent = targetPaneEl.innerHTML;
+    // Swap the stores in the sashes
+    const sourceSashId = (sourcePaneEl as HTMLElement).getAttribute('data-sash-id');
+    const targetSashId = (targetPaneEl as HTMLElement).getAttribute('data-sash-id');
 
-    sourcePaneEl.innerHTML = targetContent;
-    targetPaneEl.innerHTML = sourceContent;
+    if (sourceSashId && targetSashId) {
+      const sourceSash = rootSash.getById(sourceSashId);
+      const targetSash = rootSash.getById(targetSashId);
+
+      if (sourceSash && targetSash) {
+        // Swap stores
+        const tempStore = sourceSash.store;
+        sourceSash.store = targetSash.store;
+        targetSash.store = tempStore;
+
+        // Trigger a re-render so Glass components get recreated with swapped stores
+        triggerUpdate();
+      }
+    }
   }
 
   export function mount(containerEl: HTMLElement) {
@@ -152,8 +166,6 @@
       bind:this={windowElement}
       class="window"
       data-root-sash-id={rootSash.id}
-      style:width="{rootSash.width}px"
-      style:height="{rootSash.height}px"
       use:resize={{ rootSash, onUpdate: triggerUpdate }}
       use:drop={{ rootSash, onDrop: onPaneDrop }}
     >

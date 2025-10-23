@@ -1,25 +1,35 @@
 .sill {
   position: absolute;
   top: 100%;
-  margin-top: calc(var(--bw-sill-gap) - var(--bw-glass-clearance));
+  left: 0;
+  margin-top: 8px;
   width: 100%;
+  min-height: 24px;
   display: flex;
-  gap: var(--bw-sill-gap);
+  gap: 8px;
   box-sizing: border-box;
-  padding-inline: var(--bw-glass-clearance);
+  padding: 4px 8px;
+  pointer-events: auto;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-top: 1px solid #ccc;
+  z-index: 1000;
 }
 
 .bw-minimized-glass {
   display: block;
-  flex-basis: 10%;
-  height: 10px;
+  flex-basis: 100px;
+  min-width: 80px;
+  height: 16px;
   border: 1px solid var(--bw-glass-border-color);
-  border-radius: var(--bw-glass-border-radius);
+  border-radius: 2px;
   cursor: pointer;
-  background-color: var(--bw-glass-header-bg-color);
+  background-color: #ddd;
+  transition: all 0.2s;
 
   &:hover {
     background-color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   &:active {

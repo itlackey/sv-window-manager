@@ -17,10 +17,16 @@ export default {
     const paneSashId = paneEl?.getAttribute('data-sash-id');
     const panePosition = paneEl?.getAttribute('data-position');
 
+    // Preserve the store (title, content, etc.) before removing the pane
+    const rootSash = binaryWindow.getRootSash?.();
+    const sash = rootSash?.getById(paneSashId);
+    const store = sash?.store || {};
+
     minimizedGlassEl.bwGlassElement = glassEl;
     minimizedGlassEl.bwOriginalPosition = panePosition;
     minimizedGlassEl.bwOriginalBoundingRect = getMetricsFromElement(paneEl);
     minimizedGlassEl.bwOriginalSashId = paneSashId;
+    minimizedGlassEl.bwOriginalStore = store;
 
     binaryWindow.removePane(paneSashId);
   },
