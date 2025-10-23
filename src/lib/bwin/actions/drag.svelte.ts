@@ -11,9 +11,9 @@ export const drag: Action<HTMLElement, DragActionParams> = (node, params = {}) =
 
   function handleMouseDown(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (event.button !== 0 || !target.matches('bw-glass-header')) return;
+    if (event.button !== 0 || !target.matches('.glass-header')) return;
 
-    if (target.getAttribute('can-drag') === 'false') {
+    if (target.getAttribute('data-can-drag') === 'false') {
       // Chrome bug: use `event.preventDefault` to trigger `dragover` event
       // even if there's no `draggable` attribute set
       event.preventDefault();
@@ -21,7 +21,7 @@ export const drag: Action<HTMLElement, DragActionParams> = (node, params = {}) =
     }
 
     const headerEl = target;
-    const glassEl = headerEl.closest('bw-glass') as HTMLElement;
+    const glassEl = headerEl.closest('.glass') as HTMLElement;
     if (!glassEl) return;
 
     glassEl.setAttribute('draggable', 'true');
@@ -37,7 +37,7 @@ export const drag: Action<HTMLElement, DragActionParams> = (node, params = {}) =
 
   function handleDragStart(event: DragEvent) {
     const target = event.target as HTMLElement;
-    if (!target.matches('bw-glass') || !activeDragGlassEl) {
+    if (!target.matches('.glass') || !activeDragGlassEl) {
       return;
     }
 
@@ -45,11 +45,11 @@ export const drag: Action<HTMLElement, DragActionParams> = (node, params = {}) =
       event.dataTransfer.effectAllowed = 'move';
     }
 
-    const paneEl = activeDragGlassEl.closest('bw-pane') as HTMLElement;
+    const paneEl = activeDragGlassEl.closest('.pane') as HTMLElement;
     if (paneEl) {
-      // Save original `can-drop` attribute for later carry-over
-      activeDragGlassPaneCanDrop = paneEl.getAttribute('can-drop') !== 'false';
-      paneEl.setAttribute('can-drop', 'false');
+      // Save original `data-can-drop` attribute for later carry-over
+      activeDragGlassPaneCanDrop = paneEl.getAttribute('data-can-drop') !== 'false';
+      paneEl.setAttribute('data-can-drop', 'false');
     }
 
     if (params.onDragStart) {
@@ -60,10 +60,10 @@ export const drag: Action<HTMLElement, DragActionParams> = (node, params = {}) =
   function handleDragEnd() {
     if (activeDragGlassEl) {
       activeDragGlassEl.removeAttribute('draggable');
-      // Carry over `can-drop` attribute
-      const paneEl = activeDragGlassEl.closest('bw-pane') as HTMLElement;
+      // Carry over `data-can-drop` attribute
+      const paneEl = activeDragGlassEl.closest('.pane') as HTMLElement;
       if (paneEl) {
-        paneEl.setAttribute('can-drop', String(activeDragGlassPaneCanDrop));
+        paneEl.setAttribute('data-can-drop', String(activeDragGlassPaneCanDrop));
       }
 
       if (params.onDragEnd) {

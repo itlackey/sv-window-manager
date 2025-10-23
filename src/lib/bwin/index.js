@@ -4,14 +4,21 @@ import './css/frame.css';
 import './css/glass.css';
 import './css/sill.css';
 
-// Legacy JS exports (still available for backwards compatibility)
-export { Frame } from './frame/frame.js';
-export { BinaryWindow } from './binary-window/binary-window.js';
-export { BUILTIN_ACTIONS } from './binary-window/actions.js';
+// Core utilities and types (used by both legacy and new code)
 export { Sash } from './sash.js';
 export { SashConfig } from './config/sash-config.js';
 export { ConfigRoot } from './config/config-root.js';
 export { Position } from './position.js';
+
+// Individual action modules (modern approach)
+export { default as closeAction } from './binary-window/actions.close.js';
+export { default as minimizeAction } from './binary-window/actions.minimize.js';
+export { default as maximizeAction } from './binary-window/actions.maximize.js';
+
+// Legacy JS exports (deprecated - use Svelte components instead)
+export { Frame } from './frame/frame.js';
+export { BinaryWindow } from './binary-window/binary-window.js';
+export { BUILTIN_ACTIONS } from './binary-window/actions.js';
 
 // New Svelte component exports
 export { default as FrameSvelte } from './frame/Frame.svelte';

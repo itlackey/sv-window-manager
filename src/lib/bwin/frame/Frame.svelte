@@ -31,6 +31,12 @@
     onPaneDrop
   }: FrameProps = $props();
 
+  // Force re-render trigger
+  let updateCounter = $state(0);
+  function triggerUpdate() {
+    updateCounter++;
+  }
+
   // Initialize sash tree from settings
   let rootSash = $derived.by(() => {
     if (settings instanceof SashConfig) {
@@ -42,6 +48,8 @@
 
   // Collect panes and muntins from tree
   const panes = $derived.by(() => {
+    // Access updateCounter to create dependency
+    updateCounter;
     if (!rootSash) return [];
     const result: Sash[] = [];
     rootSash.walk((sash) => {
@@ -51,6 +59,8 @@
   });
 
   const muntins = $derived.by(() => {
+    // Access updateCounter to create dependency
+    updateCounter;
     if (!rootSash) return [];
     const result: Sash[] = [];
     rootSash.walk((sash) => {
@@ -59,11 +69,9 @@
     return result;
   });
 
-  // Force re-render trigger
-  let updateCounter = $state(0);
-  function triggerUpdate() {
-    updateCounter++;
-  }
+  // DOM element references
+  let windowElement = $state<HTMLElement | undefined>();
+  let containerElement = $state<HTMLElement | undefined>();
 
   // Share context
   setContext('frame', { debug });
@@ -114,18 +122,40 @@
     triggerUpdate();
   }
 
-  export { rootSash };
+  export function swapPanes(sourcePaneEl: HTMLElement | Element | null, targetPaneEl: HTMLElement | Element | null) {
+    if (!sourcePaneEl || !targetPaneEl) return;
+
+    const sourceContent = sourcePaneEl.innerHTML;
+    const targetContent = targetPaneEl.innerHTML;
+
+    sourcePaneEl.innerHTML = targetContent;
+    targetPaneEl.innerHTML = sourceContent;
+  }
+
+  export function mount(containerEl: HTMLElement) {
+    containerElement = containerEl;
+  }
+
+  export function fit() {
+    if (!containerElement || !rootSash) return;
+    rootSash.width = containerElement.clientWidth;
+    rootSash.height = containerElement.clientHeight;
+    triggerUpdate();
+  }
+
+  export { rootSash, windowElement, containerElement };
 </script>
 
 {#if rootSash}
   {#key updateCounter}
     <div
+      bind:this={windowElement}
       class="window"
       data-root-sash-id={rootSash.id}
       style:width="{rootSash.width}px"
       style:height="{rootSash.height}px"
       use:resize={{ rootSash, onUpdate: triggerUpdate }}
-      use:drop={{ rootSash, onDrop: () => {} }}
+      use:drop={{ rootSash, onDrop: onPaneDrop }}
     >
       {#each panes as sash (sash.id)}
         <Pane {sash} {onPaneRender} />

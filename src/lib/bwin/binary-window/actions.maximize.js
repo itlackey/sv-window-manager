@@ -3,7 +3,9 @@ import { getMetricsFromElement } from '../utils.js';
 export default {
   label: '',
   className: 'glass-action glass-action--maximize',
-  onClick: (event) => {
+  onClick: (/** @type {MouseEvent} */ event) => {
+    if (!(event.target instanceof HTMLElement)) return;
+
     const paneEl = event.target.closest('.pane');
     if (!paneEl) return;
 

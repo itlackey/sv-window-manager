@@ -15,23 +15,23 @@ export const drop: Action<HTMLElement, DropActionParams> = (node, params) => {
     event.preventDefault();
 
     const target = event.target as HTMLElement;
-    const paneEl = target.matches('bw-pane')
+    const paneEl = target.matches('.pane')
       ? target
-      : target.closest('bw-pane') as HTMLElement;
+      : target.closest('.pane') as HTMLElement;
 
     if (!paneEl) return;
 
     if (paneEl !== activeDropPaneEl) {
       if (activeDropPaneEl) {
-        activeDropPaneEl.removeAttribute('drop-area');
+        activeDropPaneEl.removeAttribute('data-drop-area');
       }
       activeDropPaneEl = paneEl;
     }
 
-    if (paneEl.getAttribute('can-drop') === 'false') return;
+    if (paneEl.getAttribute('data-can-drop') === 'false') return;
 
     const position = getCursorPosition(paneEl, event);
-    paneEl.setAttribute('drop-area', position);
+    paneEl.setAttribute('data-drop-area', position);
   }
 
   function handleDragLeave(event: DragEvent) {
@@ -46,20 +46,20 @@ export const drop: Action<HTMLElement, DropActionParams> = (node, params) => {
     }
 
     if (activeDropPaneEl) {
-      activeDropPaneEl.removeAttribute('drop-area');
+      activeDropPaneEl.removeAttribute('data-drop-area');
       activeDropPaneEl = null;
     }
   }
 
   function handleDrop(event: DragEvent) {
     if (!activeDropPaneEl) return;
-    if (activeDropPaneEl.getAttribute('can-drop') === 'false') return;
+    if (activeDropPaneEl.getAttribute('data-can-drop') === 'false') return;
 
-    const sashId = activeDropPaneEl.getAttribute('sash-id');
+    const sashId = activeDropPaneEl.getAttribute('data-sash-id');
     if (!sashId) return;
 
     const sash = rootSash.getById(sashId);
-    const dropArea = activeDropPaneEl.getAttribute('drop-area') || '';
+    const dropArea = activeDropPaneEl.getAttribute('data-drop-area') || '';
 
     if (onDrop && sash) {
       onDrop(event, sash, dropArea);
@@ -69,7 +69,7 @@ export const drop: Action<HTMLElement, DropActionParams> = (node, params) => {
       sash.store.onDrop(event, sash);
     }
 
-    activeDropPaneEl.removeAttribute('drop-area');
+    activeDropPaneEl.removeAttribute('data-drop-area');
     activeDropPaneEl = null;
   }
 
@@ -87,7 +87,7 @@ export const drop: Action<HTMLElement, DropActionParams> = (node, params) => {
       node.removeEventListener('dragleave', handleDragLeave);
       node.removeEventListener('drop', handleDrop);
       if (activeDropPaneEl) {
-        activeDropPaneEl.removeAttribute('drop-area');
+        activeDropPaneEl.removeAttribute('data-drop-area');
       }
     }
   };

@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { Sash } from '../sash.js';
-  import { BUILTIN_ACTIONS } from './actions.js';
+  import closeAction from './actions.close.js';
+  import minimizeAction from './actions.minimize.js';
+  import maximizeAction from './actions.maximize.js';
 
   interface GlassProps {
     title?: string | HTMLElement | null;
@@ -24,6 +26,9 @@
 
   let contentElement = $state<HTMLElement>();
 
+  // Default built-in actions
+  const BUILTIN_ACTIONS = [minimizeAction, maximizeAction, closeAction];
+
   const finalActions = $derived(
     actions === undefined ? BUILTIN_ACTIONS : Array.isArray(actions) ? actions : []
   );
@@ -32,6 +37,14 @@
     if (typeof action === 'object' && typeof action.onClick === 'function') {
       action.onClick(event, binaryWindow);
     }
+  }
+
+  // Get aria-label for action button
+  function getActionAriaLabel(action: any): string {
+    if (action === closeAction) return 'Close window';
+    if (action === minimizeAction) return 'Minimize window';
+    if (action === maximizeAction) return 'Maximize window';
+    return action.label || 'Action';
   }
 </script>
 
@@ -52,6 +65,8 @@
         <button
           class="glass-action {action.className || ''}"
           onclick={(e) => handleActionClick(e, action)}
+          aria-label={getActionAriaLabel(action)}
+          type="button"
         >
           {typeof action === 'string' ? action : action.label}
         </button>

@@ -13,9 +13,9 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
   let lastY = 0;
 
   function applyResizeStyles(muntinEl: HTMLElement) {
-    if (muntinEl.hasAttribute('vertical')) {
+    if (muntinEl.classList.contains('vertical')) {
       document.body.classList.add('body--bw-resize-x');
-    } else if (muntinEl.hasAttribute('horizontal')) {
+    } else if (muntinEl.classList.contains('horizontal')) {
       document.body.classList.add('body--bw-resize-y');
     }
   }
@@ -27,10 +27,10 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
 
   function handleMouseDown(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (target.tagName !== 'BW-MUNTIN') return;
-    if (target.getAttribute('resizable') === 'false') return;
+    if (!target.classList.contains('muntin')) return;
+    if (target.getAttribute('data-resizable') === 'false') return;
 
-    const sashId = target.getAttribute('sash-id');
+    const sashId = target.getAttribute('data-sash-id');
     if (!sashId) return;
 
     activeMuntinSash = rootSash.getById(sashId);
@@ -64,7 +64,10 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
       rightChild.width = newRightChildWidth;
       rightChild.left = rightChild.left + distX;
 
-      onUpdate();
+      // Update DOM directly during drag for smooth resizing
+      updatePaneAndMuntinStyles(leftChild);
+      updatePaneAndMuntinStyles(rightChild);
+
       lastX = event.pageX;
     } else if (isHorizontalMuntin && topChild && bottomChild) {
       const distY = event.pageY - lastY;
@@ -79,12 +82,71 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
       bottomChild.height = newBottomChildHeight;
       bottomChild.top = bottomChild.top + distY;
 
-      onUpdate();
+      // Update DOM directly during drag for smooth resizing
+      updatePaneAndMuntinStyles(topChild);
+      updatePaneAndMuntinStyles(bottomChild);
+
       lastY = event.pageY;
     }
   }
 
+  function updatePaneAndMuntinStyles(sash: any) {
+    // Update pane element if it exists
+    const paneEl = document.querySelector(`[data-sash-id="${sash.id}"].pane`) as HTMLElement;
+    if (paneEl) {
+      paneEl.style.top = `${sash.top}px`;
+      paneEl.style.left = `${sash.left}px`;
+      paneEl.style.width = `${sash.width}px`;
+      paneEl.style.height = `${sash.height}px`;
+    }
+
+    // Update child muntins recursively
+    sash.walk((childSash: any) => {
+      if (childSash.children.length > 0) {
+        // This is a muntin
+        const muntinEl = document.querySelector(`[data-sash-id="${childSash.id}"].muntin`) as HTMLElement;
+        if (muntinEl) {
+          updateMuntinElement(muntinEl, childSash);
+        }
+      } else {
+        // This is a pane
+        const childPaneEl = document.querySelector(`[data-sash-id="${childSash.id}"].pane`) as HTMLElement;
+        if (childPaneEl) {
+          childPaneEl.style.top = `${childSash.top}px`;
+          childPaneEl.style.left = `${childSash.left}px`;
+          childPaneEl.style.width = `${childSash.width}px`;
+          childPaneEl.style.height = `${childSash.height}px`;
+        }
+      }
+    });
+  }
+
+  function updateMuntinElement(muntinEl: HTMLElement, sash: any) {
+    const muntinSize = 4; // Default muntin size from Muntin.svelte
+    const trimSize = 8; // Trim size from BinaryWindow
+    const isVertical = !!sash.leftChild;
+    const isHorizontal = !!sash.topChild;
+
+    if (isVertical) {
+      muntinEl.style.width = `${muntinSize}px`;
+      muntinEl.style.height = `${sash.height - trimSize}px`;
+      muntinEl.style.top = `${sash.top + trimSize / 2}px`;
+      muntinEl.style.left = `${sash.left + sash.leftChild.width - muntinSize / 2}px`;
+    } else if (isHorizontal) {
+      muntinEl.style.width = `${sash.width - trimSize}px`;
+      muntinEl.style.height = `${muntinSize}px`;
+      muntinEl.style.top = `${sash.top + sash.topChild.height - muntinSize / 2}px`;
+      muntinEl.style.left = `${sash.left + trimSize / 2}px`;
+    }
+  }
+
   function handleMouseUp() {
+    if (isResizeStarted) {
+      // Call onUpdate only once when resize is complete
+      // This ensures the sash tree state is properly saved
+      onUpdate();
+    }
+
     isResizeStarted = false;
     activeMuntinSash = null;
     revertResizeStyles();

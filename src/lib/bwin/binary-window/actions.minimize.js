@@ -3,7 +3,9 @@ import { createDomNode, getMetricsFromElement } from '../utils.js';
 export default {
   label: '',
   className: 'glass-action glass-action--minimize',
-  onClick: (event, binaryWindow) => {
+  onClick: (/** @type {MouseEvent} */ event, /** @type {any} */ binaryWindow) => {
+    if (!(event.target instanceof HTMLElement)) return;
+
     const sillEl = binaryWindow.getSillElement?.();
     if (!sillEl) throw new Error(`[bwin] Sill element not found when minimizing`);
 
