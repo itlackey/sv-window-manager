@@ -365,18 +365,42 @@
   });
 
   // Create and append sill element inside window element
+  // Need to recreate sill whenever windowElement changes (e.g., when Frame re-renders due to {#key})
   $effect(() => {
-    if (frameComponent?.windowElement && !sillElement) {
-      const sillEl = document.createElement('div');
-      sillEl.className = 'sill';
-      frameComponent.windowElement.append(sillEl);
-      sillElement = sillEl;
-      console.log('[Sill] Created and appended sill element:', {
-        sillEl,
-        parent: frameComponent.windowElement,
-        computedStyles: window.getComputedStyle(sillEl)
+    const winEl = frameComponent?.windowElement;
+    if (!winEl) return;
+
+    // Check if sill already exists in this windowElement
+    const existingSill = winEl.querySelector('.sill');
+    if (existingSill) {
+      // Reuse existing sill
+      sillElement = existingSill as HTMLElement;
+      console.log('[Sill] Found existing sill in windowElement:', sillElement);
+      return;
+    }
+
+    // Create new sill
+    const sillEl = document.createElement('div');
+    sillEl.className = 'sill';
+
+    // Preserve minimized glass buttons from old sill if it exists
+    // Move (not clone) the buttons to preserve all custom properties
+    if (sillElement) {
+      const minimizedGlasses = Array.from(sillElement.querySelectorAll('.bw-minimized-glass'));
+      console.log('[Sill] Preserving minimized glasses:', minimizedGlasses.length);
+      minimizedGlasses.forEach(glassBtn => {
+        sillEl.append(glassBtn); // Move the original element
       });
     }
+
+    winEl.append(sillEl);
+    sillElement = sillEl;
+    console.log('[Sill] Created and appended sill element:', {
+      sillEl,
+      parent: winEl,
+      preservedCount: sillEl.children.length,
+      computedStyles: window.getComputedStyle(sillEl)
+    });
   });
 
   // Handle sill click for minimized glasses

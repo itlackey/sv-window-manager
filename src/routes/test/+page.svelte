@@ -73,15 +73,26 @@
 
 	const config = $derived(selectedConfig === 'simple' ? testConfig : complexConfig);
 
+	// Use a unique key that changes with selectedConfig
+	const componentKey = $derived(`${selectedConfig}-${debugMode}`);
+
 	// BinaryWindow component reference
 	let binaryWindowComponent = $state<any>();
 
 	// State for adding panes
-	let newPaneTitle = $state('New Pane');
+	let newPaneTitle = $state('');
 	let newPanePosition = $state<string>(Position.Right);
 	let targetSashId = $state('');
 	let errorMessage = $state('');
-	let paneCounter = $state(1);
+	let nextPaneNumber = $state(1);
+
+	// Initialize pane counter based on current pane count
+	$effect(() => {
+		const panes = getAvailablePanes();
+		const currentCount = panes.length;
+		nextPaneNumber = currentCount + 1;
+		newPaneTitle = `New Pane ${nextPaneNumber}`;
+	});
 
 	// Get available pane sash IDs
 	function getAvailablePanes(): Array<{ id: string; title: string }> {
@@ -137,8 +148,11 @@
 		}
 
 		try {
+			// Determine final title - use provided or default
+			const finalTitle = newPaneTitle || `Pane ${nextPaneNumber}`;
+
 			const content = `<div style="padding: 1rem;">
-				<h3 style="margin: 0 0 0.5rem 0;">${newPaneTitle || `Pane ${paneCounter}`}</h3>
+				<h3 style="margin: 0 0 0.5rem 0;">${finalTitle}</h3>
 				<p style="margin: 0;">This is a dynamically added pane at position <strong>${newPanePosition}</strong>.</p>
 				<p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #666;">Added at ${new Date().toLocaleTimeString()}</p>
 			</div>`;
@@ -146,15 +160,13 @@
 			binaryWindowComponent.addPane(targetSashId, {
 				position: newPanePosition,
 				size: newPanePosition === Position.Top || newPanePosition === Position.Bottom ? 200 : 300,
-				title: newPaneTitle || `Pane ${paneCounter}`,
+				title: finalTitle,
 				content,
 				droppable: true,
 				resizable: true
 			});
 
-			// Reset form
-			paneCounter++;
-			newPaneTitle = `New Pane ${paneCounter}`;
+			// Counter will auto-update via $effect based on pane count
 		} catch (error) {
 			errorMessage = error instanceof Error ? error.message : 'Failed to add pane';
 			console.error('Error adding pane:', error);
@@ -166,7 +178,7 @@
 	<title>Frame Component Test - SV BWIN</title>
 </svelte:head>
 
-<div class="test-page">
+<div class="test-page" tabindex="-1">
 	<header class="test-header">
 		<h1>Frame Component Test</h1>
 		<p>Testing the declarative Svelte 5 Frame component</p>
@@ -179,6 +191,7 @@
 					type="radio"
 					name="config"
 					value="simple"
+					tabindex="0"
 					checked={selectedConfig === 'simple'}
 					onchange={() => (selectedConfig = 'simple')}
 				/>
@@ -189,6 +202,7 @@
 					type="radio"
 					name="config"
 					value="complex"
+					tabindex="0"
 					checked={selectedConfig === 'complex'}
 					onchange={() => (selectedConfig = 'complex')}
 				/>
@@ -249,7 +263,7 @@
 	</div>
 
 	<div class="frame-container">
-		{#key selectedConfig}
+		{#key componentKey}
 			<BinaryWindow bind:this={binaryWindowComponent} settings={config} debug={debugMode} />
 		{/key}
 	</div>
@@ -455,7 +469,7 @@
 
 	.frame-container {
 		border: 2px solid #333;
-		overflow: hidden;
+		overflow: visible;
 		margin-bottom: 2rem;
 		background: #e0e0e0;
 		position: relative;

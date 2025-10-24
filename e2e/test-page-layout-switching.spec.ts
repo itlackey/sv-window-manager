@@ -21,10 +21,10 @@ test.describe('Layout Configuration Switching', () => {
     // Wait for layout to change
     await page.waitForTimeout(500); // Allow for transition
 
-    // Verify three panes are visible
-    await expect(page.locator('text=Top Pane').first()).toBeVisible();
-    await expect(page.locator('text=Bottom Left').first()).toBeVisible();
-    await expect(page.locator('text=Bottom Right').first()).toBeVisible();
+    // Verify three panes are visible - check glass-title elements
+    await expect(page.locator('.glass-title', { hasText: 'Top Pane' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Bottom Left' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Bottom Right' })).toBeVisible();
 
     // Verify pane content (exact text from test page source)
     await expect(page.locator('text=This is a top pane with nested children below.')).toBeVisible();
@@ -32,7 +32,7 @@ test.describe('Layout Configuration Switching', () => {
     await expect(page.locator('text=Try dragging the muntins (dividers) to resize!')).toBeVisible();
 
     // Verify two muntins exist (one horizontal, one vertical)
-    const muntins = page.locator('[class*="muntin"]');
+    const muntins = page.locator('.muntin');
     await expect(muntins).toHaveCount(2);
   });
 
@@ -47,7 +47,7 @@ test.describe('Layout Configuration Switching', () => {
     await page.waitForTimeout(300);
 
     // Verify Complex Layout is active
-    await expect(page.locator('text=Top Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Top Pane' })).toBeVisible();
 
     // Click Simple Layout radio button
     await page.getByRole('radio', { name: 'Simple Layout (2 panes)' }).click();
@@ -57,16 +57,16 @@ test.describe('Layout Configuration Switching', () => {
     await expect(page.getByRole('radio', { name: 'Simple Layout (2 panes)' })).toBeChecked();
 
     // Verify two original panes are rendered
-    await expect(page.locator('text=Left Pane').first()).toBeVisible();
-    await expect(page.locator('text=Right Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Right Pane' })).toBeVisible();
 
     // Verify complex layout panes are removed
-    await expect(page.locator('text=Top Pane').first()).not.toBeVisible();
-    await expect(page.locator('text=Bottom Left').first()).not.toBeVisible();
-    await expect(page.locator('text=Bottom Right').first()).not.toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Top Pane' })).not.toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Bottom Left' })).not.toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Bottom Right' })).not.toBeVisible();
 
     // Verify only one muntin exists
-    const muntins = page.locator('[class*="muntin"]');
+    const muntins = page.locator('.muntin');
     await expect(muntins).toHaveCount(1);
   });
 
@@ -92,10 +92,10 @@ test.describe('Layout Configuration Switching', () => {
     const simpleChecked = await page.getByRole('radio', { name: 'Simple Layout (2 panes)' }).isChecked();
 
     if (simpleChecked) {
-      await expect(page.locator('text=Left Pane').first()).toBeVisible();
-      await expect(page.locator('text=Right Pane').first()).toBeVisible();
+      await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
+      await expect(page.locator('.glass-title', { hasText: 'Right Pane' })).toBeVisible();
     } else {
-      await expect(page.locator('text=Top Pane').first()).toBeVisible();
+      await expect(page.locator('.glass-title', { hasText: 'Top Pane' })).toBeVisible();
     }
 
     // Verify no JavaScript errors (check console)

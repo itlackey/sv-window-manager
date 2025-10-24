@@ -85,16 +85,16 @@ test.describe('Dynamic Pane Addition', () => {
     await page.getByRole('button', { name: 'Add Pane' }).click();
     await page.waitForTimeout(500);
 
-    // Verify new pane appears
-    await expect(page.locator('text=Top Header').first()).toBeVisible();
-    // The position value from Position.Top is 'top' (lowercase)
+    // Verify new pane appears in glass-title
+    await expect(page.locator('.glass-title', { hasText: 'Top Header' })).toBeVisible();
+    // The position value from Position.Top is 'top' (lowercase) - verify in content
     await expect(page.locator('text=position top')).toBeVisible();
 
     // Verify Left Pane still exists below
-    await expect(page.locator('text=Left Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
 
     // Verify Right Pane remains unchanged
-    await expect(page.locator('text=Right Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Right Pane' })).toBeVisible();
   });
 
   test('4.4 Add Pane to the Bottom', async ({ page }) => {
@@ -112,10 +112,10 @@ test.describe('Dynamic Pane Addition', () => {
     await page.waitForTimeout(500);
 
     // Verify new pane appears
-    await expect(page.locator('text=Footer Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Footer Pane' })).toBeVisible();
 
     // Verify Left Pane remains full height on left
-    await expect(page.locator('text=Left Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
   });
 
   test('4.5 Add Pane to the Left', async ({ page }) => {
@@ -133,11 +133,11 @@ test.describe('Dynamic Pane Addition', () => {
     await page.waitForTimeout(500);
 
     // Verify new pane appears
-    await expect(page.locator('text=Sidebar').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Sidebar' })).toBeVisible();
 
     // Verify three panes exist
-    await expect(page.locator('text=Left Pane').first()).toBeVisible();
-    await expect(page.locator('text=Right Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Right Pane' })).toBeVisible();
   });
 
   test('4.6 Add Multiple Panes Sequentially', async ({ page }) => {
@@ -170,12 +170,12 @@ test.describe('Dynamic Pane Addition', () => {
     await page.waitForTimeout(300);
 
     // Verify all 6 panes are visible
-    await expect(page.locator('text=Left Pane').first()).toBeVisible();
-    await expect(page.locator('text=Right Pane').first()).toBeVisible();
-    await expect(page.locator('text=Pane 3').first()).toBeVisible();
-    await expect(page.locator('text=Pane 4').first()).toBeVisible();
-    await expect(page.locator('text=Pane 5').first()).toBeVisible();
-    await expect(page.locator('text=Pane 6').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Right Pane' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Pane 3' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Pane 4' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Pane 5' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Pane 6' })).toBeVisible();
 
     // Verify dropdown shows 6 options
     const dropdown = page.getByLabel('Target Pane:');

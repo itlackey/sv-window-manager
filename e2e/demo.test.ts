@@ -5,38 +5,26 @@ test('home page has expected h1', async ({ page }) => {
 	await expect(page.locator('h1')).toBeVisible();
 });
 
-test('reveal then toggle side panel (button and keyboard)', async ({ page }) => {
+test('demo page loads and shows Start Demo button', async ({ page }) => {
 	await page.goto('/');
 
-	// Wait for shell to mount
-	const root = page.locator('.wm-root');
-	await expect(root).toBeVisible();
+	// Verify the hero section is visible
+	await expect(page.locator('h1')).toContainText('SV BWIN');
 
-	// Attach a listener for the DOM 'ready' event mirrored by the shell and wait for it
-	await page.evaluate(() => {
-		(window as any).__svwm_ready = false;
-		const el = document.querySelector('.wm-root');
-		el?.addEventListener(
-			'ready',
-			() => {
-				(window as any).__svwm_ready = true;
-			},
-			{ once: true }
-		);
-	});
-	await page.waitForFunction(() => (window as any).__svwm_ready === true);
+	// Verify Start Demo button is visible
+	const startDemoButton = page.getByRole('button', { name: 'Start Demo' });
+	await expect(startDemoButton).toBeVisible();
 
-	const panel = page.locator('aside.wm-panel');
-	await expect(panel).toHaveCount(0); // initially hidden
+	// Click Start Demo
+	await startDemoButton.click();
 
-	// Toggle via UI button
-	await page.getByRole('button', { name: 'Toggle Panel' }).click();
-	await expect(panel).toBeVisible();
+	// Wait for demo to start
+	await page.waitForTimeout(1000);
 
-	// Toggle via keyboard: dispatch a keydown with Ctrl+` (matches default binding)
-	await page.evaluate(() => {
-		const evt = new KeyboardEvent('keydown', { key: '`', ctrlKey: true, bubbles: true });
-		window.dispatchEvent(evt);
-	});
-	await expect(panel).toHaveCount(0);
+	// Verify BwinHost container is visible
+	const demoContainer = page.locator('.demo-container');
+	await expect(demoContainer).toBeVisible();
+
+	// Verify Reset Demo button appears
+	await expect(page.getByRole('button', { name: 'Reset Demo' })).toBeVisible();
 });

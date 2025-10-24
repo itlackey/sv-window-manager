@@ -70,15 +70,15 @@ test.describe('Initial Page Load and Rendering', () => {
     await expect(leftPaneContent).toBeVisible();
     await expect(rightPaneContent).toBeVisible();
 
-    // Verify pane titles
-    await expect(page.locator('text=Left Pane').first()).toBeVisible();
-    await expect(page.locator('text=Right Pane').first()).toBeVisible();
+    // Verify pane titles are visible in the glass title bars
+    await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Right Pane' })).toBeVisible();
 
     // Verify container has correct background color
     await expect(container).toHaveCSS('background-color', 'rgb(224, 224, 224)');
 
     // Verify a vertical muntin (divider) exists
-    const muntins = page.locator('[class*="muntin"]');
+    const muntins = page.locator('.muntin');
     await expect(muntins).toHaveCount(1);
   });
 
@@ -89,20 +89,17 @@ test.describe('Initial Page Load and Rendering', () => {
     // Wait for the window to be initialized
     await page.waitForSelector('.frame-container', { state: 'visible' });
 
-    // Verify each pane has Glass component with title bar
-    const leftPane = page.locator('text=Left Pane').first();
-    const rightPane = page.locator('text=Right Pane').first();
-
-    await expect(leftPane).toBeVisible();
-    await expect(rightPane).toBeVisible();
-
     // Verify Glass components have proper structure
-    const glassComponents = page.locator('[class*="glass"]');
+    const glassComponents = page.locator('.glass');
     await expect(glassComponents.first()).toBeVisible();
+    await expect(glassComponents).toHaveCount(2);
 
-    // Check for title bars (they should contain the pane titles)
-    await expect(page.locator('text=Left Pane')).toBeVisible();
-    await expect(page.locator('text=Right Pane')).toBeVisible();
+    // Check for title bars with glass-title class
+    const leftTitleBar = page.locator('.glass-title', { hasText: 'Left Pane' });
+    const rightTitleBar = page.locator('.glass-title', { hasText: 'Right Pane' });
+
+    await expect(leftTitleBar).toBeVisible();
+    await expect(rightTitleBar).toBeVisible();
 
     // Verify content area is distinct from title bar
     await expect(page.locator('text=This is the left pane content')).toBeVisible();

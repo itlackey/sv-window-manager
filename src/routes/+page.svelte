@@ -52,6 +52,8 @@
 
 	async function startDemo() {
 		demoStarted = true;
+		// Wait a tick to ensure BwinHost is mounted and bound
+		await new Promise(resolve => setTimeout(resolve, 50));
 		// Add initial sessions to demonstrate the window manager
 		await addSession('chat1');
 		setTimeout(() => addSession('terminal1'), 200);
@@ -117,9 +119,9 @@
 
 				<div class="demo-controls">
 					{#if !demoStarted}
-						<button class="btn-primary" onclick={startDemo}> Start Demo </button>
+						<button class="btn-primary" onclick={startDemo}>Start Demo</button>
 					{:else}
-						<button class="btn-secondary" onclick={resetDemo}> Reset Demo </button>
+						<button class="btn-secondary" onclick={resetDemo}>Reset Demo</button>
 						<div class="demo-actions">
 							<button onclick={() => addSession('chat1')}>Add Chat</button>
 							<button onclick={() => addSession('terminal1')}>Add Terminal</button>

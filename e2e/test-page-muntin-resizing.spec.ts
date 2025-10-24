@@ -14,7 +14,7 @@ test.describe('Muntin (Divider) Interactions', () => {
     await expect(page.getByRole('radio', { name: 'Simple Layout (2 panes)' })).toBeChecked();
 
     // Verify vertical muntin exists
-    const muntins = page.locator('[class*="muntin"]');
+    const muntins = page.locator('.muntin');
     await expect(muntins).toHaveCount(1);
 
     // Verify muntin is visible
@@ -23,7 +23,7 @@ test.describe('Muntin (Divider) Interactions', () => {
 
   test('6.2 Hover Over Muntin', async ({ page }) => {
     // Locate the muntin
-    const muntin = page.locator('[class*="muntin"]').first();
+    const muntin = page.locator('.muntin').first();
     await expect(muntin).toBeVisible();
 
     // Get muntin bounding box
@@ -52,7 +52,7 @@ test.describe('Muntin (Divider) Interactions', () => {
 
   test('6.3 Drag Vertical Muntin to Resize Panes', async ({ page }) => {
     // Locate the muntin
-    const muntin = page.locator('[class*="muntin"]').first();
+    const muntin = page.locator('.muntin').first();
     await expect(muntin).toBeVisible();
 
     // Get initial muntin position
@@ -82,8 +82,8 @@ test.describe('Muntin (Divider) Interactions', () => {
       }
 
       // Verify panes are still visible and content reflows
-      await expect(page.locator('text=Left Pane').first()).toBeVisible();
-      await expect(page.locator('text=Right Pane').first()).toBeVisible();
+      await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
+      await expect(page.locator('.glass-title', { hasText: 'Right Pane' })).toBeVisible();
     }
   });
 
@@ -93,10 +93,10 @@ test.describe('Muntin (Divider) Interactions', () => {
     await page.waitForTimeout(500);
 
     // Verify Complex Layout is active
-    await expect(page.locator('text=Top Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Top Pane' })).toBeVisible();
 
     // Find muntins (should have 2: one horizontal, one vertical)
-    const muntins = page.locator('[class*="muntin"]');
+    const muntins = page.locator('.muntin');
     await expect(muntins).toHaveCount(2);
 
     // Identify the horizontal muntin (between top and bottom sections)
@@ -125,16 +125,16 @@ test.describe('Muntin (Divider) Interactions', () => {
         await page.waitForTimeout(500);
 
         // Verify all three panes are still visible
-        await expect(page.locator('text=Top Pane').first()).toBeVisible();
-        await expect(page.locator('text=Bottom Left').first()).toBeVisible();
-        await expect(page.locator('text=Bottom Right').first()).toBeVisible();
+        await expect(page.locator('.glass-title', { hasText: 'Top Pane' })).toBeVisible();
+        await expect(page.locator('.glass-title', { hasText: 'Bottom Left' })).toBeVisible();
+        await expect(page.locator('.glass-title', { hasText: 'Bottom Right' })).toBeVisible();
       }
     }
   });
 
   test('6.5 Drag Muntin to Minimum Width', async ({ page }) => {
     // Locate the vertical muntin
-    const muntin = page.locator('[class*="muntin"]').first();
+    const muntin = page.locator('.muntin').first();
     const initialBox = await muntin.boundingBox();
 
     if (initialBox) {
@@ -147,7 +147,7 @@ test.describe('Muntin (Divider) Interactions', () => {
       await page.waitForTimeout(500);
 
       // Verify Left Pane still visible (not collapsed)
-      await expect(page.locator('text=Left Pane').first()).toBeVisible();
+      await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
 
       // Verify muntin did not reach position 10 (minimum enforced)
       const newBox = await muntin.boundingBox();
@@ -159,7 +159,7 @@ test.describe('Muntin (Divider) Interactions', () => {
 
   test('6.6 Drag Muntin to Maximum Width', async ({ page }) => {
     // Locate the vertical muntin
-    const muntin = page.locator('[class*="muntin"]').first();
+    const muntin = page.locator('.muntin').first();
     const container = page.locator('.frame-container');
     const containerBox = await container.boundingBox();
     const initialBox = await muntin.boundingBox();
@@ -174,7 +174,7 @@ test.describe('Muntin (Divider) Interactions', () => {
       await page.waitForTimeout(500);
 
       // Verify Right Pane still visible (maintains minimum width)
-      await expect(page.locator('text=Right Pane').first()).toBeVisible();
+      await expect(page.locator('.glass-title', { hasText: 'Right Pane' })).toBeVisible();
 
       // Verify muntin stopped before right edge
       const newBox = await muntin.boundingBox();

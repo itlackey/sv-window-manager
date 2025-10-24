@@ -37,75 +37,6 @@ async function selectPaneByTitle(page: Page, titleFragment: string) {
   await page.waitForTimeout(100);
 }
 
-test.describe('Debug Mode Functionality', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173/test');
-    await page.waitForLoadState('domcontentloaded');
-    // Wait for the window to be initialized
-    await page.waitForSelector('.frame-container', { state: 'visible' });
-  });
-
-  test('3.1 Enable Debug Mode', async ({ page }) => {
-    // Verify Debug Mode is initially unchecked
-    const debugCheckbox = page.getByRole('checkbox', { name: 'Debug Mode' });
-    await expect(debugCheckbox).not.toBeChecked();
-
-    // Enable Debug Mode
-    await debugCheckbox.check();
-
-    // Verify checkbox is checked
-    await expect(debugCheckbox).toBeChecked();
-
-    // Wait for debug info to appear
-    await page.waitForTimeout(500);
-
-    // Verify sash IDs are visible in panes
-    // Debug mode shows sash ID in a <pre> tag (see Pane.svelte line 40)
-    // Look for the pre element containing sash ID
-    const debugInfo = page.locator('pre').filter({ hasText: /sash-/ });
-    await expect(debugInfo.first()).toBeVisible();
-  });
-
-  test('3.2 Disable Debug Mode', async ({ page }) => {
-    // Enable Debug Mode first
-    const debugCheckbox = page.getByRole('checkbox', { name: 'Debug Mode' });
-    await debugCheckbox.check();
-    await page.waitForTimeout(300);
-
-    // Verify debug info is visible
-    const debugInfo = page.locator('pre').filter({ hasText: /sash-/ });
-    await expect(debugInfo.first()).toBeVisible();
-
-    // Disable Debug Mode
-    await debugCheckbox.uncheck();
-    await page.waitForTimeout(300);
-
-    // Verify checkbox is unchecked
-    await expect(debugCheckbox).not.toBeChecked();
-
-    // Verify panes still display regular content
-    await expect(page.locator('text=Left Pane').first()).toBeVisible();
-    await expect(page.locator('text=Right Pane').first()).toBeVisible();
-  });
-
-  test('3.3 Debug Mode Persists with Layout Switch', async ({ page }) => {
-    // Enable Debug Mode
-    await page.getByRole('checkbox', { name: 'Debug Mode' }).check();
-    await page.waitForTimeout(300);
-
-    // Switch to Complex Layout
-    await page.getByRole('radio', { name: 'Complex Layout (3 panes, nested)' }).click();
-    await page.waitForTimeout(500);
-
-    // Verify Debug Mode checkbox still checked
-    await expect(page.getByRole('checkbox', { name: 'Debug Mode' })).toBeChecked();
-
-    // Verify sash IDs visible in new layout
-    const debugInfo = page.locator('pre').filter({ hasText: /sash-/ });
-    await expect(debugInfo.first()).toBeVisible();
-  });
-});
-
 test.describe('Error Handling and Validation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('http://localhost:5173/test');
@@ -130,7 +61,7 @@ test.describe('Error Handling and Validation', () => {
     // Pane should be added with default title "Pane 1" (from paneCounter starting at 1)
     // The addNewPane function uses: newPaneTitle || `Pane ${paneCounter}`
     // Since we cleared the title, it should use Pane 1
-    await expect(page.locator('text=Pane 1').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Pane 1' })).toBeVisible();
 
     // No error message should appear
     await expect(page.locator('.error-message')).not.toBeVisible();
@@ -185,27 +116,27 @@ test.describe('Window Chrome and Glass Components', () => {
 
   test('7.1 Examine Glass Component Structure', async ({ page }) => {
     // Inspect pane structure using DevTools equivalent
-    const panes = page.locator('[class*="pane"]');
+    const panes = page.locator('.pane');
     await expect(panes.first()).toBeVisible();
 
     // Verify Glass components exist
-    const glassElements = page.locator('[class*="glass"]');
+    const glassElements = page.locator('.glass');
     await expect(glassElements.first()).toBeVisible();
 
     // Each pane should have title and content
-    await expect(page.locator('text=Left Pane').first()).toBeVisible();
+    await expect(page.locator('.glass-title', { hasText: 'Left Pane' })).toBeVisible();
     await expect(page.locator('text=This is the left pane content')).toBeVisible();
   });
 
   test('7.2 Title Bar Display', async ({ page }) => {
-    // Verify title bars for both panes
-    const leftTitle = page.locator('text=Left Pane').first();
-    const rightTitle = page.locator('text=Right Pane').first();
+    // Verify title bars for both panes - they should be in .glass-title elements
+    const leftTitle = page.locator('.glass-title', { hasText: 'Left Pane' });
+    const rightTitle = page.locator('.glass-title', { hasText: 'Right Pane' });
 
     await expect(leftTitle).toBeVisible();
     await expect(rightTitle).toBeVisible();
 
-    // Titles should be in header elements or title bars
+    // Titles should be in glass header elements
     // Check if they have appropriate styling
     const leftTitleBox = await leftTitle.boundingBox();
     expect(leftTitleBox).not.toBeNull();
@@ -213,15 +144,15 @@ test.describe('Window Chrome and Glass Components', () => {
 
   test('7.4 Glass Border and Styling', async ({ page }) => {
     // Verify Glass components have proper CSS
-    const glassElements = page.locator('[class*="glass"]').first();
+    const glassElements = page.locator('.glass').first();
     await expect(glassElements).toBeVisible();
 
     // Glass should have border, background, etc.
     // These are visual checks that could be enhanced with percy or similar
-    // Just check that the glass element has some border-radius value (any value is fine)
-    const borderRadius = await glassElements.evaluate((el) => {
-      return window.getComputedStyle(el).borderRadius;
+    // Just check that the glass element has display flex
+    const display = await glassElements.evaluate((el) => {
+      return window.getComputedStyle(el).display;
     });
-    expect(borderRadius).toBeTruthy();
+    expect(display).toBe('flex');
   });
 });

@@ -10,14 +10,17 @@ test.describe('Accessibility Testing', () => {
   });
 
   test('10.1 Keyboard Navigation - Controls', async ({ page }) => {
-    // Start from top of page
+    // Click on the page to ensure it has focus
+    await page.locator('.test-page').click();
+
+    // Tab through controls - first should be Simple Layout radio
     await page.keyboard.press('Tab');
 
     // Should focus on first radio button
     const simpleRadio = page.getByRole('radio', { name: 'Simple Layout (2 panes)' });
     await expect(simpleRadio).toBeFocused();
 
-    // Tab to next control
+    // Tab to next control - should be Complex Layout radio
     await page.keyboard.press('Tab');
 
     // Should focus on complex layout radio
@@ -54,8 +57,8 @@ test.describe('Accessibility Testing', () => {
     await page.keyboard.press('Enter');
     await page.waitForTimeout(500);
 
-    // Verify pane was added
-    await expect(page.locator('text=New Pane 1').first()).toBeVisible();
+    // Verify pane was added - check for the title in the glass-title element
+    await expect(page.locator('.glass-title', { hasText: 'New Pane 1' })).toBeVisible();
   });
 
   test('10.4 ARIA Roles and Attributes', async ({ page }) => {
