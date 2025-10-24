@@ -4,8 +4,9 @@
 	import FileBrowserSession from './FileBrowserSession.svelte';
 	import FileEditorSession from './FileEditorSession.svelte';
 	import BwinHost from '$lib/components/BwinHost.svelte';
+	import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
 
-	let bwinHostRef = $state<BwinHost | undefined>();
+	let bwinHostRef = $state<BinaryWindow | undefined>();
 	let activeSection = $state('demo');
 	let demoStarted = $state(false);
 
@@ -47,13 +48,14 @@
 				Component = ChatSession;
 		}
 
+		// @ts-expect-error - Demo code using legacy API
 		bwinHostRef.addPane(sessionId, {}, Component, { sessionId, data: { ...info.data } });
 	}
 
 	async function startDemo() {
 		demoStarted = true;
 		// Wait a tick to ensure BwinHost is mounted and bound
-		await new Promise(resolve => setTimeout(resolve, 50));
+		await new Promise((resolve) => setTimeout(resolve, 50));
 		// Add initial sessions to demonstrate the window manager
 		await addSession('chat1');
 		setTimeout(() => addSession('terminal1'), 200);
@@ -132,7 +134,8 @@
 				</div>
 
 				<div class="demo-container">
-					<BwinHost bind:this={bwinHostRef} config={{ fitContainer: true }} />
+					<BinaryWindow bind:this={bwinHostRef} settings={{ fitContainer: true }} />
+					<!-- <BwinHost bind:this={bwinHostRef} config={{ fitContainer: true }} /> -->
 				</div>
 
 				<div class="demo-instructions">

@@ -10,17 +10,21 @@ export { SashConfig } from './config/sash-config.js';
 export { ConfigRoot } from './config/config-root.js';
 export { Position } from './position.js';
 
+// Error handling utilities
+export { BwinError, BwinErrors } from './errors.js';
+
+// Type definitions and constants (Workstream 1.2)
+export * from './types.js';
+export * from './constants.js';
+export { BWIN_CONTEXT, FRAME_CONTEXT } from './context.js';
+// Note: BwinContext and FrameContext types are exported from types.js
+
 // Individual action modules (modern approach)
 export { default as closeAction } from './binary-window/actions.close.js';
 export { default as minimizeAction } from './binary-window/actions.minimize.js';
 export { default as maximizeAction } from './binary-window/actions.maximize.js';
 
-// Legacy JS exports (deprecated - use Svelte components instead)
-export { Frame } from './frame/frame.js';
-export { BinaryWindow } from './binary-window/binary-window.js';
-export { BUILTIN_ACTIONS } from './binary-window/actions.js';
-
-// New Svelte component exports
+// Svelte component exports
 export { default as FrameSvelte } from './frame/Frame.svelte';
 export { default as BinaryWindowSvelte } from './binary-window/BinaryWindow.svelte';
 export { default as PaneSvelte } from './frame/Pane.svelte';

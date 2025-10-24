@@ -1,79 +1,85 @@
 .window {
-  position: relative;
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  overflow: visible; /* Allow sill to be visible below the window */
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	overflow: visible; /* Allow sill to be visible below the window */
 
-  /* When one pane maximized, hide all other panes and muntins */
-  &:has(> .pane[data-maximized]) > :is(.pane, .muntin):not([data-maximized]) {
-    display: none;
-  }
+	/* When one pane maximized, hide all other panes and muntins */
+	&:has(> .pane[data-maximized]) > :is(.pane, .muntin):not([data-maximized]) {
+		display: none;
+	}
 }
 
 .pane {
-  position: absolute;
-  overflow: hidden;
-  box-sizing: border-box;
-  background-color: hsl(0, 0%, 95%);
+	position: absolute;
+	overflow: hidden;
+	box-sizing: border-box;
+	background-color: hsl(0, 0%, 95%);
 
-  &[data-drop-area]::before {
-    content: '';
-    position: absolute;
-    background-color: var(--bw-drop-area-bg-color);
-  }
+	&[data-drop-area]::before {
+		content: '';
+		position: absolute;
+		background-color: var(--bw-drop-area-bg-color);
+	}
 
-  &[data-drop-area='top']::before {
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-  }
+	&[data-drop-area='top']::before {
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 50%;
+	}
 
-  &[data-drop-area='right']::before {
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 50%;
-  }
+	&[data-drop-area='right']::before {
+		top: 0;
+		right: 0;
+		bottom: 0;
+		width: 50%;
+	}
 
-  &[data-drop-area='bottom']::before {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50%;
-  }
+	&[data-drop-area='bottom']::before {
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 50%;
+	}
 
-  &[data-drop-area='left']::before {
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 50%;
-  }
+	&[data-drop-area='left']::before {
+		top: 0;
+		left: 0;
+		bottom: 0;
+		width: 50%;
+	}
 
-  &[data-drop-area='center']::before {
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
+	&[data-drop-area='center']::before {
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+	}
 }
 
 .muntin {
-  box-sizing: border-box;
-  position: absolute;
-  background-color: var(--bw-muntin-bg-color, white);
+	box-sizing: border-box;
+	position: absolute;
+	background-color: var(--bw-muntin-bg-color, white);
 
-  &.horizontal {
-    cursor: ns-resize;
-  }
+	&.horizontal {
+		cursor: ns-resize;
+	}
 
-  &.vertical {
-    cursor: ew-resize;
-  }
+	&.vertical {
+		cursor: ew-resize;
+	}
 
-  &[data-resizable='false'] {
-    cursor: auto;
-  }
+	&[data-resizable='false'] {
+		cursor: auto;
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--bw-accent-color);
+		outline-offset: 0px;
+		z-index: 1000;
+	}
 }

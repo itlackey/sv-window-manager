@@ -215,7 +215,9 @@
 		font-size: 14px;
 		font-weight: 500;
 		cursor: pointer;
-		transition: transform 0.2s, box-shadow 0.2s;
+		transition:
+			transform 0.2s,
+			box-shadow 0.2s;
 	}
 
 	.send-btn:hover {

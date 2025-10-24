@@ -1,18 +1,23 @@
 :root {
-  --bw-font-family: system-ui;
-  --bw-font-size: 14px;
-  --bw-drop-area-bg-color: hsl(0, 0%, 0%, 0.05);
+	--bw-font-family: system-ui;
+	--bw-font-size: 14px;
+	--bw-accent-color: hsl(210, 100%, 50%);
+	--bw-drop-area-bg-color: color-mix(in srgb, black 5%, transparent);
 
-  --bw-glass-clearance: 2px;
-  --bw-glass-border-radius: 2px;
-  --bw-glass-border-color: hsl(0, 0%, 10%);
-  --bw-glass-border-color-disabled: hsl(0, 0%, 80%);
-  --bw-glass-bg-color-disabled: hsl(0, 0%, 97%);
+	--bw-glass-clearance: 2px;
+	--bw-glass-border-radius: 2px;
+	--bw-glass-border-color: hsl(0, 0%, 10%);
+	--bw-glass-border-color-disabled: hsl(0, 0%, 80%);
+	--bw-glass-bg-color-disabled: hsl(0, 0%, 97%);
 
-  --bw-glass-header-height: 30px;
-  --bw-glass-header-gap: 4px;
-  --bw-glass-header-bg-color: hsl(0, 0%, 97%);
+	--bw-glass-header-height: 30px;
+	--bw-glass-header-gap: 4px;
+	--bw-glass-header-bg-color: hsl(0, 0%, 97%);
+	--bw-glass-action-bg-color: transparent;
+	--bw-glass-action-hover-bg: transparent;
+	--bw-glass-action-hover-color: var(--bw-accent-color);
+	--bw-glass-action-border: none;
 
-  --bw-sill-gap: 6px;
-  --bw-minimized-glass-height: 10px;
+	--bw-sill-gap: 6px;
+	--bw-minimized-glass-height: 10px;
 }

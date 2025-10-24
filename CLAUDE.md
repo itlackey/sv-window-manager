@@ -7,12 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a **Svelte 5 component library** that provides a wrapper over the **bwin.js** JavaScript window manager. It enables tiling window management in web applications using modern Svelte 5 patterns. The project is in early POC stage, inspired by Wave Terminal.
 
 **Key Resources:**
+
 - bwin.js documentation: https://bhjsdev.github.io/bwin-docs/
 - Built with Svelte 5 and SvelteKit as a reusable library package
 
 ## Development Commands
 
 ### Essential Commands
+
 ```bash
 npm run dev              # Start development server with showcase app
 npm run storybook        # Launch Storybook for component development
@@ -21,6 +23,7 @@ npm run build            # Build the production showcase app
 ```
 
 ### Testing
+
 ```bash
 npm test                 # Run all tests (unit + e2e)
 npm run test:unit        # Run Vitest tests only
@@ -28,6 +31,7 @@ npm run test:e2e         # Run Playwright e2e tests
 ```
 
 ### Code Quality
+
 ```bash
 npm run lint             # Run ESLint and Prettier checks
 npm run format           # Auto-format code with Prettier
@@ -36,6 +40,7 @@ npm run check:watch      # Type check in watch mode
 ```
 
 ### Library Publishing
+
 ```bash
 npm run prepack          # Sync SvelteKit + package library (runs automatically before pack)
 npm run build            # Build showcase app
@@ -45,6 +50,7 @@ npm publish              # Publish to npm (after pack)
 ## Architecture
 
 ### Library Structure
+
 The project follows a **dual-purpose structure**:
 
 - **`src/lib/`** - Exportable library code (published to npm)
@@ -63,17 +69,20 @@ The project follows a **dual-purpose structure**:
 ### Core Components
 
 **BwinHost.svelte** - Primary integration component
+
 - Wraps the bwin.js `BinaryWindow` class
 - Provides `addPane()` method to dynamically add panes with Svelte components
 - Mounts bwin.js into a container element
 - Uses Svelte 5's `mount()` API for imperative component instantiation
 
 **SessionComponentFactory.svelte.ts** - Dynamic session loader
+
 - Async factory for loading session components based on type
 - Maps session types (chat, terminal, filebrowser, fileeditor) to Svelte components
 - Uses `mount()` to create component instances and returns DOM elements for bwin.js
 
 **Session Components** - Pluggable pane content types:
+
 - `ChatSession.svelte`
 - `TerminalSession.svelte`
 - `FileBrowserSession.svelte`
@@ -89,15 +98,16 @@ The library bridges **Svelte 5 components** with **vanilla JS bwin.js**:
 4. bwin.js manages layout/tiling, Svelte handles reactive UI within each pane
 
 Example:
+
 ```typescript
 const contentElem = document.createElement('div');
 mount(Component, {
-  target: contentElem,
-  props: { sessionId, data }
+	target: contentElem,
+	props: { sessionId, data }
 });
 manager.addPane(nodeId, {
-  position: 'right',
-  content: contentElem
+	position: 'right',
+	content: contentElem
 });
 ```
 
@@ -107,6 +117,7 @@ The `src/lib/components/bwin/bwin.js` file is the **bundled bwin.js library** (m
 
 **CSS Customization:**
 The library exposes CSS custom properties for theming:
+
 - `--bw-*` variables control colors, sizing, spacing
 - Example: `--bw-glass-border-color`, `--bw-container-height`
 - See `src/routes/+page.svelte` for full variable reference
@@ -116,27 +127,31 @@ The library exposes CSS custom properties for theming:
 This library uses **modern Svelte 5 syntax** exclusively:
 
 ### Props
+
 ```typescript
 let { config = {}, oncreated = () => {}, onupdated = () => {} } = $props();
 ```
 
 ### State
+
 ```typescript
 let manager = $state<undefined | BinaryWindow>();
 let bwinContainer = $state<HTMLElement>();
 ```
 
 ### Effects
+
 ```typescript
 $effect(() => {
-  if (!manager && bwinContainer) {
-    manager = new BinaryWindow(config || {});
-    manager.mount(bwinContainer);
-  }
+	if (!manager && bwinContainer) {
+		manager = new BinaryWindow(config || {});
+		manager.mount(bwinContainer);
+	}
 });
 ```
 
 **Always:**
+
 - Define TypeScript interfaces for component props
 - Use `$props()` for prop destructuring with defaults
 - Use `$state()` for reactive state
@@ -148,25 +163,29 @@ $effect(() => {
 The project uses **dual-environment testing** via Vitest:
 
 ### 1. Component Tests (Browser Environment)
+
 - Files: `*.svelte.{test,spec}.{js,ts}`
 - Runs in real browser via Playwright
 - Uses `vitest-browser-svelte` for rendering
 - Example pattern:
+
   ```typescript
   import { render } from 'vitest-browser-svelte';
 
   test('renders component', async () => {
-    const { container } = render(Component, { props: {} });
-    await expect.element(page.getByRole('button')).toBeVisible();
+  	const { container } = render(Component, { props: {} });
+  	await expect.element(page.getByRole('button')).toBeVisible();
   });
   ```
 
 ### 2. Server Tests (Node Environment)
+
 - Files: `*.{test,spec}.{js,ts}` (excluding `.svelte.`)
 - Standard Vitest unit tests for utilities/logic
 - No DOM or component rendering
 
 ### 3. E2E Tests
+
 - Directory: `e2e/`
 - Playwright tests against built preview app
 - Full browser automation
@@ -174,6 +193,7 @@ The project uses **dual-environment testing** via Vitest:
 ## Common Development Workflows
 
 ### Adding a New Library Component
+
 1. Create component in `src/lib/components/`
 2. **MUST** export from `src/lib/index.ts`
 3. Add TypeScript types/interfaces
@@ -182,12 +202,14 @@ The project uses **dual-environment testing** via Vitest:
 6. Follow Svelte 5 syntax patterns
 
 ### Adding a New Session Type
+
 1. Create session component in `src/lib/components/bwin/`
 2. Add type mapping in `SessionComponentFactory.svelte.ts`
 3. Export from `src/lib/index.ts`
 4. Update demo in `src/routes/+page.svelte`
 
 ### Working with bwin.js
+
 - **Read bwin.js docs:** https://bhjsdev.github.io/bwin-docs/
 - The `BinaryWindow` class manages the tree of sash/pane nodes
 - Panes are added relative to existing nodes (top/right/bottom/left)
@@ -240,6 +262,7 @@ dist/                             # Build output (generated)
 ## Current POC Status
 
 This is an **early proof of concept**:
+
 - Basic window manager integration is functional
 - Session component factory demonstrates dynamic loading
 - Demo app shows adding multiple session types

@@ -156,7 +156,9 @@ function addPane() {
 		align-items: center;
 		justify-content: center;
 		border-radius: 3px;
-		transition: background 0.2s, color 0.2s;
+		transition:
+			background 0.2s,
+			color 0.2s;
 	}
 
 	.tab-close:hover {

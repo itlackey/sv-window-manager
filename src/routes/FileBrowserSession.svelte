@@ -74,7 +74,9 @@
 		{#each files as item}
 			<div class="file-item" style="padding-left: 12px">
 				<div class="file-content">
-					<span class="expand-icon">{item.type === 'folder' ? (item.expanded ? '▼' : '▶') : ' '}</span>
+					<span class="expand-icon"
+						>{item.type === 'folder' ? (item.expanded ? '▼' : '▶') : ' '}</span
+					>
 					<span class="file-icon">{getFileIcon(item)}</span>
 					<span class="file-name">{item.name}</span>
 					{#if item.type === 'file'}

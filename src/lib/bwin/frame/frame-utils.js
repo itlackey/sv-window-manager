@@ -1,3 +1,6 @@
+import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
+import { BwinErrors } from '../errors.js';
+
 /**
  * Read `data-sash-id` attribute from the pane element
  *
@@ -5,15 +8,24 @@
  * @returns {string} - Sash ID
  */
 export function getSashIdFromPane(innerElement) {
-  if (innerElement.classList?.contains('pane')) {
-    return innerElement.getAttribute('data-sash-id');
-  }
+	if (innerElement.classList?.contains(CSS_CLASSES.PANE)) {
+		const sashId = innerElement.getAttribute(DATA_ATTRIBUTES.SASH_ID);
+		if (!sashId) {
+			throw BwinErrors.paneElementMissingSashId();
+		}
+		return sashId;
+	}
 
-  const paneEl = innerElement.closest('.pane');
+	const paneEl = innerElement.closest(`.${CSS_CLASSES.PANE}`);
 
-  if (!paneEl) {
-    throw new Error('[bwin] Pane element not found');
-  }
+	if (!paneEl) {
+		throw BwinErrors.paneElementNotFound();
+	}
 
-  return paneEl.getAttribute('data-sash-id');
+	const sashId = paneEl.getAttribute(DATA_ATTRIBUTES.SASH_ID);
+	if (!sashId) {
+		throw BwinErrors.paneElementMissingSashId();
+	}
+
+	return sashId;
 }

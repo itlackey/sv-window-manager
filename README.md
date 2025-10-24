@@ -18,6 +18,7 @@ npm install sv-window-manager
 ```
 
 **Requirements:**
+
 - Svelte 5 or later
 - SvelteKit (recommended) or Vite
 
@@ -25,51 +26,50 @@ npm install sv-window-manager
 
 ```svelte
 <script lang="ts">
-  import BwinHost from 'sv-window-manager';
-  import type { BwinConfig, PaneConfig } from 'sv-window-manager';
-  import YourComponent from './YourComponent.svelte';
+	import BwinHost from 'sv-window-manager';
+	import type { BwinConfig, PaneConfig } from 'sv-window-manager';
+	import YourComponent from './YourComponent.svelte';
 
-  let bwinHost = $state<BwinHost | undefined>();
+	let bwinHost = $state<BwinHost | undefined>();
 
-  const config: BwinConfig = {
-    fitContainer: true
-  };
+	const config: BwinConfig = {
+		fitContainer: true
+	};
 
-  function addPane() {
-    if (!bwinHost) return;
+	function addPane() {
+		if (!bwinHost) return;
 
-    const paneConfig: PaneConfig = {
-      position: 'right'
-    };
+		const paneConfig: PaneConfig = {
+			position: 'right'
+		};
 
-    bwinHost.addPane(
-      'pane-1',
-      paneConfig,
-      YourComponent,
-      { sessionId: 'session-1', data: { title: 'My Pane' } }
-    );
-  }
+		bwinHost.addPane('pane-1', paneConfig, YourComponent, {
+			sessionId: 'session-1',
+			data: { title: 'My Pane' }
+		});
+	}
 </script>
 
 <BwinHost bind:this={bwinHost} {config} />
 <button onclick={addPane}>Add Pane</button>
 ```
+
 ## API Reference
 
 ### BwinHost Component
 
 **Props:**
 
-| Prop | Type | Description |
-|------|------|-------------|
+| Prop     | Type         | Description                          |
+| -------- | ------------ | ------------------------------------ |
 | `config` | `BwinConfig` | Configuration for the window manager |
 
 **Methods:**
 
-| Method | Signature | Description |
-|--------|-----------|-------------|
+| Method    | Signature                                                                                                                   | Description                            |
+| --------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
 | `addPane` | `addPane(sessionId: string, paneConfig: PaneConfig, Component: Component<any>, componentProps?: Record<string, any>): void` | Add a new pane with a Svelte component |
-| `getInfo` | `getInfo(): any` | Get current window manager state |
+| `getInfo` | `getInfo(): any`                                                                                                            | Get current window manager state       |
 
 ## Customization
 
@@ -77,17 +77,17 @@ Customize the appearance using CSS custom properties:
 
 ```css
 :root {
-  /* Colors */
-  --bw-glass-bg-color: #ffffff;
-  --bw-glass-border-color: #667eea;
-  --bw-glass-header-bg-color: #667eea;
-  --bw-muntin-bg-color: #4c5fd5;
-  --bw-pane-bg-color: #333333;
+	/* Colors */
+	--bw-glass-bg-color: #ffffff;
+	--bw-glass-border-color: #667eea;
+	--bw-glass-header-bg-color: #667eea;
+	--bw-muntin-bg-color: #4c5fd5;
+	--bw-pane-bg-color: #333333;
 
-  /* Sizing */
-  --bw-container-height: 100vh;
-  --bw-glass-header-height: 30px;
-  --bw-glass-border-radius: 5px;
+	/* Sizing */
+	--bw-container-height: 100vh;
+	--bw-glass-header-height: 30px;
+	--bw-glass-border-radius: 5px;
 }
 ```
 

@@ -1,10 +1,145 @@
-// Public exports for the SV Window Manager library
+// ============================================================================
+// SV Window Manager - Public API
+// ============================================================================
+// This barrel export provides a clean, tree-shakeable API for consumers.
+// Exports are organized into logical groups for better discoverability.
 
-// Main component
+// ============================================================================
+// PRIMARY COMPONENTS
+// ============================================================================
+
+/**
+ * Main host component that wraps the bwin window manager.
+ * This is typically the only component you need to import for basic usage.
+ */
 export { default as BwinHost } from './components/BwinHost.svelte';
 
-// Re-export types
-export type * from './types.js';
+/**
+ * Core Svelte components for advanced usage.
+ * These are typically used internally but can be used directly for custom layouts.
+ */
+export { default as BinaryWindow } from './bwin/binary-window/BinaryWindow.svelte';
+export { default as Frame } from './bwin/frame/Frame.svelte';
+export { default as Pane } from './bwin/frame/Pane.svelte';
+export { default as Muntin } from './bwin/frame/Muntin.svelte';
+export { default as Glass } from './bwin/binary-window/Glass.svelte';
 
-// Re-export bwin components (both JS and Svelte versions)
-export * from './bwin/index.js';
+// ============================================================================
+// SVELTE ACTIONS
+// ============================================================================
+
+/**
+ * Svelte actions for drag-drop and resizing functionality.
+ * Use these to add interactive behaviors to custom components.
+ */
+export { resize } from './bwin/actions/resize.svelte';
+export { drag } from './bwin/actions/drag.svelte';
+export { drop } from './bwin/actions/drop.svelte';
+
+// ============================================================================
+// WINDOW ACTIONS
+// ============================================================================
+
+/**
+ * Window action handlers for close, minimize, and maximize operations.
+ * These are typically used with Glass component actions.
+ */
+export { default as closeAction } from './bwin/binary-window/actions.close.js';
+export { default as minimizeAction } from './bwin/binary-window/actions.minimize.js';
+export { default as maximizeAction } from './bwin/binary-window/actions.maximize.js';
+
+// ============================================================================
+// CORE UTILITIES
+// ============================================================================
+
+/**
+ * Core utilities for working with sashes, positions, and configurations.
+ */
+export { Sash } from './bwin/sash.js';
+export { Position } from './bwin/position.js';
+export { SashConfig } from './bwin/config/sash-config.js';
+export { ConfigRoot } from './bwin/config/config-root.js';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+/**
+ * Size constants for layout calculations.
+ */
+export { MUNTIN_SIZE, TRIM_SIZE, MIN_WIDTH, MIN_HEIGHT } from './bwin/constants.js';
+
+/**
+ * CSS class names used by the window manager.
+ * Use these for custom styling or selectors.
+ */
+export { CSS_CLASSES } from './bwin/constants.js';
+
+/**
+ * Data attribute names used for DOM manipulation.
+ * Use these when working with DOM elements directly.
+ */
+export { DATA_ATTRIBUTES } from './bwin/constants.js';
+
+// ============================================================================
+// CONTEXT
+// ============================================================================
+
+/**
+ * Svelte context keys for accessing window manager state.
+ */
+export { BWIN_CONTEXT, FRAME_CONTEXT } from './bwin/context.js';
+
+// ============================================================================
+// ERROR HANDLING
+// ============================================================================
+
+/**
+ * Error classes and factories for consistent error handling.
+ */
+export { BwinError, BwinErrors } from './bwin/errors.js';
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * TypeScript type definitions for the library.
+ * All types are re-exported for convenient importing.
+ */
+
+// High-level library types (from src/lib/types.ts)
+export type {
+	BwinConfig,
+	PaneConfig,
+	BwinHostProps,
+	SessionComponentProps
+} from './types.js';
+
+// Core bwin types (from src/lib/bwin/types.ts)
+export type {
+	Sash as SashInterface,
+	GlassAction,
+	GlassProps,
+	BwinContext,
+	FrameComponent,
+	FrameContext,
+	ResizeActionParams,
+	DragActionParams,
+	DropActionParams
+} from './bwin/types.js';
+
+// ============================================================================
+// BACKWARD COMPATIBILITY EXPORTS
+// ============================================================================
+
+/**
+ * Legacy component names for backward compatibility.
+ * These will be deprecated in future versions.
+ * @deprecated Use the non-Svelte suffixed names instead
+ */
+export { default as BinaryWindowSvelte } from './bwin/binary-window/BinaryWindow.svelte';
+export { default as FrameSvelte } from './bwin/frame/Frame.svelte';
+export { default as PaneSvelte } from './bwin/frame/Pane.svelte';
+export { default as MuntinSvelte } from './bwin/frame/Muntin.svelte';
+export { default as GlassSvelte } from './bwin/binary-window/Glass.svelte';

@@ -1,94 +1,96 @@
 import type { Action } from 'svelte/action';
+import type { Sash } from '../sash.js';
 import { getCursorPosition } from '../position.js';
+import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 
 interface DropActionParams {
-  rootSash: any;
-  onDrop?: (event: DragEvent, sash: any, dropArea: string) => void;
+	rootSash: Sash;
+	onDrop?: (event: DragEvent, sash: Sash, dropArea: string) => void;
 }
 
 export const drop: Action<HTMLElement, DropActionParams> = (node, params) => {
-  let { rootSash, onDrop } = params;
-  let activeDropPaneEl: HTMLElement | null = null;
+	let { rootSash, onDrop } = params;
+	let activeDropPaneEl: HTMLElement | null = null;
 
-  function handleDragOver(event: DragEvent) {
-    // `preventDefault` is required to allow drop
-    event.preventDefault();
+	function handleDragOver(event: DragEvent) {
+		// `preventDefault` is required to allow drop
+		event.preventDefault();
 
-    const target = event.target as HTMLElement;
-    const paneEl = target.matches('.pane')
-      ? target
-      : target.closest('.pane') as HTMLElement;
+		const target = event.target as HTMLElement;
+		const paneEl = target.matches(`.${CSS_CLASSES.PANE}`)
+			? target
+			: (target.closest(`.${CSS_CLASSES.PANE}`) as HTMLElement);
 
-    if (!paneEl) return;
+		if (!paneEl) return;
 
-    if (paneEl !== activeDropPaneEl) {
-      if (activeDropPaneEl) {
-        activeDropPaneEl.removeAttribute('data-drop-area');
-      }
-      activeDropPaneEl = paneEl;
-    }
+		if (paneEl !== activeDropPaneEl) {
+			if (activeDropPaneEl) {
+				activeDropPaneEl.removeAttribute(DATA_ATTRIBUTES.DROP_AREA);
+			}
+			activeDropPaneEl = paneEl;
+		}
 
-    if (paneEl.getAttribute('data-can-drop') === 'false') return;
+		if (paneEl.getAttribute(DATA_ATTRIBUTES.CAN_DROP) === 'false') return;
 
-    const position = getCursorPosition(paneEl, event);
-    paneEl.setAttribute('data-drop-area', position);
-  }
+		const position = getCursorPosition(paneEl, event);
+		paneEl.setAttribute(DATA_ATTRIBUTES.DROP_AREA, position);
+	}
 
-  function handleDragLeave(event: DragEvent) {
-    // Prevent `dragleave` from triggering on child elements in Chrome
-    const relatedTarget = event.relatedTarget as Node;
-    if (
-      event.currentTarget &&
-      (event.currentTarget as HTMLElement).contains(relatedTarget) &&
-      event.currentTarget !== relatedTarget
-    ) {
-      return;
-    }
+	function handleDragLeave(event: DragEvent) {
+		// Prevent `dragleave` from triggering on child elements in Chrome
+		const relatedTarget = event.relatedTarget as Node;
+		if (
+			event.currentTarget &&
+			(event.currentTarget as HTMLElement).contains(relatedTarget) &&
+			event.currentTarget !== relatedTarget
+		) {
+			return;
+		}
 
-    if (activeDropPaneEl) {
-      activeDropPaneEl.removeAttribute('data-drop-area');
-      activeDropPaneEl = null;
-    }
-  }
+		if (activeDropPaneEl) {
+			activeDropPaneEl.removeAttribute(DATA_ATTRIBUTES.DROP_AREA);
+			activeDropPaneEl = null;
+		}
+	}
 
-  function handleDrop(event: DragEvent) {
-    if (!activeDropPaneEl) return;
-    if (activeDropPaneEl.getAttribute('data-can-drop') === 'false') return;
+	function handleDrop(event: DragEvent) {
+		if (!activeDropPaneEl) return;
+		if (activeDropPaneEl.getAttribute(DATA_ATTRIBUTES.CAN_DROP) === 'false') return;
 
-    const sashId = activeDropPaneEl.getAttribute('data-sash-id');
-    if (!sashId) return;
+		const sashId = activeDropPaneEl.getAttribute(DATA_ATTRIBUTES.SASH_ID);
+		if (!sashId) return;
 
-    const sash = rootSash.getById(sashId);
-    const dropArea = activeDropPaneEl.getAttribute('data-drop-area') || '';
+		const sash = rootSash.getById(sashId);
+		const dropArea = activeDropPaneEl.getAttribute(DATA_ATTRIBUTES.DROP_AREA) || '';
 
-    if (onDrop && sash) {
-      onDrop(event, sash, dropArea);
-    }
+		if (onDrop && sash) {
+			onDrop(event, sash, dropArea);
+		}
 
-    if (typeof sash?.store?.onDrop === 'function') {
-      sash.store.onDrop(event, sash);
-    }
+		if (typeof sash?.store?.onDrop === 'function') {
+			sash.store.onDrop(event, sash);
+		}
 
-    activeDropPaneEl.removeAttribute('data-drop-area');
-    activeDropPaneEl = null;
-  }
+		activeDropPaneEl.removeAttribute(DATA_ATTRIBUTES.DROP_AREA);
+		activeDropPaneEl = null;
+	}
 
-  node.addEventListener('dragover', handleDragOver);
-  node.addEventListener('dragleave', handleDragLeave);
-  node.addEventListener('drop', handleDrop);
+	node.addEventListener('dragover', handleDragOver);
+	node.addEventListener('dragleave', handleDragLeave);
+	node.addEventListener('drop', handleDrop);
 
-  return {
-    update(newParams: DropActionParams) {
-      rootSash = newParams.rootSash;
-      onDrop = newParams.onDrop;
-    },
-    destroy() {
-      node.removeEventListener('dragover', handleDragOver);
-      node.removeEventListener('dragleave', handleDragLeave);
-      node.removeEventListener('drop', handleDrop);
-      if (activeDropPaneEl) {
-        activeDropPaneEl.removeAttribute('data-drop-area');
-      }
-    }
-  };
+	return {
+		update(newParams: DropActionParams) {
+			rootSash = newParams.rootSash;
+			onDrop = newParams.onDrop;
+		},
+		destroy() {
+			node.removeEventListener('dragover', handleDragOver);
+			node.removeEventListener('dragleave', handleDragLeave);
+			node.removeEventListener('drop', handleDrop);
+			if (activeDropPaneEl) {
+				activeDropPaneEl.removeAttribute(DATA_ATTRIBUTES.DROP_AREA);
+			}
+		}
+	};
 };

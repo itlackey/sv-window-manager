@@ -1,183 +1,196 @@
 .window:has(.glass) {
-  .pane {
-    background-color: transparent;
+	.pane {
+		background-color: transparent;
 
-    &[data-drop-area]::before {
-      z-index: 1;
-    }
+		&[data-drop-area]::before {
+			z-index: 1;
+		}
 
-    &[data-drop-area='top']::before {
-      top: var(--bw-glass-clearance);
-      left: var(--bw-glass-clearance);
-      right: var(--bw-glass-clearance);
-      height: 50%;
-    }
+		&[data-drop-area='top']::before {
+			top: var(--bw-glass-clearance);
+			left: var(--bw-glass-clearance);
+			right: var(--bw-glass-clearance);
+			height: 50%;
+		}
 
-    &[data-drop-area='right']::before {
-      top: var(--bw-glass-clearance);
-      right: var(--bw-glass-clearance);
-      bottom: var(--bw-glass-clearance);
-      width: 50%;
-    }
+		&[data-drop-area='right']::before {
+			top: var(--bw-glass-clearance);
+			right: var(--bw-glass-clearance);
+			bottom: var(--bw-glass-clearance);
+			width: 50%;
+		}
 
-    &[data-drop-area='bottom']::before {
-      bottom: var(--bw-glass-clearance);
-      left: var(--bw-glass-clearance);
-      right: var(--bw-glass-clearance);
-      height: 50%;
-    }
+		&[data-drop-area='bottom']::before {
+			bottom: var(--bw-glass-clearance);
+			left: var(--bw-glass-clearance);
+			right: var(--bw-glass-clearance);
+			height: 50%;
+		}
 
-    &[data-drop-area='left']::before {
-      top: var(--bw-glass-clearance);
-      left: var(--bw-glass-clearance);
-      bottom: var(--bw-glass-clearance);
-      width: 50%;
-    }
+		&[data-drop-area='left']::before {
+			top: var(--bw-glass-clearance);
+			left: var(--bw-glass-clearance);
+			bottom: var(--bw-glass-clearance);
+			width: 50%;
+		}
 
-    &[data-drop-area='center']::before {
-      inset: var(--bw-glass-clearance);
-    }
-  }
+		&[data-drop-area='center']::before {
+			inset: var(--bw-glass-clearance);
+		}
+	}
 
-  .muntin {
-    background-color: transparent;
-  }
+	.muntin {
+		background-color: transparent;
+	}
 }
 
 .glass {
-  position: absolute;
-  inset: var(--bw-glass-clearance);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--bw-glass-border-color);
-  border-radius: var(--bw-glass-border-radius);
-  background-color: var(--bw-glass-bg-color, white);
-  font-family: var(--bw-font-family);
-  font-size: var(--bw-font-size);
-  box-sizing: border-box;
+	position: absolute;
+	inset: var(--bw-glass-clearance);
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--bw-glass-border-color);
+	border-radius: var(--bw-glass-border-radius);
+	background-color: var(--bw-glass-bg-color, white);
+	font-family: var(--bw-font-family);
+	font-size: var(--bw-font-size);
+	box-sizing: border-box;
 
-  &[data-draggable='true']:active {
-    cursor: move;
-    opacity: 0.4;
-  }
+	&[data-draggable='true']:active {
+		cursor: move;
+		opacity: 0.4;
+	}
 }
 
 .glass-header {
-  box-sizing: border-box;
-  flex-basis: var(--bw-glass-header-height);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--bw-glass-header-gap);
-  overflow: hidden;
-  padding-inline: var(--bw-glass-header-gap);
-  border-bottom: 1px solid var(--bw-glass-border-color);
-  border-top-left-radius: var(--bw-glass-border-radius);
-  border-top-right-radius: var(--bw-glass-border-radius);
-  background-color: var(--bw-glass-header-bg-color);
+	box-sizing: border-box;
+	flex-basis: var(--bw-glass-header-height);
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	gap: var(--bw-glass-header-gap);
+	overflow: hidden;
+	padding-inline: var(--bw-glass-header-gap);
+	border-bottom: 1px solid var(--bw-glass-border-color);
+	border-top-left-radius: var(--bw-glass-border-radius);
+	border-top-right-radius: var(--bw-glass-border-radius);
+	background-color: var(--bw-glass-header-bg-color);
 }
 
 .glass-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0; /* Allow flex item to shrink below content size */
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	min-width: 0; /* Allow flex item to shrink below content size */
 }
 
 .glass-tabs {
-  align-self: flex-end;
-  display: flex;
-  gap: var(--bw-glass-header-gap);
+	align-self: flex-end;
+	display: flex;
+	gap: var(--bw-glass-header-gap);
 }
 
 .glass-tab {
-  font-family: var(--bw-font-family);
-  border: 1px solid var(--bw-glass-border-color);
-  border-bottom: none;
-  border-top-left-radius: var(--bw-glass-border-radius);
-  border-top-right-radius: var(--bw-glass-border-radius);
-  cursor: pointer;
-  background: transparent;
-  padding: 0.25rem 0.5rem;
+	font-family: var(--bw-font-family);
+	border: 1px solid var(--bw-glass-border-color);
+	border-bottom: none;
+	border-top-left-radius: var(--bw-glass-border-radius);
+	border-top-right-radius: var(--bw-glass-border-radius);
+	cursor: pointer;
+	background: transparent;
+	padding: 0.25rem 0.5rem;
 
-  &:hover {
-    background-color: var(--bw-glass-tab-hover-bg, white);
-  }
+	&:hover {
+		background-color: var(--bw-glass-tab-hover-bg, white);
+	}
 
-  &:active {
-    transform: translateY(1px);
-  }
+	&:focus-visible {
+		outline: 2px solid var(--bw-accent-color);
+		outline-offset: 2px;
+		z-index: 1;
+	}
+
+	&:active {
+		transform: translateY(1px);
+	}
 }
 
 .glass-actions {
-  /* always on the right */
-  margin-left: auto;
-  display: flex;
-  flex-shrink: 0;
-  gap: var(--bw-action-gap, 2px);
+	/* always on the right */
+	margin-left: auto;
+	display: flex;
+	flex-shrink: 0;
+	gap: var(--bw-action-gap, 2px);
 }
 
 .glass-action {
-  font-family: var(--bw-font-family);
-  border: 1px solid var(--bw-glass-border-color);
-  border-radius: var(--bw-glass-border-radius);
-  cursor: pointer;
-  background: transparent;
-  padding: 0.25rem 0.5rem;
-  min-width: 24px;
+	font-family: var(--bw-font-family);
+	border: var(--bw-glass-action-border);
+	border-radius: var(--bw-glass-border-radius);
+	cursor: pointer;
+	background: var(--bw-glass-action-bg-color);
+	padding: 0.25rem 0.5rem;
+	min-width: 24px;
 
-  &:hover {
-    background-color: var(--bw-glass-action-hover-bg, white);
-  }
+	&:hover {
+		color: var(--bw-glass-action-hover-color);
+		background-color: var(--bw-glass-action-hover-bg, white);
+	}
 
-  &:active {
-    transform: scale(0.95);
-  }
+	&:focus-visible {
+		outline: 2px solid var(--bw-accent-color);
+		outline-offset: 2px;
+		z-index: 1;
+	}
 
-  &:disabled {
-    border: 1px solid var(--bw-glass-border-color-disabled);
-    background-color: var(--bw-glass-bg-color-disabled);
-    cursor: not-allowed;
+	&:active {
+		transform: scale(0.95);
+	}
 
-    &:hover {
-      background-color: var(--bw-glass-bg-color-disabled);
-    }
+	&:disabled {
+		border: 1px solid var(--bw-glass-border-color-disabled);
+		background-color: var(--bw-glass-bg-color-disabled);
+		cursor: not-allowed;
 
-    &:active {
-      transform: scale(1);
-    }
-  }
+		&:hover {
+			background-color: var(--bw-glass-bg-color-disabled);
+		}
+
+		&:active {
+			transform: scale(1);
+		}
+	}
 }
 
 .glass-action--close {
-  &::before {
-    content: '✕';
-  }
+	&::before {
+		content: '✕';
+	}
 }
 
 .glass-action--maximize {
-  &::before {
-    /* 🗖 🗗 ◫ □ ☐ */
-    content: '☐';
-  }
+	&::before {
+		/* 🗖 🗗 ◫ □ ☐ */
+		content: '☐';
+	}
 }
 
 .pane[data-maximized] .glass-action--maximize {
-  &::before {
-    content: '□';
-  }
+	&::before {
+		content: '□';
+	}
 }
 
 .glass-action--minimize {
-  &::before {
-    content: '−';
-  }
+	&::before {
+		content: '−';
+	}
 }
 
 .glass-content {
-  display: block;
-  box-sizing: border-box;
-  overflow: hidden;
-  flex-grow: 1;
-  padding: 1rem;
+	display: block;
+	box-sizing: border-box;
+	overflow: hidden;
+	flex-grow: 1;
+	padding: 1rem;
 }

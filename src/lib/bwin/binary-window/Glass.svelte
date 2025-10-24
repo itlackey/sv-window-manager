@@ -1,113 +1,213 @@
 <script lang="ts">
-  import type { Sash } from '../sash.js';
-  import closeAction from './actions.close.js';
-  import minimizeAction from './actions.minimize.js';
-  import maximizeAction from './actions.maximize.js';
+	import type { Sash } from '../sash.js';
+	import type { GlassAction, BwinContext } from '../types.js';
+	import closeAction from './actions.close.js';
+	import minimizeAction from './actions.minimize.js';
+	import maximizeAction from './actions.maximize.js';
+	import DOMPurify from 'isomorphic-dompurify';
 
-  interface GlassProps {
-    title?: string | HTMLElement | null;
-    content?: string | HTMLElement | null;
-    tabs?: (string | { label: string })[];
-    actions?: any[] | boolean;
-    draggable?: boolean;
-    sash?: Sash;
-    binaryWindow: any;
-  }
+	/**
+	 * Props for the Glass component
+	 *
+	 * Glass represents the content container within a pane, providing a header
+	 * with title/tabs and action buttons, plus a content area for arbitrary DOM.
+	 *
+	 * @property {string | HTMLElement | null} [title] - Title text or element for the header
+	 * @property {string | HTMLElement | null} [content] - Content to render (HTML string or DOM element)
+	 * @property {Array<string | {label: string}>} [tabs] - Tab labels for tabbed interface
+	 * @property {GlassAction[] | boolean} [actions] - Action buttons or false to hide defaults
+	 * @property {boolean} [draggable=true] - Whether the glass can be dragged to reposition
+	 * @property {Sash} [sash] - The sash this glass is attached to
+	 * @property {BwinContext} binaryWindow - Reference to the parent BinaryWindow context
+	 */
+	interface GlassProps {
+		title?: string | HTMLElement | null;
+		content?: string | HTMLElement | null;
+		tabs?: (string | { label: string })[];
+		actions?: GlassAction[] | boolean;
+		draggable?: boolean;
+		sash?: Sash;
+		binaryWindow: BwinContext;
+	}
 
-  let {
-    title = null,
-    content = null,
-    tabs = [],
-    actions = undefined,
-    draggable = true,
-    sash,
-    binaryWindow
-  }: GlassProps = $props();
+	let {
+		title = null,
+		content = null,
+		tabs = [],
+		actions = undefined,
+		draggable = true,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		sash: _sash,
+		binaryWindow
+	}: GlassProps = $props();
 
-  let contentElement = $state<HTMLElement>();
+	let contentElement = $state<HTMLElement>();
 
-  // Default built-in actions
-  const BUILTIN_ACTIONS = [minimizeAction, maximizeAction, closeAction];
+	// Handle content mounting - supports both DOM nodes and HTML strings
+	// Security: This approach eliminates XSS vulnerabilities by:
+	// 1. Directly appending DOM nodes without parsing (most common case via BwinHost)
+	// 2. Sanitizing HTML strings with DOMPurify to remove malicious scripts
+	// 3. Using strict sanitization config to prevent all script execution vectors
+	$effect(() => {
+		if (!contentElement) return;
 
-  const finalActions = $derived(
-    actions === undefined ? BUILTIN_ACTIONS : Array.isArray(actions) ? actions : []
-  );
+		// Clear previous content
+		contentElement.innerHTML = '';
 
-  function handleActionClick(event: MouseEvent, action: any) {
-    if (typeof action === 'object' && typeof action.onClick === 'function') {
-      action.onClick(event, binaryWindow);
-    }
-  }
+		if (!content) return;
 
-  // Get aria-label for action button
-  function getActionAriaLabel(action: any): string {
-    if (action === closeAction) return 'Close window';
-    if (action === minimizeAction) return 'Minimize window';
-    if (action === maximizeAction) return 'Maximize window';
-    return action.label || 'Action';
-  }
+		// If content is already a DOM element, append it directly (safe)
+		if (content instanceof HTMLElement) {
+			contentElement.appendChild(content);
+		}
+		// If content is an HTML string, sanitize it before rendering
+		else if (typeof content === 'string') {
+			// DOMPurify removes all dangerous HTML/JS while preserving safe markup
+			const sanitized = DOMPurify.sanitize(content, {
+				ALLOWED_TAGS: [
+					'p',
+					'div',
+					'span',
+					'h1',
+					'h2',
+					'h3',
+					'h4',
+					'h5',
+					'h6',
+					'strong',
+					'em',
+					'u',
+					'br',
+					'ul',
+					'ol',
+					'li'
+				],
+				ALLOWED_ATTR: ['style', 'class'],
+				ALLOW_DATA_ATTR: false,
+				// Prevent javascript: URLs in CSS
+				FORBID_ATTR: ['onerror', 'onload', 'onclick'],
+				SAFE_FOR_TEMPLATES: true
+			});
+			contentElement.innerHTML = sanitized;
+		}
+	});
+
+	// Default built-in actions
+	const BUILTIN_ACTIONS = [minimizeAction, maximizeAction, closeAction];
+
+	const finalActions = $derived(
+		actions === undefined ? BUILTIN_ACTIONS : Array.isArray(actions) ? actions : []
+	);
+
+	function handleActionClick(event: MouseEvent, action: GlassAction) {
+		if (typeof action === 'object' && typeof action.onClick === 'function') {
+			action.onClick(event, binaryWindow);
+		}
+	}
+
+	// Get aria-label for action button
+	function getActionAriaLabel(action: GlassAction): string {
+		if (action === closeAction) return 'Close window';
+		if (action === minimizeAction) return 'Minimize window';
+		if (action === maximizeAction) return 'Maximize window';
+		return action.label || 'Action';
+	}
+
+	// Handle keyboard events for tab navigation
+	function handleTabKeyDown(event: KeyboardEvent, index: number) {
+		if (!tabs || tabs.length === 0) return;
+
+		const key = event.key;
+		const tabCount = tabs.length;
+
+		if (key === 'ArrowLeft') {
+			event.preventDefault();
+			const prevIndex = index === 0 ? tabCount - 1 : index - 1;
+			const prevTab = event.currentTarget?.parentElement?.children[prevIndex] as HTMLElement;
+			prevTab?.focus();
+		} else if (key === 'ArrowRight') {
+			event.preventDefault();
+			const nextIndex = index === tabCount - 1 ? 0 : index + 1;
+			const nextTab = event.currentTarget?.parentElement?.children[nextIndex] as HTMLElement;
+			nextTab?.focus();
+		} else if (key === 'Home') {
+			event.preventDefault();
+			const firstTab = event.currentTarget?.parentElement?.children[0] as HTMLElement;
+			firstTab?.focus();
+		} else if (key === 'End') {
+			event.preventDefault();
+			const lastTab = event.currentTarget?.parentElement?.children[tabCount - 1] as HTMLElement;
+			lastTab?.focus();
+		}
+	}
 </script>
 
-<div class="glass">
-  <header class="glass-header" data-can-drag={draggable}>
-    {#if Array.isArray(tabs) && tabs.length > 0}
-      <div class="glass-tabs">
-        {#each tabs as tab}
-          <button class="glass-tab">{typeof tab === 'string' ? tab : tab.label}</button>
-        {/each}
-      </div>
-    {:else if title}
-      <div class="glass-title">{title}</div>
-    {/if}
+<div class="glass" role="region" aria-label={title ? String(title) : 'Window pane'}>
+	<header class="glass-header" data-can-drag={draggable}>
+		{#if Array.isArray(tabs) && tabs.length > 0}
+			<div class="glass-tabs" role="tablist">
+				{#each tabs as tab, index (index)}
+					<button
+						class="glass-tab"
+						role="tab"
+						aria-selected={index === 0}
+						tabindex={index === 0 ? 0 : -1}
+						onkeydown={(e) => handleTabKeyDown(e, index)}
+						type="button"
+					>
+						{typeof tab === 'string' ? tab : tab.label}
+					</button>
+				{/each}
+			</div>
+		{:else if title}
+			<div class="glass-title">{title}</div>
+		{/if}
 
-    <div class="glass-actions">
-      {#each finalActions as action}
-        <button
-          class="glass-action {action.className || ''}"
-          onclick={(e) => handleActionClick(e, action)}
-          aria-label={getActionAriaLabel(action)}
-          type="button"
-        >
-          {typeof action === 'string' ? action : action.label}
-        </button>
-      {/each}
-    </div>
-  </header>
+		<div class="glass-actions" role="group" aria-label="Window actions">
+			{#each finalActions as action, index (index)}
+				<button
+					class="glass-action {action.className || ''}"
+					onclick={(e) => handleActionClick(e, action)}
+					aria-label={getActionAriaLabel(action)}
+					type="button"
+				>
+					{typeof action === 'string' ? action : action.label}
+				</button>
+			{/each}
+		</div>
+	</header>
 
-  <div class="glass-content" bind:this={contentElement}>
-    {#if content}
-      {@html content}
-    {/if}
-  </div>
+	<!-- Content is mounted via $effect above - no {@html} needed for security -->
+	<div class="glass-content" bind:this={contentElement} role="tabpanel" tabindex="0"></div>
 </div>
 
 <style>
-  .glass {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
+	.glass {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
 
-  .glass-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem;
-    border-bottom: 1px solid #ccc;
-  }
+	.glass-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem;
+		border-bottom: 1px solid #ccc;
+	}
 
-  .glass-content {
-    flex: 1;
-    overflow: auto;
-  }
+	.glass-content {
+		flex: 1;
+		overflow: auto;
+	}
 
-  .glass-actions {
-    display: flex;
-    gap: 0.25rem;
-  }
+	.glass-actions {
+		display: flex;
+		gap: 0.25rem;
+	}
 
-  .glass-tabs {
-    display: flex;
-    gap: 0.25rem;
-  }
+	.glass-tabs {
+		display: flex;
+		gap: 0.25rem;
+	}
 </style>

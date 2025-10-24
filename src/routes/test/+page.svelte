@@ -9,8 +9,9 @@
 
 	// Create a simple test configuration with 2 panes
 	const testConfig = {
-		width: 800,
-		height: 600,
+		width: 800, // Initial dimensions for SSR
+		height: 500,
+		fitContainer: true, // Enable automatic container fitting
 		children: [
 			{
 				position: Position.Left,
@@ -35,8 +36,9 @@
 
 	// More complex configuration with nested panes
 	const complexConfig = {
-		width: 800,
-		height: 600,
+		width: 800, // Initial dimensions for SSR
+		height: 500,
+		fitContainer: true, // Enable automatic container fitting
 		children: [
 			{
 				position: Position.Top,
@@ -243,7 +245,12 @@
 
 				<div class="form-field">
 					<label for="pane-title">Title:</label>
-					<input id="pane-title" type="text" bind:value={newPaneTitle} placeholder="Enter pane title" />
+					<input
+						id="pane-title"
+						type="text"
+						bind:value={newPaneTitle}
+						placeholder="Enter pane title"
+					/>
 				</div>
 
 				<div class="form-field">
@@ -256,8 +263,8 @@
 			{/if}
 
 			<div class="add-pane-instructions">
-				<strong>Instructions:</strong> Select a target pane to split, choose the position (which side of the
-				target), enter a title, and click "Add Pane".
+				<strong>Instructions:</strong> Select a target pane to split, choose the position (which side
+				of the target), enter a title, and click "Add Pane".
 			</div>
 		</div>
 	</div>

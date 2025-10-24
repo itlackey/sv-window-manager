@@ -1,38 +1,44 @@
 .sill {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 8px;
-  width: 100%;
-  min-height: 24px;
-  display: flex;
-  gap: 8px;
-  box-sizing: border-box;
-  padding: 4px 8px;
-  pointer-events: auto;
-  background-color: rgba(0, 0, 0, 0.05);
-  border-top: 1px solid #ccc;
-  z-index: 1000;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	margin-top: 8px;
+	width: 100%;
+	min-height: 24px;
+	display: flex;
+	gap: 8px;
+	box-sizing: border-box;
+	padding: 4px 8px;
+	pointer-events: auto;
+	background-color: rgba(0, 0, 0, 0.05);
+	border-top: 1px solid #ccc;
+	z-index: 1000;
 }
 
 .bw-minimized-glass {
-  display: block;
-  flex-basis: 100px;
-  min-width: 80px;
-  height: 16px;
-  border: 1px solid var(--bw-glass-border-color);
-  border-radius: 2px;
-  cursor: pointer;
-  background-color: #ddd;
-  transition: all 0.2s;
+	display: block;
+	flex-basis: 100px;
+	min-width: 80px;
+	height: 16px;
+	border: 1px solid var(--bw-glass-border-color);
+	border-radius: 2px;
+	cursor: pointer;
+	background-color: #ddd;
+	transition: all 0.2s;
 
-  &:hover {
-    background-color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  }
+	&:hover {
+		background-color: white;
+		transform: translateY(-2px);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
 
-  &:active {
-    transform: scale(0.95);
-  }
+	&:focus-visible {
+		outline: 2px solid var(--bw-accent-color);
+		outline-offset: 2px;
+		z-index: 1;
+	}
+
+	&:active {
+		transform: scale(0.95);
+	}
 }

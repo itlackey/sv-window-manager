@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { mount } from 'svelte';
-	import { BinaryWindow } from '../bwin/binary-window/binary-window.js';
+	import { BinaryWindow } from 'bwin';
 	import type { Component } from 'svelte';
 	import type { BwinConfig, PaneConfig } from '../types.js';
 	import './bwin.css';
@@ -14,7 +14,11 @@
 		onpaneremoved?: (sessionId: string) => void;
 	}
 
-	let { config = {}, onpaneadded = (sessionId) => {}, onpaneremoved = (sessionId) => {} }: Props = $props();
+	let {
+		config = {},
+		onpaneadded = (sessionId) => {},
+		onpaneremoved = (sessionId) => {}
+	}: Props = $props();
 
 	let bwinContainer = $state<HTMLElement>();
 	let manager = $state<BinaryWindow | undefined>();
