@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Sash } from '../sash.js';
 	import type { GlassAction, BwinContext } from '../types.js';
+	import type { Snippet } from 'svelte';
 	import closeAction from './actions.close.js';
 	import minimizeAction from './actions.minimize.js';
 	import maximizeAction from './actions.maximize.js';
@@ -12,8 +13,8 @@
 	 * Glass represents the content container within a pane, providing a header
 	 * with title/tabs and action buttons, plus a content area for arbitrary DOM.
 	 *
-	 * @property {string | HTMLElement | null} [title] - Title text or element for the header
-	 * @property {string | HTMLElement | null} [content] - Content to render (HTML string or DOM element)
+	 * @property {string | HTMLElement | Snippet | null} [title] - Title text, element, or snippet for the header
+	 * @property {string | HTMLElement | Snippet | null} [content] - Content to render (HTML string, DOM element, or snippet)
 	 * @property {Array<string | {label: string}>} [tabs] - Tab labels for tabbed interface
 	 * @property {GlassAction[] | boolean} [actions] - Action buttons or false to hide defaults
 	 * @property {boolean} [draggable=true] - Whether the glass can be dragged to reposition
@@ -21,8 +22,8 @@
 	 * @property {BwinContext} binaryWindow - Reference to the parent BinaryWindow context
 	 */
 	interface GlassProps {
-		title?: string | HTMLElement | null;
-		content?: string | HTMLElement | null;
+		title?: string | HTMLElement | Snippet | null;
+		content?: string | HTMLElement | Snippet | null;
 		tabs?: (string | { label: string })[];
 		actions?: GlassAction[] | boolean;
 		draggable?: boolean;
@@ -41,9 +42,18 @@
 		binaryWindow
 	}: GlassProps = $props();
 
+	// Helper to check if value is a Snippet
+	function isSnippet(value: unknown): value is Snippet {
+		return typeof value === 'function';
+	}
+
 	let contentElement = $state<HTMLElement>();
 
-	// REFACTORED: Use $effect for true DOM side effect (content mounting)
+	// Determine if content is a snippet (needs to be rendered in template)
+	// vs DOM content (needs to be mounted via $effect)
+	const isContentSnippet = $derived(isSnippet(content));
+
+	// REFACTORED: Use $effect for DOM side effect (content mounting) - only for non-snippet content
 	// This is a legitimate use of $effect because:
 	// 1. It performs DOM manipulation (appendChild, innerHTML)
 	// 2. It doesn't update reactive state
@@ -52,10 +62,11 @@
 	// 1. Directly appending DOM nodes without parsing (most common case via BwinHost)
 	// 2. Sanitizing HTML strings with DOMPurify to remove malicious scripts
 	// 3. Using strict sanitization config to prevent all script execution vectors
+	// Note: Snippets are rendered declaratively in the template, so they skip this effect
 	$effect(() => {
-		if (!contentElement) return;
+		if (!contentElement || isContentSnippet) return;
 
-		// Clear previous content
+		// Clear previous content (only for DOM-based content)
 		contentElement.innerHTML = '';
 
 		if (!content) return;
@@ -165,7 +176,13 @@
 				{/each}
 			</div>
 		{:else if title}
-			<div class="glass-title">{title}</div>
+			<div class="glass-title">
+				{#if isSnippet(title)}
+					{@render title()}
+				{:else}
+					{title}
+				{/if}
+			</div>
 		{/if}
 
 		<div class="glass-actions" role="group" aria-label="Window actions">
@@ -182,8 +199,12 @@
 		</div>
 	</header>
 
-	<!-- Content is mounted via $effect above - no {@html} needed for security -->
-	<div class="glass-content" bind:this={contentElement} role="tabpanel" tabindex="0"></div>
+	<!-- Content rendering: snippets use {@render}, DOM/string content uses $effect mounting -->
+	<div class="glass-content" bind:this={contentElement} role="tabpanel" tabindex="0">
+		{#if isContentSnippet && content}
+			{@render content()}
+		{/if}
+	</div>
 </div>
 
 <style>

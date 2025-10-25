@@ -37,10 +37,13 @@ export interface GlassAction {
 	onClick: (event: MouseEvent, binaryWindow: BwinContext) => void;
 }
 
+// Import Snippet type from Svelte for type-safe content composition
+import type { Snippet } from 'svelte';
+
 // Glass Component Props
 export interface GlassProps {
-	title?: string | HTMLElement | null;
-	content?: string | HTMLElement | null;
+	title?: string | HTMLElement | Snippet | null;
+	content?: string | HTMLElement | Snippet | null;
 	tabs?: (string | { label: string })[];
 	actions?: GlassAction[] | boolean;
 	draggable?: boolean;
