@@ -3,12 +3,13 @@
 	import TerminalSession from './TerminalSession.svelte';
 	import FileBrowserSession from './FileBrowserSession.svelte';
 	import FileEditorSession from './FileEditorSession.svelte';
-	import BwinHost from '$lib/components/BwinHost.svelte';
 	import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
+	import type { Component } from 'svelte';
 
-	let bwinHostRef = $state<BinaryWindow | undefined>();
+	let bwinRef = $state<BinaryWindow | undefined>();
 	let activeSection = $state('demo');
 	let demoStarted = $state(false);
+	let sessionCounter = $state(0);
 
 	// Mock API data for sessions (sessionId -> {type, data})
 	const sessionData: Record<string, { type: string; data: Record<string, any> }> = {
@@ -21,45 +22,102 @@
 		}
 	};
 
-	async function fetchSessionInfo(id: string) {
-		return sessionData[id] || { type: 'chat', data: { welcome: 'Default Session' } };
+	async function fetchSessionInfo(sessionType: string) {
+		// Map session type to mock data
+		const mockDataMap: Record<string, { type: string; data: Record<string, any> }> = {
+			chat: { type: 'chat', data: { welcome: 'Welcome to Chat Session!' } },
+			terminal: { type: 'terminal', data: { initCommand: "echo 'Terminal Ready'" } },
+			filebrowser: { type: 'filebrowser', data: { rootPath: '/home/user/projects' } },
+			fileeditor: {
+				type: 'fileeditor',
+				data: { filename: 'README.md', content: '# Welcome\n\nStart editing...' }
+			}
+		};
+		return mockDataMap[sessionType] || { type: 'chat', data: { welcome: 'Default Session' } };
 	}
 
-	async function addSession(sessionId: string) {
-		if (!bwinHostRef) return;
-
-		const info = await fetchSessionInfo(sessionId);
-		let Component;
-
-		switch (info.type) {
-			case 'chat':
-				Component = ChatSession;
-				break;
-			case 'terminal':
-				Component = TerminalSession;
-				break;
-			case 'filebrowser':
-				Component = FileBrowserSession;
-				break;
-			case 'fileeditor':
-				Component = FileEditorSession;
-				break;
-			default:
-				Component = ChatSession;
+	async function addSession(sessionType: string) {
+		if (!bwinRef) {
+			console.warn('[addSession] BinaryWindow not initialized');
+			return;
 		}
 
-		// @ts-expect-error - Demo code using legacy API
-		bwinHostRef.addPane(sessionId, {}, Component, { sessionId, data: { ...info.data } });
+		try {
+			// Generate unique session ID
+			sessionCounter++;
+			const sessionId = `${sessionType}${sessionCounter}`;
+
+			const info = await fetchSessionInfo(sessionType);
+
+			// Component mapping - type-safe and extensible
+			const componentMap: Record<string, Component<any>> = {
+				chat: ChatSession,
+				terminal: TerminalSession,
+				filebrowser: FileBrowserSession,
+				fileeditor: FileEditorSession
+			};
+
+			const component = componentMap[info.type] || ChatSession;
+
+			// Get the root sash to start traversal
+			const rootSash = bwinRef.getRootSash();
+			if (!rootSash) {
+				console.warn('[addSession] Root sash not found');
+				return;
+			}
+
+			// Find a LEAF pane (a sash with no children) using getAllLeafDescendants
+			// This is more reliable than manual traversal and guaranteed to find a leaf
+			const leafNodes = rootSash.getAllLeafDescendants();
+			if (leafNodes.length === 0) {
+				console.error('[addSession] No leaf nodes found in tree');
+				return;
+			}
+
+			// Use the last leaf node (typically the rightmost/bottommost pane)
+			const targetSash = leafNodes[leafNodes.length - 1];
+
+			// Add the pane with the component
+			bwinRef.addPane(targetSash.id, {
+				id: sessionId,
+				position: 'right',
+				component,
+				componentProps: {
+					sessionId,
+					data: { ...info.data }
+				},
+				title: `${info.type.charAt(0).toUpperCase() + info.type.slice(1)} - ${sessionId}`
+			});
+		} catch (error) {
+			console.error('[addSession] Failed to add session:', error);
+			// In production, you might want to show a user-visible error message
+		}
 	}
 
 	async function startDemo() {
 		demoStarted = true;
-		// Wait a tick to ensure BwinHost is mounted and bound
+		// Wait a tick to ensure BinaryWindow is mounted and bound
 		await new Promise((resolve) => setTimeout(resolve, 50));
 		// Add initial sessions to demonstrate the window manager
-		await addSession('chat1');
-		setTimeout(() => addSession('terminal1'), 200);
-		setTimeout(() => addSession('editor1'), 400);
+		await addSession('chat');
+		setTimeout(() => addSession('terminal'), 200);
+		setTimeout(() => addSession('fileeditor'), 400);
+	}
+
+	function addChatSession() {
+		addSession('chat');
+	}
+
+	function addTerminalSession() {
+		addSession('terminal');
+	}
+
+	function addFileBrowserSession() {
+		addSession('filebrowser');
+	}
+
+	function addEditorSession() {
+		addSession('fileeditor');
 	}
 
 	function resetDemo() {
@@ -125,17 +183,19 @@
 					{:else}
 						<button class="btn-secondary" onclick={resetDemo}>Reset Demo</button>
 						<div class="demo-actions">
-							<button onclick={() => addSession('chat1')}>Add Chat</button>
-							<button onclick={() => addSession('terminal1')}>Add Terminal</button>
-							<button onclick={() => addSession('files1')}>Add File Browser</button>
-							<button onclick={() => addSession('editor1')}>Add Editor</button>
+							<button onclick={addChatSession}>Add Chat</button>
+							<button onclick={addTerminalSession}>Add Terminal</button>
+							<button onclick={addFileBrowserSession}>Add File Browser</button>
+							<button onclick={addEditorSession}>Add Editor</button>
 						</div>
 					{/if}
 				</div>
 
 				<div class="demo-container">
-					<BinaryWindow bind:this={bwinHostRef} settings={{ fitContainer: true }} />
-					<!-- <BwinHost bind:this={bwinHostRef} config={{ fitContainer: true }} /> -->
+					<BinaryWindow
+						bind:this={bwinRef}
+						settings={{ width: 900, height: 500, fitContainer: true }}
+					/>
 				</div>
 
 				<div class="demo-instructions">
@@ -165,92 +225,85 @@
 					</ul>
 				</div>
 
-				<h3>1. Import the Component and Types</h3>
+				<h3>1. Import the Component</h3>
 				<pre><code
 						>&lt;script lang="ts"&gt;
-  import BwinHost from 'sv-window-manager';
-  import type {'{'}
-    BwinConfig,
-    PaneConfig,
-    SessionComponentProps
-  {'}'} from 'sv-window-manager';
+  import BinaryWindow from 'sv-window-manager';
   import YourComponent from './YourComponent.svelte';
+  import type {'{'} Component {'}'} from 'svelte';
 
-  let bwinHost = $state&lt;BwinHost | undefined&gt;();
+  let bwin = $state&lt;BinaryWindow | undefined&gt;();
 &lt;/script&gt;</code
 					></pre>
 
-				<h3>2. Add BwinHost to Your Page</h3>
+				<h3>2. Add BinaryWindow to Your Page</h3>
 				<pre><code
-						>&lt;BwinHost
-  bind:this={'{bwinHost}'}
-  config={'{{'} fitContainer: true {'}}'}
+						>&lt;BinaryWindow
+  bind:this={'{bwin}'}
+  settings={'{{'} fitContainer: true {'}}'}
 /&gt;</code
 					></pre>
 
 				<h3>3. Dynamically Add Panes</h3>
 				<pre><code
 						>async function addPane() {'{'}
-  if (!bwinHost) return;
+  if (!bwin) return;
 
-  const paneConfig: PaneConfig = {'{'}
-    position: 'right',  // 'top' | 'right' | 'bottom' | 'left'
-  {'}'};
-
-  const componentProps: SessionComponentProps = {'{'}
-    sessionId: 'session-1',
-    data: {'{'}
-      title: 'My Pane'
-    {'}'}
-  {'}'};
+  // Get the root sash to add panes relative to
+  const rootSash = bwin.getRootSash();
+  if (!rootSash) return;
 
   // Add a pane with your component
-  bwinHost.addPane(
-    'unique-pane-id',     // Unique identifier for the pane
-    paneConfig,           // Pane configuration
-    YourComponent,        // Svelte component to render
-    componentProps        // Props to pass to the component
-  );
+  bwin.addPane(rootSash.id, {'{'}
+    id: 'unique-pane-id',      // Custom pane ID
+    position: 'right',          // 'top' | 'right' | 'bottom' | 'left'
+    component: YourComponent,   // Svelte component to render
+    componentProps: {'{'}          // Props passed to component
+      sessionId: 'session-1',
+      data: {'{'} title: 'My Pane' {'}'}
+    {'}'},
+    title: 'My Pane Title'      // Glass header title
+  {'}'});
 {'}'}</code
 					></pre>
 
 				<h3>Complete Example</h3>
 				<pre><code
 						>&lt;script lang="ts"&gt;
-  import BwinHost from 'sv-window-manager';
-  import type {'{'}
-    BwinConfig,
-    PaneConfig,
-    SessionComponentProps
-  {'}'} from 'sv-window-manager';
+  import BinaryWindow from 'sv-window-manager';
   import ChatComponent from './ChatComponent.svelte';
+  import type {'{'} Component {'}'} from 'svelte';
 
-  let bwinHost = $state&lt;BwinHost | undefined&gt;();
-
-  const config: BwinConfig = {'{'}
-    fitContainer: true
-  {'}'};
+  let bwin = $state&lt;BinaryWindow | undefined&gt;();
 
   function addChatSession(id: string, title: string) {'{'}
-    if (!bwinHost) return;
+    if (!bwin) return;
 
-    const paneConfig: PaneConfig = {'{'}
-      position: 'right'
-    {'}'};
+    const rootSash = bwin.getRootSash();
+    if (!rootSash) return;
 
-    const props: SessionComponentProps = {'{'}
-      sessionId: id,
-      data: {'{'}
-        title,
-        timestamp: new Date()
-      {'}'}
-    {'}'};
+    // Find the rightmost leaf pane (a sash with no children)
+    // Each sash can only have 2 children max, so we need to find
+    // an actual pane (leaf node) to add relative to
+    let targetSash = rootSash;
+    while (targetSash.children.length > 0) {'{'}
+      targetSash = targetSash.rightChild || targetSash.bottomChild || targetSash.children[0];
+    {'}'}
 
-    bwinHost.addPane(id, paneConfig, ChatComponent, props);
+    bwin.addPane(targetSash.id, {'{'}
+      id,
+      position: 'right',
+      component: ChatComponent,
+      componentProps: {'{'}
+        sessionId: id,
+        data: {'{'} title, timestamp: new Date() {'}'}
+      {'}'},
+      title
+    {'}'});
   {'}'}
 &lt;/script&gt;
 
-&lt;BwinHost bind:this={'{bwinHost}'} {'{config}'} /&gt;
+&lt;BinaryWindow bind:this={'{bwin}'} settings={'{{'} fitContainer: true {'}}'}  /&gt;
 
 &lt;button onclick={'{() => addChatSession("chat-1", "Chat Session")}'}&gt;
   Add Chat
@@ -269,9 +322,19 @@
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>config</code></td>
-								<td><code>BwinConfig</code></td>
-								<td>Configuration for bwin.js (e.g., <code>{'{'}fitContainer: true{'}'}</code>)</td>
+								<td><code>settings</code></td>
+								<td><code>SashConfig | ConfigRoot | Record&lt;string, unknown&gt;</code></td>
+								<td>Configuration options (e.g., <code>{'{'}fitContainer: true{'}'}</code>)</td>
+							</tr>
+							<tr>
+								<td><code>debug</code></td>
+								<td><code>boolean</code></td>
+								<td>Enable debug logging to console (default: false)</td>
+							</tr>
+							<tr>
+								<td><code>fitContainer</code></td>
+								<td><code>boolean</code></td>
+								<td>Automatically resize to fit parent container (default: true)</td>
 							</tr>
 						</tbody>
 					</table>
@@ -292,61 +355,72 @@
 								<td><code>addPane</code></td>
 								<td>
 									<code
-										>addPane(sessionId: string, paneConfig: PaneConfig, Component:
-										Component&lt;any&gt;, componentProps?: Record&lt;string, any&gt;): void</code
+										>addPane(targetPaneSashId: string, props: Record&lt;string, unknown&gt;): Sash</code
 									>
 								</td>
 								<td
-									>Add a new pane with a Svelte component. The component will be mounted and
-									rendered within the pane.</td
+									>Add a new pane relative to a target pane. Props include position, size, id, component, componentProps, title, content, and other Glass properties.</td
 								>
 							</tr>
 							<tr>
-								<td><code>getInfo</code></td>
-								<td><code>getInfo(): any</code></td>
+								<td><code>removePane</code></td>
+								<td><code>removePane(sashId: string): void</code></td>
+								<td>Remove a pane by its sash ID</td>
+							</tr>
+							<tr>
+								<td><code>getRootSash</code></td>
+								<td><code>getRootSash(): Sash | undefined</code></td>
 								<td
-									>Get information about the current window manager state (returns root sash node)</td
+									>Get the root sash of the layout tree</td
 								>
+							</tr>
+							<tr>
+								<td><code>getWindowElement</code></td>
+								<td><code>getWindowElement(): HTMLElement | undefined</code></td>
+								<td>Get the window element containing all panes and muntins</td>
+							</tr>
+							<tr>
+								<td><code>fit</code></td>
+								<td><code>fit(): void</code></td>
+								<td>Reflow the window layout to fit current container dimensions</td>
+							</tr>
+							<tr>
+								<td><code>mount</code></td>
+								<td><code>mount(containerEl: HTMLElement): void</code></td>
+								<td>Mount the window to a specific container element</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 
-				<h3>TypeScript Interfaces</h3>
+				<h3>TypeScript Support</h3>
 				<div class="info-box">
-					<p>The library provides comprehensive TypeScript types for type-safe integration:</p>
+					<p>BinaryWindow is fully typed with TypeScript for type-safe development.</p>
 				</div>
 
-				<h4>BwinConfig</h4>
+				<h4>AddPane Props Interface</h4>
 				<pre><code
-						>interface BwinConfig {'{'}
-  /** Whether the window manager should fit its container */
-  fitContainer?: boolean;
-  /** Additional bwin.js configuration options */
-  [key: string]: any;
-{'}'}</code
-					></pre>
+						>// Props accepted by the addPane method
+interface AddPaneProps {'{'}
+  // Required
+  position: 'top' | 'right' | 'bottom' | 'left';
 
-				<h4>PaneConfig</h4>
-				<pre><code
-						>interface PaneConfig {'{'}
-  /** Position where the pane should be added relative to the target node */
-  position?: 'top' | 'right' | 'bottom' | 'left';
-  /** The content element to display in the pane */
-  content?: HTMLElement;
-  /** Additional pane configuration options */
-  [key: string]: any;
-{'}'}</code
-					></pre>
+  // Optional - Pane configuration
+  id?: string;                  // Custom pane ID
+  size?: string | number;       // Pane size (px, %, or ratio)
 
-				<h4>SessionComponentProps</h4>
-				<pre><code
-						>interface SessionComponentProps {'{'}
-  /** Unique identifier for the session */
-  sessionId: string;
-  /** Additional data for the session component */
-  data?: Record&lt;string, any&gt;;
-  /** Additional props */
+  // Optional - Svelte component integration
+  component?: Component;        // Svelte component to mount
+  componentProps?: Record&lt;string, any&gt;;  // Props for component
+
+  // Optional - Glass properties
+  title?: string | HTMLElement; // Header title
+  content?: string | HTMLElement;  // Static content
+  tabs?: string[];              // Tab labels
+  actions?: Array | boolean;    // Action buttons
+  draggable?: boolean;          // Enable drag-and-drop
+
+  // Additional Glass props
   [key: string]: any;
 {'}'}</code
 					></pre>

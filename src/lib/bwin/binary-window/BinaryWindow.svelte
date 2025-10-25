@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { mount as svelteMount, unmount } from 'svelte';
+	import type { Component } from 'svelte';
 	import { Position } from '../position.js';
 	import { getMetricsFromElement } from '../utils.js';
 	import { getSashIdFromPane } from '../frame/frame-utils.js';
@@ -15,7 +16,7 @@
 	import type { ConfigRoot } from '../config/config-root.js';
 	import { TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 	import { BwinErrors } from '../errors.js';
-
+	import '../css/index.css';
 	const DEBUG = import.meta.env.VITE_DEBUG == 'true' ? true : false;
 
 	// Throttle timeout for ResizeObserver
@@ -70,6 +71,9 @@
 	let glassesBySashId = $state(
 		new Map<string, { container: HTMLElement; instance: Record<string, unknown> }>()
 	);
+
+	// Track user-mounted components by sash ID for cleanup
+	let userComponentsBySashId = $state(new Map<string, Record<string, unknown>>());
 
 	// Drag state
 	let activeDragGlassEl = $state<HTMLElement | null>(null);
@@ -222,13 +226,19 @@
 	 * have a custom size and ID. The method automatically creates and mounts the Glass component
 	 * with any provided properties (title, content, tabs, actions, etc.).
 	 *
+	 * You can provide either a static content element/string OR a Svelte component to render
+	 * in the pane. If a component is provided, it will be mounted automatically and cleaned up
+	 * when the pane is removed.
+	 *
 	 * @param {string} targetPaneSashId - The ID of the target pane to position relative to
 	 * @param {Object} props - Pane configuration object
 	 * @param {string} props.position - Position relative to target: 'top', 'right', 'bottom', 'left'
 	 * @param {string|number} [props.size] - Size of new pane (px, %, or ratio). If omitted, splits evenly
 	 * @param {string} [props.id] - Optional custom ID for the pane. Auto-generated if omitted
+	 * @param {Component} [props.component] - Svelte component class to mount in the pane
+	 * @param {Object} [props.componentProps] - Props to pass to the mounted component
 	 * @param {string|HTMLElement} [props.title] - Title text or element for the Glass header
-	 * @param {string|HTMLElement} [props.content] - Content to render in the Glass body
+	 * @param {string|HTMLElement} [props.content] - Content to render in the Glass body (ignored if component is provided)
 	 * @param {Array} [props.tabs] - Array of tab labels for tabbed interface
 	 * @param {Array|boolean} [props.actions] - Custom action buttons or false to hide defaults
 	 * @param {boolean} [props.draggable=true] - Whether the Glass can be dragged to reposition
@@ -240,12 +250,22 @@
 	 *
 	 * @example
 	 * ```typescript
-	 * // Add a pane to the right of the root pane with custom size
+	 * // Add a pane with static content
 	 * const newPane = binaryWindow.addPane('root', {
 	 *   position: 'right',
 	 *   size: '40%',
 	 *   title: 'Editor',
 	 *   content: editorElement
+	 * });
+	 *
+	 * // Add a pane with a Svelte component
+	 * import MyComponent from './MyComponent.svelte';
+	 * binaryWindow.addPane('root', {
+	 *   position: 'right',
+	 *   size: '40%',
+	 *   title: 'Component View',
+	 *   component: MyComponent,
+	 *   componentProps: { data: myData, onUpdate: handleUpdate }
 	 * });
 	 *
 	 * // Add a pane with tabs and custom actions
@@ -261,13 +281,36 @@
 	 * ```
 	 */
 	export function addPane(targetPaneSashId: string, props: Record<string, unknown>) {
-		const { position, size, id, ...glassProps } = props;
+		const { position, size, id, component, componentProps, ...glassProps } = props;
 
 		if (!frameComponent) throw BwinErrors.frameNotInitialized();
 
 		const newPaneSash = frameComponent.addPane(targetPaneSashId, { position, size, id });
 		if (!newPaneSash) {
 			throw BwinErrors.paneNotFound(targetPaneSashId);
+		}
+
+		// If a Svelte component is provided, mount it and use as content
+		if (component) {
+			const contentElem = document.createElement('div');
+			contentElem.style.height = '100%';
+			contentElem.style.width = '100%';
+			contentElem.style.overflow = 'hidden';
+
+			const componentInstance = svelteMount(component as Component, {
+				target: contentElem,
+				props: componentProps || {}
+			});
+
+			// Store component instance for cleanup
+			userComponentsBySashId.set(newPaneSash.id, componentInstance);
+
+			// Use the mounted component's container as content
+			glassProps.content = contentElem;
+
+			// Preserve component info for potential restore after minimize
+			glassProps.component = component;
+			glassProps.componentProps = componentProps;
 		}
 
 		// Store glass props (title, content, etc.) in the sash's store
@@ -314,6 +357,13 @@
 		);
 
 		if (paneEl) {
+			// Cleanup user component if it exists
+			const userComponent = userComponentsBySashId.get(sashId);
+			if (userComponent) {
+				unmount(userComponent);
+				userComponentsBySashId.delete(sashId);
+			}
+
 			// Cleanup glass component if it exists
 			const glassData = glassesBySashId.get(sashId);
 			if (glassData) {
@@ -410,21 +460,19 @@
 		let biggestIntersectArea = 0;
 		let targetPaneEl: HTMLElement | null = null;
 
-		frameComponent.windowElement
-			.querySelectorAll(`.${CSS_CLASSES.PANE}`)
-			.forEach((paneEl) => {
-				const paneRect = getMetricsFromElement(paneEl as HTMLElement);
-				const intersectRect = getIntersectRect(originalRect, paneRect);
+		frameComponent.windowElement.querySelectorAll(`.${CSS_CLASSES.PANE}`).forEach((paneEl) => {
+			const paneRect = getMetricsFromElement(paneEl as HTMLElement);
+			const intersectRect = getIntersectRect(originalRect, paneRect);
 
-				if (intersectRect) {
-					const intersectArea = intersectRect.width * intersectRect.height;
+			if (intersectRect) {
+				const intersectArea = intersectRect.width * intersectRect.height;
 
-					if (intersectArea > biggestIntersectArea) {
-						biggestIntersectArea = intersectArea;
-						targetPaneEl = paneEl as HTMLElement;
-					}
+				if (intersectArea > biggestIntersectArea) {
+					biggestIntersectArea = intersectArea;
+					targetPaneEl = paneEl as HTMLElement;
 				}
-			});
+			}
+		});
 
 		debugLog('[restoreGlass] Target pane found:', {
 			targetPaneEl,
@@ -633,6 +681,16 @@
 				unmount(glassData.instance);
 			});
 			glassesBySashId.clear();
+		};
+	});
+
+	// Cleanup all user components on destroy
+	$effect(() => {
+		return () => {
+			userComponentsBySashId.forEach((instance) => {
+				unmount(instance);
+			});
+			userComponentsBySashId.clear();
 		};
 	});
 
