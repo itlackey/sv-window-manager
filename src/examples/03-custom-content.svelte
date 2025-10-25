@@ -12,16 +12,16 @@
   Svelte reactivity and component composition inside each pane.
 -->
 <script lang="ts">
-	import BwinHost from '$lib/components/BwinHost.svelte';
+	import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
 	import { onMount } from 'svelte';
 
 	// Import session components (we'll use the existing ones as examples)
-	import ChatSession from '../routes/ChatSession.svelte';
-	import TerminalSession from '../routes/TerminalSession.svelte';
-	import FileEditorSession from '../routes/FileEditorSession.svelte';
+	import ChatSession from '../routes/components/ChatSession.svelte';
+	import TerminalSession from '../routes/components/TerminalSession.svelte';
+	import FileEditorSession from '../routes/components/FileEditorSession.svelte';
 
-	// BwinHost component reference
-	let bwinHostRef = $state<BwinHost | undefined>();
+	// BinaryWindow component reference
+	let bwinHostRef = $state<BinaryWindow | undefined>();
 
 	// Configuration for responsive behavior
 	const config = {
@@ -33,42 +33,28 @@
 		if (!bwinHostRef) return;
 
 		// Add a chat session component
-		bwinHostRef.addPane(
-			'chat-1',
-			{ position: 'right' },
-			ChatSession,
-			{
-				sessionId: 'chat-1',
-				data: { welcome: 'Hello! This is a custom Svelte component in a pane.' }
-			}
-		);
+		bwinHostRef.addPane('chat-1', { position: 'right' }, ChatSession, {
+			sessionId: 'chat-1',
+			data: { welcome: 'Hello! This is a custom Svelte component in a pane.' }
+		});
 
 		// Add a terminal session component
 		setTimeout(() => {
 			if (!bwinHostRef) return;
-			bwinHostRef.addPane(
-				'terminal-1',
-				{ position: 'bottom' },
-				TerminalSession,
-				{
-					sessionId: 'terminal-1',
-					data: { initCommand: 'echo "Custom Svelte components in action!"' }
-				}
-			);
+			bwinHostRef.addPane('terminal-1', { position: 'bottom' }, TerminalSession, {
+				sessionId: 'terminal-1',
+				data: { initCommand: 'echo "Custom Svelte components in action!"' }
+			});
 		}, 100);
 
 		// Add a file editor component
 		setTimeout(() => {
 			if (!bwinHostRef) return;
-			bwinHostRef.addPane(
-				'editor-1',
-				{ position: 'right' },
-				FileEditorSession,
-				{
-					sessionId: 'editor-1',
-					data: {
-						filename: 'example.ts',
-						content: `// Custom Svelte Components Example
+			bwinHostRef.addPane('editor-1', { position: 'right' }, FileEditorSession, {
+				sessionId: 'editor-1',
+				data: {
+					filename: 'example.ts',
+					content: `// Custom Svelte Components Example
 //
 // This demonstrates using BwinHost to mount
 // full Svelte components into panes.
@@ -88,9 +74,8 @@ function addCustomPane() {
   );
 }
 `
-					}
 				}
-			);
+			});
 		}, 200);
 	});
 
@@ -99,15 +84,10 @@ function addCustomPane() {
 		if (!bwinHostRef) return;
 
 		const chatId = `chat-${Date.now()}`;
-		bwinHostRef.addPane(
-			chatId,
-			{ position: 'right' },
-			ChatSession,
-			{
-				sessionId: chatId,
-				data: { welcome: 'Another chat session added dynamically!' }
-			}
-		);
+		bwinHostRef.addPane(chatId, { position: 'right' }, ChatSession, {
+			sessionId: chatId,
+			data: { welcome: 'Another chat session added dynamically!' }
+		});
 	}
 
 	// Add another terminal pane
@@ -115,15 +95,10 @@ function addCustomPane() {
 		if (!bwinHostRef) return;
 
 		const termId = `terminal-${Date.now()}`;
-		bwinHostRef.addPane(
-			termId,
-			{ position: 'bottom' },
-			TerminalSession,
-			{
-				sessionId: termId,
-				data: { initCommand: 'ls -la' }
-			}
-		);
+		bwinHostRef.addPane(termId, { position: 'bottom' }, TerminalSession, {
+			sessionId: termId,
+			data: { initCommand: 'ls -la' }
+		});
 	}
 
 	// Add another editor pane
@@ -131,18 +106,13 @@ function addCustomPane() {
 		if (!bwinHostRef) return;
 
 		const editorId = `editor-${Date.now()}`;
-		bwinHostRef.addPane(
-			editorId,
-			{ position: 'right' },
-			FileEditorSession,
-			{
-				sessionId: editorId,
-				data: {
-					filename: 'new-file.md',
-					content: '# New Document\n\nStart editing here...'
-				}
+		bwinHostRef.addPane(editorId, { position: 'right' }, FileEditorSession, {
+			sessionId: editorId,
+			data: {
+				filename: 'new-file.md',
+				content: '# New Document\n\nStart editing here...'
 			}
-		);
+		});
 	}
 </script>
 
@@ -161,7 +131,7 @@ function addCustomPane() {
 	</div>
 
 	<div class="window-wrapper">
-		<BwinHost bind:this={bwinHostRef} {config} />
+		<BinaryWindow bind:this={bwinHostRef} settings={config} />
 	</div>
 
 	<div class="info-panel">

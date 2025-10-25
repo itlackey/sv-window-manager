@@ -283,7 +283,27 @@
 	export function addPane(targetPaneSashId: string, props: Record<string, unknown>) {
 		const { position, size, id, component, componentProps, ...glassProps } = props;
 
+		// Validate frame component is initialized
 		if (!frameComponent) throw BwinErrors.frameNotInitialized();
+
+		// Validate required position parameter
+		if (!position || typeof position !== 'string') {
+			throw BwinErrors.invalidPosition(String(position || 'undefined'));
+		}
+
+		// Validate position is one of the valid directional values
+		const validPositions = [Position.Top, Position.Right, Position.Bottom, Position.Left];
+		if (!validPositions.includes(position)) {
+			throw BwinErrors.invalidPosition(position);
+		}
+
+		// Validate component/componentProps combination
+		if (componentProps && !component) {
+			debugWarn(
+				'componentProps provided without component - props will be ignored',
+				componentProps
+			);
+		}
 
 		const newPaneSash = frameComponent.addPane(targetPaneSashId, { position, size, id });
 		if (!newPaneSash) {
@@ -671,7 +691,9 @@
 
 	// Handle sill click for minimized glasses
 	$effect(() => {
-		return setupSillClickHandler();
+		const cleanup = setupSillClickHandler();
+		// Return cleanup function or noop if sillElement not yet available
+		return cleanup || (() => {});
 	});
 
 	// Cleanup all glasses on destroy
@@ -700,10 +722,11 @@
 	 * Returns cleanup function to disconnect observer and clear timeout
 	 */
 	function setupFitContainer() {
-		if (!shouldFitContainer || !rootElement || !frameComponent?.rootSash) return;
+		// Early return with noop cleanup if conditions not met
+		if (!shouldFitContainer || !rootElement || !frameComponent?.rootSash) return () => {};
 
 		const containerElement = rootElement.parentElement;
-		if (!containerElement) return;
+		if (!containerElement) return () => {};
 
 		// Mount the container element so fit() can work properly
 		frameComponent.mount(containerElement);
@@ -781,6 +804,7 @@
 	// Observe parent container size changes and update rootSash dimensions
 	// This matches the bwin.js fitContainer feature implementation
 	$effect(() => {
+		// setupFitContainer always returns a cleanup function (or noop)
 		return setupFitContainer();
 	});
 

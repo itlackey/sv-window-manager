@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { Position, getOppositePosition, getCursorPosition, isTopRightBottomLeftOrCenter } from './position.js';
+import {
+	Position,
+	getOppositePosition,
+	getCursorPosition,
+	isTopRightBottomLeftOrCenter
+} from './position.js';
 import { BwinErrors } from './errors.js';
 
 describe('Position constants', () => {
@@ -40,7 +45,9 @@ describe('getOppositePosition', () => {
 
 	it('throws BwinError for invalid position', () => {
 		expect(() => getOppositePosition('invalid')).toThrow();
-		expect(() => getOppositePosition('invalid')).toThrow(BwinErrors.invalidPosition('invalid').message);
+		expect(() => getOppositePosition('invalid')).toThrow(
+			BwinErrors.invalidPosition('invalid').message
+		);
 	});
 
 	it('throws BwinError for Center position', () => {
@@ -100,15 +107,19 @@ describe('isTopRightBottomLeftOrCenter', () => {
 
 describe('getCursorPosition', () => {
 	// Helper function to create a mock element with getBoundingClientRect
-	const createMockElement = (left, top, width, height) => {
+	const createMockElement = (left: number, top: number, width: number, height: number) => {
 		return {
 			getBoundingClientRect: () => ({
 				left,
 				top,
 				width,
-				height
+				height,
+				right: left + width,
+				bottom: top + height,
+				x: left,
+				y: top
 			})
-		};
+		} as HTMLElement;
 	};
 
 	describe('Center detection', () => {

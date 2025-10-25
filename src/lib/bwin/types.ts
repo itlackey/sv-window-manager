@@ -25,6 +25,9 @@ export interface Sash {
 	calcMinWidth(): number;
 	calcMinHeight(): number;
 	walk(callback: (sash: Sash) => void): void;
+	getAllLeafDescendants(): Sash[];
+	getDescendantParentById(id: string): Sash | null;
+	getChildSiblingById(id: string): Sash | undefined;
 }
 
 // Glass Action Interface

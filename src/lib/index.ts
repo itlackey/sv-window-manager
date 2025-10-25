@@ -9,12 +9,6 @@
 // ============================================================================
 
 /**
- * Main host component that wraps the bwin window manager.
- * This is typically the only component you need to import for basic usage.
- */
-export { default as BwinHost } from './components/BwinHost.svelte';
-
-/**
  * Core Svelte components for advanced usage.
  * These are typically used internally but can be used directly for custom layouts.
  */
@@ -109,12 +103,7 @@ export { BwinError, BwinErrors } from './bwin/errors.js';
  */
 
 // High-level library types (from src/lib/types.ts)
-export type {
-	BwinConfig,
-	PaneConfig,
-	BwinHostProps,
-	SessionComponentProps
-} from './types.js';
+export type { BwinConfig, PaneConfig, BwinHostProps, SessionComponentProps } from './types.js';
 
 // Core bwin types (from src/lib/bwin/types.ts)
 export type {
@@ -128,18 +117,3 @@ export type {
 	DragActionParams,
 	DropActionParams
 } from './bwin/types.js';
-
-// ============================================================================
-// BACKWARD COMPATIBILITY EXPORTS
-// ============================================================================
-
-/**
- * Legacy component names for backward compatibility.
- * These will be deprecated in future versions.
- * @deprecated Use the non-Svelte suffixed names instead
- */
-export { default as BinaryWindowSvelte } from './bwin/binary-window/BinaryWindow.svelte';
-export { default as FrameSvelte } from './bwin/frame/Frame.svelte';
-export { default as PaneSvelte } from './bwin/frame/Pane.svelte';
-export { default as MuntinSvelte } from './bwin/frame/Muntin.svelte';
-export { default as GlassSvelte } from './bwin/binary-window/Glass.svelte';

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import BwinHost from '$lib/components/BwinHost.svelte';
-  import DemoSession from '../routes/ChatSession.svelte';
-  
+  import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
+  import DemoSession from '../routes/components/ChatSession.svelte';
+
   let { config = {} } = $props();
   let hostRef: any = $state();
   
@@ -18,4 +18,4 @@
   });
 </script>
 
-<BwinHost bind:this={hostRef} {config} />
+<BinaryWindow bind:this={hostRef} settings={config} />

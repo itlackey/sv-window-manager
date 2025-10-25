@@ -1,8 +1,8 @@
 <script lang="ts">
-	import ChatSession from './ChatSession.svelte';
-	import TerminalSession from './TerminalSession.svelte';
-	import FileBrowserSession from './FileBrowserSession.svelte';
-	import FileEditorSession from './FileEditorSession.svelte';
+	import ChatSession from './components/ChatSession.svelte';
+	import TerminalSession from './components/TerminalSession.svelte';
+	import FileBrowserSession from './components/FileBrowserSession.svelte';
+	import FileEditorSession from './components/FileEditorSession.svelte';
 	import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
 	import type { Component } from 'svelte';
 
@@ -359,7 +359,8 @@
 									>
 								</td>
 								<td
-									>Add a new pane relative to a target pane. Props include position, size, id, component, componentProps, title, content, and other Glass properties.</td
+									>Add a new pane relative to a target pane. Props include position, size, id,
+									component, componentProps, title, content, and other Glass properties.</td
 								>
 							</tr>
 							<tr>
@@ -370,9 +371,7 @@
 							<tr>
 								<td><code>getRootSash</code></td>
 								<td><code>getRootSash(): Sash | undefined</code></td>
-								<td
-									>Get the root sash of the layout tree</td
-								>
+								<td>Get the root sash of the layout tree</td>
 							</tr>
 							<tr>
 								<td><code>getWindowElement</code></td>

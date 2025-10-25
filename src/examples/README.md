@@ -20,14 +20,14 @@ All examples follow the same pattern:
 
 ## Examples Overview
 
-| Example | File | Features Demonstrated |
-|---------|------|----------------------|
-| **Basic Setup** | `01-basic-setup.svelte` | Minimal configuration, static 2-pane layout |
-| **Dynamic Panes** | `02-dynamic-panes.svelte` | Add/remove panes programmatically, button controls |
-| **Custom Content** | `03-custom-content.svelte` | BwinHost wrapper, mounting Svelte components |
-| **Drag & Drop** | `04-drag-drop.svelte` | Rearranging panes, drop zones, visual feedback |
-| **Glass Actions** | `05-glass-actions.svelte` | Minimize, maximize, close, sill restoration |
-| **Responsive Fit** | `06-responsive-fit.svelte` | Container resizing, responsive behavior |
+| Example            | File                       | Features Demonstrated                              |
+| ------------------ | -------------------------- | -------------------------------------------------- |
+| **Basic Setup**    | `01-basic-setup.svelte`    | Minimal configuration, static 2-pane layout        |
+| **Dynamic Panes**  | `02-dynamic-panes.svelte`  | Add/remove panes programmatically, button controls |
+| **Custom Content** | `03-custom-content.svelte` | BwinHost wrapper, mounting Svelte components       |
+| **Drag & Drop**    | `04-drag-drop.svelte`      | Rearranging panes, drop zones, visual feedback     |
+| **Glass Actions**  | `05-glass-actions.svelte`  | Minimize, maximize, close, sill restoration        |
+| **Responsive Fit** | `06-responsive-fit.svelte` | Container resizing, responsive behavior            |
 
 ## Running Examples
 
@@ -53,7 +53,7 @@ Then import an example in your page:
 
 ```svelte
 <script>
-  import BasicSetup from '$lib/../examples/01-basic-setup.svelte';
+	import BasicSetup from '$lib/../examples/01-basic-setup.svelte';
 </script>
 
 <BasicSetup />
@@ -72,36 +72,39 @@ Each example can be used as a template for your own implementation. Simply copy 
 The simplest possible BinaryWindow setup. Perfect for getting started.
 
 **Key Concepts:**
+
 - Basic BinaryWindow configuration
 - Using `onMount` to add panes after initialization
 - Creating DOM elements for pane content
 - Positioning panes (top, right, bottom, left)
 
 **Code Snippet:**
+
 ```svelte
 <script lang="ts">
-  import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
+	import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
 
-  let bwinRef = $state<BinaryWindow | undefined>();
+	let bwinRef = $state<BinaryWindow | undefined>();
 
-  const settings = {
-    width: 800,
-    height: 500,
-    fitContainer: false
-  };
+	const settings = {
+		width: 800,
+		height: 500,
+		fitContainer: false
+	};
 
-  onMount(() => {
-    bwinRef.addPane('root', {
-      title: 'Welcome',
-      content: createContent()
-    });
-  });
+	onMount(() => {
+		bwinRef.addPane('root', {
+			title: 'Welcome',
+			content: createContent()
+		});
+	});
 </script>
 
 <BinaryWindow bind:this={bwinRef} {settings} />
 ```
 
 **Use Cases:**
+
 - Learning the basics
 - Simple static layouts
 - Prototyping layouts
@@ -115,12 +118,14 @@ The simplest possible BinaryWindow setup. Perfect for getting started.
 Demonstrates adding and removing panes dynamically based on user actions.
 
 **Key Concepts:**
+
 - Adding panes programmatically with buttons
 - Removing specific panes by ID
 - Tracking active panes
 - State management for dynamic layouts
 
 **Code Snippet:**
+
 ```svelte
 function addPaneRight() {
   const newPaneId = `pane-${counter++}`;
@@ -138,6 +143,7 @@ function removePane(paneId: string) {
 ```
 
 **Use Cases:**
+
 - Dynamic dashboards
 - Tab-like interfaces
 - Session-based applications
@@ -152,34 +158,32 @@ function removePane(paneId: string) {
 Shows how to use BwinHost to mount full Svelte components inside panes.
 
 **Key Concepts:**
+
 - Using BwinHost wrapper
 - Mounting Svelte components with `mount()`
 - Passing props to child components
 - Mixing different component types
 
 **Code Snippet:**
+
 ```svelte
 <script lang="ts">
-  import BwinHost from '$lib/components/BwinHost.svelte';
-  import ChatSession from './ChatSession.svelte';
+	import BwinHost from '$lib/components/BwinHost.svelte';
+	import ChatSession from './ChatSession.svelte';
 
-  let bwinHostRef = $state<BwinHost | undefined>();
+	let bwinHostRef = $state<BwinHost | undefined>();
 
-  function addChatPane() {
-    bwinHostRef.addPane(
-      'chat-1',
-      { position: 'right' },
-      ChatSession,
-      {
-        sessionId: 'chat-1',
-        data: { welcome: 'Hello!' }
-      }
-    );
-  }
+	function addChatPane() {
+		bwinHostRef.addPane('chat-1', { position: 'right' }, ChatSession, {
+			sessionId: 'chat-1',
+			data: { welcome: 'Hello!' }
+		});
+	}
 </script>
 ```
 
 **Use Cases:**
+
 - Complex interactive components
 - Full Svelte reactivity needed
 - Component composition
@@ -194,6 +198,7 @@ Shows how to use BwinHost to mount full Svelte components inside panes.
 Demonstrates the built-in drag-and-drop functionality for rearranging panes.
 
 **Key Concepts:**
+
 - Drag-and-drop is enabled by default
 - Drop zones appear automatically
 - Center drop swaps panes
@@ -201,6 +206,7 @@ Demonstrates the built-in drag-and-drop functionality for rearranging panes.
 - Visual feedback during drag
 
 **Code Snippet:**
+
 ```svelte
 bwinRef.addPane('root', {
   title: 'Draggable Pane',
@@ -210,6 +216,7 @@ bwinRef.addPane('root', {
 ```
 
 **Use Cases:**
+
 - User-customizable layouts
 - Workspace arrangement
 - Dashboard configuration
@@ -224,6 +231,7 @@ bwinRef.addPane('root', {
 Shows window management controls: minimize, maximize, and close.
 
 **Key Concepts:**
+
 - Default actions (minimize, maximize, close)
 - Minimize to sill at bottom
 - Click sill button to restore
@@ -231,6 +239,7 @@ Shows window management controls: minimize, maximize, and close.
 - Last pane cannot be closed
 
 **Code Snippet:**
+
 ```svelte
 bwinRef.addPane('root', {
   title: 'My Pane',
@@ -245,6 +254,7 @@ bwinRef.addPane('root', {
 ```
 
 **Use Cases:**
+
 - Standard window management
 - User-controlled layout
 - Minimizing inactive panes
@@ -259,12 +269,14 @@ bwinRef.addPane('root', {
 Demonstrates automatic resizing to fit parent container dimensions.
 
 **Key Concepts:**
+
 - `fitContainer: true` for responsive behavior
 - ResizeObserver for efficient resize detection
 - Proportional pane resizing
 - Testing with different container sizes
 
 **Code Snippet:**
+
 ```svelte
 const settings = {
   fitContainer: true  // Key setting for responsive behavior
@@ -276,6 +288,7 @@ const settings = {
 ```
 
 **Use Cases:**
+
 - Responsive web applications
 - Mobile-friendly layouts
 - Embedded windows in dynamic containers
@@ -286,23 +299,20 @@ const settings = {
 ### Pattern 1: Creating Pane Content
 
 **Using DOM elements:**
+
 ```typescript
 function createContent() {
-  const div = document.createElement('div');
-  div.style.cssText = 'padding: 20px;';
-  div.innerHTML = '<h2>Hello</h2>';
-  return div;
+	const div = document.createElement('div');
+	div.style.cssText = 'padding: 20px;';
+	div.innerHTML = '<h2>Hello</h2>';
+	return div;
 }
 ```
 
 **Using Svelte components (BwinHost):**
+
 ```typescript
-bwinHostRef.addPane(
-  'pane-id',
-  { position: 'right' },
-  MyComponent,
-  { prop1: 'value', prop2: 123 }
-);
+bwinHostRef.addPane('pane-id', { position: 'right' }, MyComponent, { prop1: 'value', prop2: 123 });
 ```
 
 ### Pattern 2: Positioning Panes
@@ -326,20 +336,20 @@ bwinRef.addPane(targetId, { position: 'top' });
 ```typescript
 // Percentage size (relative)
 bwinRef.addPane(targetId, {
-  position: 'right',
-  size: '30%'  // 30% of parent
+	position: 'right',
+	size: '30%' // 30% of parent
 });
 
 // Fixed size (absolute)
 bwinRef.addPane(targetId, {
-  position: 'bottom',
-  size: 200  // 200px height
+	position: 'bottom',
+	size: 200 // 200px height
 });
 
 // Default (splits evenly)
 bwinRef.addPane(targetId, {
-  position: 'right'
-  // size omitted = 50/50 split
+	position: 'right'
+	// size omitted = 50/50 split
 });
 ```
 
@@ -350,14 +360,14 @@ let paneCount = $state(0);
 let activePanes = $state<string[]>([]);
 
 function addPane() {
-  const id = `pane-${paneCount++}`;
-  activePanes = [...activePanes, id];
-  bwinRef.addPane('root', { id, /* ... */ });
+	const id = `pane-${paneCount++}`;
+	activePanes = [...activePanes, id];
+	bwinRef.addPane('root', { id /* ... */ });
 }
 
 function removePane(id: string) {
-  bwinRef.removePane(id);
-  activePanes = activePanes.filter(p => p !== id);
+	bwinRef.removePane(id);
+	activePanes = activePanes.filter((p) => p !== id);
 }
 ```
 
@@ -376,14 +386,14 @@ const settings = {
 ```typescript
 // Good: Scales with container
 bwinRef.addPane(targetId, {
-  position: 'right',
-  size: '25%'
+	position: 'right',
+	size: '25%'
 });
 
 // Less flexible: Fixed size
 bwinRef.addPane(targetId, {
-  position: 'right',
-  size: 300
+	position: 'right',
+	size: 300
 });
 ```
 
@@ -392,14 +402,14 @@ bwinRef.addPane(targetId, {
 ```typescript
 // Good: Descriptive IDs
 bwinRef.addPane('root', {
-  id: 'editor-main',
-  title: 'Main Editor'
+	id: 'editor-main',
+	title: 'Main Editor'
 });
 
 // Less clear
 bwinRef.addPane('root', {
-  id: 'pane1',
-  title: 'Pane 1'
+	id: 'pane1',
+	title: 'Pane 1'
 });
 ```
 
@@ -407,14 +417,14 @@ bwinRef.addPane('root', {
 
 ```typescript
 function removePane(id: string) {
-  // Check if it's the last pane
-  if (activePanes.length <= 1) {
-    alert('Cannot remove the last pane');
-    return;
-  }
+	// Check if it's the last pane
+	if (activePanes.length <= 1) {
+		alert('Cannot remove the last pane');
+		return;
+	}
 
-  bwinRef.removePane(id);
-  activePanes = activePanes.filter(p => p !== id);
+	bwinRef.removePane(id);
+	activePanes = activePanes.filter((p) => p !== id);
 }
 ```
 
@@ -423,16 +433,11 @@ function removePane(id: string) {
 ```typescript
 // For simple HTML content: use BinaryWindow
 bwinRef.addPane('root', {
-  content: createDomElement()
+	content: createDomElement()
 });
 
 // For Svelte components: use BwinHost
-bwinHostRef.addPane(
-  'pane-id',
-  {},
-  SvelteComponent,
-  { props }
-);
+bwinHostRef.addPane('pane-id', {}, SvelteComponent, { props });
 ```
 
 ## Troubleshooting

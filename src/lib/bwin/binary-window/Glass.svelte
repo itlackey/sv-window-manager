@@ -116,6 +116,7 @@
 	// Handle keyboard events for tab navigation
 	function handleTabKeyDown(event: KeyboardEvent, index: number) {
 		if (!tabs || tabs.length === 0) return;
+		if (!(event.currentTarget instanceof HTMLElement)) return;
 
 		const key = event.key;
 		const tabCount = tabs.length;
@@ -123,20 +124,20 @@
 		if (key === 'ArrowLeft') {
 			event.preventDefault();
 			const prevIndex = index === 0 ? tabCount - 1 : index - 1;
-			const prevTab = event.currentTarget?.parentElement?.children[prevIndex] as HTMLElement;
+			const prevTab = event.currentTarget.parentElement?.children[prevIndex] as HTMLElement;
 			prevTab?.focus();
 		} else if (key === 'ArrowRight') {
 			event.preventDefault();
 			const nextIndex = index === tabCount - 1 ? 0 : index + 1;
-			const nextTab = event.currentTarget?.parentElement?.children[nextIndex] as HTMLElement;
+			const nextTab = event.currentTarget.parentElement?.children[nextIndex] as HTMLElement;
 			nextTab?.focus();
 		} else if (key === 'Home') {
 			event.preventDefault();
-			const firstTab = event.currentTarget?.parentElement?.children[0] as HTMLElement;
+			const firstTab = event.currentTarget.parentElement?.children[0] as HTMLElement;
 			firstTab?.focus();
 		} else if (key === 'End') {
 			event.preventDefault();
-			const lastTab = event.currentTarget?.parentElement?.children[tabCount - 1] as HTMLElement;
+			const lastTab = event.currentTarget.parentElement?.children[tabCount - 1] as HTMLElement;
 			lastTab?.focus();
 		}
 	}

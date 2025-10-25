@@ -93,7 +93,12 @@
 	});
 
 	// Create content for drag-drop demo panes
-	function createDragDropContent(paneId: string, colorName: string, bgColor: string, lightColor: string) {
+	function createDragDropContent(
+		paneId: string,
+		colorName: string,
+		bgColor: string,
+		lightColor: string
+	) {
 		const div = document.createElement('div');
 		div.style.cssText = `
 			padding: 20px;
@@ -182,9 +187,13 @@
 			<li><strong>Built-in:</strong> Drag and drop is enabled by default on all glass headers</li>
 			<li><strong>Smart Positioning:</strong> Drop zones appear automatically when dragging</li>
 			<li><strong>Center Swap:</strong> Drop in the center of a pane to swap positions</li>
-			<li><strong>Edge Split:</strong> Drop on edges (top/right/bottom/left) to create adjacent panes</li>
+			<li>
+				<strong>Edge Split:</strong> Drop on edges (top/right/bottom/left) to create adjacent panes
+			</li>
 			<li><strong>Visual Feedback:</strong> Drop areas highlight during drag operations</li>
-			<li><strong>Disable Option:</strong> Set <code>draggable: false</code> to disable on specific panes</li>
+			<li>
+				<strong>Disable Option:</strong> Set <code>draggable: false</code> to disable on specific panes
+			</li>
 		</ul>
 	</div>
 </div>

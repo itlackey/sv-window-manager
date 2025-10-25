@@ -348,9 +348,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 
 				// Log memory usage for reporting
 				if (memoryLeak > 0) {
-					console.log(
-						`Memory increase: ${bytesToMB(memoryLeak).toFixed(2)}MB (target: < 1MB)`
-					);
+					console.log(`Memory increase: ${bytesToMB(memoryLeak).toFixed(2)}MB (target: < 1MB)`);
 				}
 
 				// Assert < 1MB leak (allow some overhead for test infrastructure)
@@ -389,9 +387,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 				const memoryLeak = finalMemory - initialMemory;
 
 				if (memoryLeak > 0) {
-					console.log(
-						`Memory increase: ${bytesToMB(memoryLeak).toFixed(2)}MB (target: < 1MB)`
-					);
+					console.log(`Memory increase: ${bytesToMB(memoryLeak).toFixed(2)}MB (target: < 1MB)`);
 				}
 			},
 			{

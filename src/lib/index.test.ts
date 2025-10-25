@@ -11,11 +11,6 @@ import { describe, it, expect } from 'vitest';
 
 describe('Barrel Exports', () => {
 	describe('Component Exports', () => {
-		it('should export BwinHost component', async () => {
-			const { BwinHost } = await import('./index.js');
-			expect(BwinHost).toBeDefined();
-		});
-
 		it('should export BinaryWindow component', async () => {
 			const { BinaryWindow } = await import('./index.js');
 			expect(BinaryWindow).toBeDefined();
@@ -145,37 +140,6 @@ describe('Barrel Exports', () => {
 			// Test error factory
 			const error = BwinErrors.frameNotInitialized();
 			expect(error.code).toBe('FRAME_NOT_INIT');
-		});
-	});
-
-	describe('Backward Compatibility', () => {
-		it('should export legacy component names', async () => {
-			const {
-				BinaryWindowSvelte,
-				FrameSvelte,
-				PaneSvelte,
-				MuntinSvelte,
-				GlassSvelte
-			} = await import('./index.js');
-
-			expect(BinaryWindowSvelte).toBeDefined();
-			expect(FrameSvelte).toBeDefined();
-			expect(PaneSvelte).toBeDefined();
-			expect(MuntinSvelte).toBeDefined();
-			expect(GlassSvelte).toBeDefined();
-		});
-
-		it('should have legacy names point to same exports as new names', async () => {
-			const {
-				BinaryWindow,
-				BinaryWindowSvelte,
-				Frame,
-				FrameSvelte
-			} = await import('./index.js');
-
-			// They should be the same component
-			expect(BinaryWindow).toBe(BinaryWindowSvelte);
-			expect(Frame).toBe(FrameSvelte);
 		});
 	});
 

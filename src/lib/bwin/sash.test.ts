@@ -658,8 +658,20 @@ describe('Sash class', () => {
 
 			it('propagates top change to left/right children', () => {
 				const root = new Sash({ position: Position.Root, top: 0, width: 800, height: 600 });
-				const left = new Sash({ position: Position.Left, parent: root, top: 0, width: 400, height: 600 });
-				const right = new Sash({ position: Position.Right, parent: root, top: 0, width: 400, height: 600 });
+				const left = new Sash({
+					position: Position.Left,
+					parent: root,
+					top: 0,
+					width: 400,
+					height: 600
+				});
+				const right = new Sash({
+					position: Position.Right,
+					parent: root,
+					top: 0,
+					width: 400,
+					height: 600
+				});
 
 				root.addChild(left);
 				root.addChild(right);
@@ -673,8 +685,20 @@ describe('Sash class', () => {
 
 			it('propagates top change to top/bottom children', () => {
 				const root = new Sash({ position: Position.Root, top: 0, width: 800, height: 600 });
-				const top = new Sash({ position: Position.Top, parent: root, top: 0, width: 800, height: 300 });
-				const bottom = new Sash({ position: Position.Bottom, parent: root, top: 300, width: 800, height: 300 });
+				const top = new Sash({
+					position: Position.Top,
+					parent: root,
+					top: 0,
+					width: 800,
+					height: 300
+				});
+				const bottom = new Sash({
+					position: Position.Bottom,
+					parent: root,
+					top: 300,
+					width: 800,
+					height: 300
+				});
 
 				root.addChild(top);
 				root.addChild(bottom);
@@ -697,8 +721,20 @@ describe('Sash class', () => {
 
 			it('propagates left change to left/right children', () => {
 				const root = new Sash({ position: Position.Root, left: 0, width: 800, height: 600 });
-				const left = new Sash({ position: Position.Left, parent: root, left: 0, width: 400, height: 600 });
-				const right = new Sash({ position: Position.Right, parent: root, left: 400, width: 400, height: 600 });
+				const left = new Sash({
+					position: Position.Left,
+					parent: root,
+					left: 0,
+					width: 400,
+					height: 600
+				});
+				const right = new Sash({
+					position: Position.Right,
+					parent: root,
+					left: 400,
+					width: 400,
+					height: 600
+				});
 
 				root.addChild(left);
 				root.addChild(right);
@@ -712,8 +748,20 @@ describe('Sash class', () => {
 
 			it('propagates left change to top/bottom children', () => {
 				const root = new Sash({ position: Position.Root, left: 0, width: 800, height: 600 });
-				const top = new Sash({ position: Position.Top, parent: root, left: 0, width: 800, height: 300 });
-				const bottom = new Sash({ position: Position.Bottom, parent: root, left: 0, width: 800, height: 300 });
+				const top = new Sash({
+					position: Position.Top,
+					parent: root,
+					left: 0,
+					width: 800,
+					height: 300
+				});
+				const bottom = new Sash({
+					position: Position.Bottom,
+					parent: root,
+					left: 0,
+					width: 800,
+					height: 300
+				});
 
 				root.addChild(top);
 				root.addChild(bottom);
@@ -737,7 +785,12 @@ describe('Sash class', () => {
 			it('propagates width change to top/bottom children', () => {
 				const root = new Sash({ position: Position.Root, width: 800, height: 600 });
 				const top = new Sash({ position: Position.Top, parent: root, width: 800, height: 300 });
-				const bottom = new Sash({ position: Position.Bottom, parent: root, width: 800, height: 300 });
+				const bottom = new Sash({
+					position: Position.Bottom,
+					parent: root,
+					width: 800,
+					height: 300
+				});
 
 				root.addChild(top);
 				root.addChild(bottom);
@@ -751,8 +804,20 @@ describe('Sash class', () => {
 
 			it('distributes width change proportionally to left/right children', () => {
 				const root = new Sash({ position: Position.Root, width: 800, height: 600, left: 0 });
-				const left = new Sash({ position: Position.Left, parent: root, width: 400, height: 600, left: 0 });
-				const right = new Sash({ position: Position.Right, parent: root, width: 400, height: 600, left: 400 });
+				const left = new Sash({
+					position: Position.Left,
+					parent: root,
+					width: 400,
+					height: 600,
+					left: 0
+				});
+				const right = new Sash({
+					position: Position.Right,
+					parent: root,
+					width: 400,
+					height: 600,
+					left: 400
+				});
 
 				root.addChild(left);
 				root.addChild(right);
@@ -792,8 +857,20 @@ describe('Sash class', () => {
 
 			it('distributes height change proportionally to top/bottom children', () => {
 				const root = new Sash({ position: Position.Root, width: 800, height: 600, top: 0 });
-				const top = new Sash({ position: Position.Top, parent: root, width: 800, height: 300, top: 0 });
-				const bottom = new Sash({ position: Position.Bottom, parent: root, width: 800, height: 300, top: 300 });
+				const top = new Sash({
+					position: Position.Top,
+					parent: root,
+					width: 800,
+					height: 300,
+					top: 0
+				});
+				const bottom = new Sash({
+					position: Position.Bottom,
+					parent: root,
+					width: 800,
+					height: 300,
+					top: 300
+				});
 
 				root.addChild(top);
 				root.addChild(bottom);
@@ -812,16 +889,48 @@ describe('Sash class', () => {
 	describe('resize strategies', () => {
 		describe('natural resize strategy - left position', () => {
 			it('adjusts only right child width when expanding left sash', () => {
-				const root = new Sash({ position: Position.Root, width: 800, height: 600, left: 0, resizeStrategy: 'natural' });
-				const left = new Sash({ position: Position.Left, parent: root, width: 400, height: 600, left: 0, position: Position.Left, resizeStrategy: 'natural' });
-				const right = new Sash({ position: Position.Right, parent: root, width: 400, height: 600, left: 400 });
+				const root = new Sash({
+					position: Position.Root,
+					width: 800,
+					height: 600,
+					left: 0,
+					resizeStrategy: 'natural'
+				});
+				const left = new Sash({
+					position: Position.Left,
+					parent: root,
+					width: 400,
+					height: 600,
+					left: 0,
+					position: Position.Left,
+					resizeStrategy: 'natural'
+				});
+				const right = new Sash({
+					position: Position.Right,
+					parent: root,
+					width: 400,
+					height: 600,
+					left: 400
+				});
 
 				root.addChild(left);
 				root.addChild(right);
 
 				// Create a nested split within left sash
-				const leftChild = new Sash({ position: Position.Left, parent: left, width: 200, height: 600, left: 0 });
-				const rightChild = new Sash({ position: Position.Right, parent: left, width: 200, height: 600, left: 200 });
+				const leftChild = new Sash({
+					position: Position.Left,
+					parent: left,
+					width: 200,
+					height: 600,
+					left: 0
+				});
+				const rightChild = new Sash({
+					position: Position.Right,
+					parent: left,
+					width: 200,
+					height: 600,
+					left: 200
+				});
 				left.addChild(leftChild);
 				left.addChild(rightChild);
 
@@ -836,16 +945,48 @@ describe('Sash class', () => {
 
 		describe('natural resize strategy - right position', () => {
 			it('adjusts only left child width when expanding right sash', () => {
-				const root = new Sash({ position: Position.Root, width: 800, height: 600, left: 0, resizeStrategy: 'natural' });
-				const left = new Sash({ position: Position.Left, parent: root, width: 400, height: 600, left: 0 });
-				const right = new Sash({ position: Position.Right, parent: root, width: 400, height: 600, left: 400, position: Position.Right, resizeStrategy: 'natural' });
+				const root = new Sash({
+					position: Position.Root,
+					width: 800,
+					height: 600,
+					left: 0,
+					resizeStrategy: 'natural'
+				});
+				const left = new Sash({
+					position: Position.Left,
+					parent: root,
+					width: 400,
+					height: 600,
+					left: 0
+				});
+				const right = new Sash({
+					position: Position.Right,
+					parent: root,
+					width: 400,
+					height: 600,
+					left: 400,
+					position: Position.Right,
+					resizeStrategy: 'natural'
+				});
 
 				root.addChild(left);
 				root.addChild(right);
 
 				// Create a nested split within right sash
-				const leftChild = new Sash({ position: Position.Left, parent: right, width: 200, height: 600, left: 400 });
-				const rightChild = new Sash({ position: Position.Right, parent: right, width: 200, height: 600, left: 600 });
+				const leftChild = new Sash({
+					position: Position.Left,
+					parent: right,
+					width: 200,
+					height: 600,
+					left: 400
+				});
+				const rightChild = new Sash({
+					position: Position.Right,
+					parent: right,
+					width: 200,
+					height: 600,
+					left: 600
+				});
 				right.addChild(leftChild);
 				right.addChild(rightChild);
 
@@ -861,15 +1002,39 @@ describe('Sash class', () => {
 		describe('classic resize strategy (default)', () => {
 			it('distributes width change proportionally to both children', () => {
 				const root = new Sash({ position: Position.Root, width: 800, height: 600, left: 0 });
-				const left = new Sash({ position: Position.Left, parent: root, width: 400, height: 600, left: 0 });
-				const right = new Sash({ position: Position.Right, parent: root, width: 400, height: 600, left: 400 });
+				const left = new Sash({
+					position: Position.Left,
+					parent: root,
+					width: 400,
+					height: 600,
+					left: 0
+				});
+				const right = new Sash({
+					position: Position.Right,
+					parent: root,
+					width: 400,
+					height: 600,
+					left: 400
+				});
 
 				root.addChild(left);
 				root.addChild(right);
 
 				// Create a nested split with classic strategy
-				const leftChild = new Sash({ position: Position.Left, parent: left, width: 200, height: 600, left: 0 });
-				const rightChild = new Sash({ position: Position.Right, parent: left, width: 200, height: 600, left: 200 });
+				const leftChild = new Sash({
+					position: Position.Left,
+					parent: left,
+					width: 200,
+					height: 600,
+					left: 0
+				});
+				const rightChild = new Sash({
+					position: Position.Right,
+					parent: left,
+					width: 200,
+					height: 600,
+					left: 200
+				});
 				left.addChild(leftChild);
 				left.addChild(rightChild);
 
@@ -886,8 +1051,22 @@ describe('Sash class', () => {
 	describe('minimum width constraints during resize', () => {
 		it('respects minimum width when shrinking left child', () => {
 			const root = new Sash({ position: Position.Root, width: 800, height: 600, left: 0 });
-			const left = new Sash({ position: Position.Left, parent: root, width: 400, height: 600, left: 0, minWidth: 300 });
-			const right = new Sash({ position: Position.Right, parent: root, width: 400, height: 600, left: 400, minWidth: 100 });
+			const left = new Sash({
+				position: Position.Left,
+				parent: root,
+				width: 400,
+				height: 600,
+				left: 0,
+				minWidth: 300
+			});
+			const right = new Sash({
+				position: Position.Right,
+				parent: root,
+				width: 400,
+				height: 600,
+				left: 400,
+				minWidth: 100
+			});
 
 			root.addChild(left);
 			root.addChild(right);
@@ -904,8 +1083,22 @@ describe('Sash class', () => {
 
 		it('respects minimum width when shrinking right child', () => {
 			const root = new Sash({ position: Position.Root, width: 800, height: 600, left: 0 });
-			const left = new Sash({ position: Position.Left, parent: root, width: 400, height: 600, left: 0, minWidth: 100 });
-			const right = new Sash({ position: Position.Right, parent: root, width: 400, height: 600, left: 400, minWidth: 300 });
+			const left = new Sash({
+				position: Position.Left,
+				parent: root,
+				width: 400,
+				height: 600,
+				left: 0,
+				minWidth: 100
+			});
+			const right = new Sash({
+				position: Position.Right,
+				parent: root,
+				width: 400,
+				height: 600,
+				left: 400,
+				minWidth: 300
+			});
 
 			root.addChild(left);
 			root.addChild(right);
@@ -922,8 +1115,22 @@ describe('Sash class', () => {
 	describe('minimum height constraints during resize', () => {
 		it('respects minimum height when shrinking top child', () => {
 			const root = new Sash({ position: Position.Root, width: 800, height: 600, top: 0 });
-			const top = new Sash({ position: Position.Top, parent: root, width: 800, height: 300, top: 0, minHeight: 200 });
-			const bottom = new Sash({ position: Position.Bottom, parent: root, width: 800, height: 300, top: 300, minHeight: 100 });
+			const top = new Sash({
+				position: Position.Top,
+				parent: root,
+				width: 800,
+				height: 300,
+				top: 0,
+				minHeight: 200
+			});
+			const bottom = new Sash({
+				position: Position.Bottom,
+				parent: root,
+				width: 800,
+				height: 300,
+				top: 300,
+				minHeight: 100
+			});
 
 			root.addChild(top);
 			root.addChild(bottom);
@@ -938,8 +1145,22 @@ describe('Sash class', () => {
 
 		it('respects minimum height when shrinking bottom child', () => {
 			const root = new Sash({ position: Position.Root, width: 800, height: 600, top: 0 });
-			const top = new Sash({ position: Position.Top, parent: root, width: 800, height: 300, top: 0, minHeight: 100 });
-			const bottom = new Sash({ position: Position.Bottom, parent: root, width: 800, height: 300, top: 300, minHeight: 200 });
+			const top = new Sash({
+				position: Position.Top,
+				parent: root,
+				width: 800,
+				height: 300,
+				top: 0,
+				minHeight: 100
+			});
+			const bottom = new Sash({
+				position: Position.Bottom,
+				parent: root,
+				width: 800,
+				height: 300,
+				top: 300,
+				minHeight: 200
+			});
 
 			root.addChild(top);
 			root.addChild(bottom);

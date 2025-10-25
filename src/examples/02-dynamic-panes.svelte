@@ -42,7 +42,10 @@
 		bwinRef.addPane('root', {
 			id: paneId,
 			title: 'Pane 1',
-			content: createPaneContent(paneId, 'This is your first pane. Use the controls above to add more!')
+			content: createPaneContent(
+				paneId,
+				'This is your first pane. Use the controls above to add more!'
+			)
 		});
 	}
 

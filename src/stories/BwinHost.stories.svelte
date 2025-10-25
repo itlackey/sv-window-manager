@@ -1,11 +1,11 @@
 <script lang="ts" context="module">
   import { defineMeta } from '@storybook/addon-svelte-csf';
-  import BwinHost from '$lib/components/BwinHost.svelte';
+  import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
   import BwinHostDemo from './BwinHostDemo.svelte';
 
   const { Story } = defineMeta({
-    title: 'Bwin/BwinHost',
-    component: BwinHost,
+    title: 'Bwin/BinaryWindow',
+    component: BinaryWindow,
     parameters: {
       layout: 'fullscreen'
     }
@@ -20,13 +20,13 @@
 </script>
 
 <Story name="Default" args={defaultArgs}>
-  {#snippet template(args)}
-    <BwinHost {...args} />
+  {#snippet template(args: any)}
+    <BinaryWindow {...args} />
   {/snippet}
 </Story>
 
 <Story name="With Demo Pane" args={defaultArgs}>
-  {#snippet template(args)}
+  {#snippet template(args: any)}
     <BwinHostDemo {...args} />
   {/snippet}
 </Story>

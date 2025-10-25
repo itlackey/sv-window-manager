@@ -160,10 +160,7 @@
 			<div class="section-label">Quick Presets:</div>
 			<div class="preset-buttons">
 				{#each presets as preset}
-					<button
-						class="btn btn-preset"
-						onclick={() => applyPreset(preset)}
-					>
+					<button class="btn btn-preset" onclick={() => applyPreset(preset)}>
 						{preset.name}
 					</button>
 				{/each}

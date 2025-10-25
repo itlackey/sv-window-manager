@@ -116,10 +116,7 @@
 	 * });
 	 * ```
 	 */
-	export function addPane(
-		targetId: string,
-		options: Record<string, unknown>
-	): Sash | null {
+	export function addPane(targetId: string, options: Record<string, unknown>): Sash | null {
 		const { position, size, id } = options;
 		if (!position || !rootSash) return null;
 
