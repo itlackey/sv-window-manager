@@ -1,16 +1,19 @@
 <script lang="ts">
 	import type { Sash } from '../sash.js';
+	import type { MuntinEvents } from '../types.js';
 	import { MUNTIN_SIZE, DATA_ATTRIBUTES } from '../constants.js';
-	import { onMount } from 'svelte';
+	import { onMount, createEventDispatcher } from 'svelte';
 
 	interface MuntinProps {
 		sash: Sash;
 		muntinSize?: number;
+		/** @deprecated Use on:muntinrender event instead. Will be removed in v2.0 */
 		onMuntinRender?: (muntinEl: HTMLElement, sash: Sash) => void;
 	}
 
 	let { sash, muntinSize = MUNTIN_SIZE, onMuntinRender }: MuntinProps = $props();
 
+	const dispatch = createEventDispatcher<MuntinEvents>();
 	const isVertical = $derived(!!sash.leftChild);
 	const isHorizontal = $derived(!!sash.topChild);
 	const isResizable = $derived(sash.store.resizable !== false);
@@ -20,8 +23,17 @@
 	// REFACTORED: Use onMount lifecycle hook instead of $effect
 	// This runs ONCE when the muntin mounts, preventing infinite loops
 	onMount(() => {
-		if (muntinElement && onMuntinRender) {
-			onMuntinRender(muntinElement, sash);
+		if (muntinElement) {
+			// Dispatch new event API
+			dispatch('muntinrender', { muntinElement, sash });
+
+			// Support deprecated callback for backward compatibility
+			if (onMuntinRender) {
+				console.warn(
+					'[Muntin] onMuntinRender callback prop is deprecated and will be removed in v2.0. Use on:muntinrender event instead.'
+				);
+				onMuntinRender(muntinElement, sash);
+			}
 		}
 	});
 

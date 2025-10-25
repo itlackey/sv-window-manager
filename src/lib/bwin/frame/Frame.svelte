@@ -21,14 +21,16 @@
 	 *
 	 * @property {SashConfig | ConfigRoot | Record<string, unknown>} settings - Initial layout configuration
 	 * @property {boolean} [debug=false] - Enable debug logging to console
-	 * @property {Function} [onPaneRender] - Callback when a pane is rendered, receives (paneEl, sash)
-	 * @property {Function} [onMuntinRender] - Callback when a muntin is rendered, receives (muntinEl, sash)
+	 * @property {Function} [onPaneRender] - @deprecated Use on:panerender event. Callback when a pane is rendered, receives (paneEl, sash)
+	 * @property {Function} [onMuntinRender] - @deprecated Use on:muntinrender event. Callback when a muntin is rendered, receives (muntinEl, sash)
 	 * @property {Function} [onPaneDrop] - Callback when a drop occurs on a pane, receives (event, sash, dropArea)
 	 */
 	interface FrameProps {
 		settings: SashConfig | ConfigRoot | Record<string, unknown>;
 		debug?: boolean;
+		/** @deprecated Use on:panerender event instead. Will be removed in v2.0 */
 		onPaneRender?: (paneEl: HTMLElement, sash: Sash) => void;
+		/** @deprecated Use on:muntinrender event instead. Will be removed in v2.0 */
 		onMuntinRender?: (muntinEl: HTMLElement, sash: Sash) => void;
 		onPaneDrop?: (event: DragEvent, sash: Sash, dropArea: string) => void;
 	}
@@ -287,11 +289,19 @@
 			use:drop={{ rootSash, onDrop: onPaneDrop }}
 		>
 			{#each panes as sash (sash.id)}
-				<Pane {sash} {onPaneRender} />
+				<Pane
+					{sash}
+					{onPaneRender}
+					on:panerender
+				/>
 			{/each}
 
 			{#each muntins as sash (sash.id)}
-				<Muntin {sash} {onMuntinRender} />
+				<Muntin
+					{sash}
+					{onMuntinRender}
+					on:muntinrender
+				/>
 			{/each}
 		</div>
 	{/key}
