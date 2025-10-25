@@ -1,9 +1,10 @@
 import { mount as svelteMount, unmount } from 'svelte';
+import { SvelteMap } from 'svelte/reactivity';
 import type { Component } from 'svelte';
 import Glass from '../binary-window/Glass.svelte';
 import type { Sash } from '../sash.js';
 import type { BwinContext } from '../context.js';
-import type { GlassInstance, UserComponentInstance, CreateGlassProps } from './types.js';
+import type { GlassInstance, UserComponentInstance, CreateGlassProps} from './types.js';
 import { CSS_CLASSES } from '../constants.js';
 
 /**
@@ -34,9 +35,9 @@ export class GlassManager {
 	glasses = $state.raw<GlassInstance[]>([]);
 
 	/** User components mapped by sash ID (reactive map)
-	 * Using $state.raw to prevent proxy wrapping of component instances
+	 * Using SvelteMap for automatic reactivity without proxy wrapping issues
 	 */
-	userComponents = $state.raw(new Map<string, UserComponentInstance>());
+	userComponents = new SvelteMap<string, UserComponentInstance>();
 
 	/** Currently active glass instance */
 	activeGlass = $state<GlassInstance | undefined>();
