@@ -9,16 +9,6 @@ import { BwinErrors } from './errors.js';
  * - Root position for the top-level sash
  * - Special positions (Unknown, Outside) for edge cases in cursor detection
  *
- * @constant {Object}
- * @property {string} Top - Position above the target pane
- * @property {string} Right - Position to the right of the target pane
- * @property {string} Bottom - Position below the target pane
- * @property {string} Left - Position to the left of the target pane
- * @property {string} Center - Center position (used for swapping panes)
- * @property {string} Root - Root position (only for the top-level sash)
- * @property {string} Unknown - Unknown position (cursor on boundary/diagonal)
- * @property {string} Outside - Outside the element bounds
- *
  * @example
  * ```javascript
  * // Add a pane to the right
@@ -36,24 +26,25 @@ import { BwinErrors } from './errors.js';
  * }
  * ```
  */
-export const Position = {
-	Top: 'top',
-	Right: 'right',
-	Bottom: 'bottom',
-	Left: 'left',
-	Center: 'center',
-	Root: 'root',
-	Unknown: 'unknown',
-	Outside: 'outside'
-};
+export enum Position {
+	Top = 'top',
+	Right = 'right',
+	Bottom = 'bottom',
+	Left = 'left',
+	Center = 'center',
+	Root = 'root',
+	Unknown = 'unknown',
+	Outside = 'outside'
+}
 
 /**
  * Get the opposite position of a given position
  *
- * @param {string} position - The position to get the opposite of
- * @returns {string} The opposite position
+ * @param position - The position to get the opposite of
+ * @returns The opposite position
+ * @throws {BwinError} INVALID_POSITION - If position is not a directional position
  */
-export function getOppositePosition(position) {
+export function getOppositePosition(position: Position): Position {
 	switch (position) {
 		case Position.Top:
 			return Position.Bottom;
@@ -69,35 +60,55 @@ export function getOppositePosition(position) {
 }
 
 /**
- * @param {{ width: number; height: number; x: number }} params
- * @returns {number}
+ * Coordinates for diagonal calculations
  */
-function getMainDiagonalY({ width, height, x }) {
+interface DiagonalParams {
+	width: number;
+	height: number;
+}
+
+interface MainDiagonalYParams extends DiagonalParams {
+	x: number;
+}
+
+interface MainDiagonalXParams extends DiagonalParams {
+	y: number;
+}
+
+/**
+ * Calculate the Y coordinate on the main diagonal line at a given X
+ */
+function getMainDiagonalY({ width, height, x }: MainDiagonalYParams): number {
 	return (height / width) * x;
 }
 
 /**
- * @param {{ width: number; height: number; y: number }} params
- * @returns {number}
+ * Calculate the X coordinate on the main diagonal line at a given Y
  */
-function getMainDiagonalX({ width, height, y }) {
+function getMainDiagonalX({ width, height, y }: MainDiagonalXParams): number {
 	return (width / height) * y;
 }
 
 /**
- * @param {{ width: number; height: number; x: number }} params
- * @returns {number}
+ * Calculate the Y coordinate on the minor diagonal line at a given X
  */
-function getMinorDiagonalY({ width, height, x }) {
+function getMinorDiagonalY({ width, height, x }: MainDiagonalYParams): number {
 	return height - (height / width) * x;
 }
 
 /**
- * @param {{ width: number; height: number; y: number }} params
- * @returns {number}
+ * Calculate the X coordinate on the minor diagonal line at a given Y
  */
-function getMinorDiagonalX({ width, height, y }) {
+function getMinorDiagonalX({ width, height, y }: MainDiagonalXParams): number {
 	return width - (width / height) * y;
+}
+
+/**
+ * Mouse coordinates
+ */
+export interface CursorCoordinates {
+	clientX: number;
+	clientY: number;
 }
 
 /**
@@ -114,9 +125,9 @@ function getMinorDiagonalX({ width, height, y }) {
  * - Returns Position.Unknown for boundary/diagonal areas
  * - Returns Position.Outside if cursor is outside element bounds
  *
- * @param {HTMLElement} element - The element to check position relative to
- * @param {{ clientX: number; clientY: number }} coords - The mouse coordinates
- * @returns {string} One of Position constants (Top, Right, Bottom, Left, Center, Unknown, Outside)
+ * @param element - The element to check position relative to
+ * @param coords - The mouse coordinates
+ * @returns One of Position enum values (Top, Right, Bottom, Left, Center, Unknown, Outside)
  *
  * @example
  * ```javascript
@@ -138,7 +149,10 @@ function getMinorDiagonalX({ width, height, y }) {
  * });
  * ```
  */
-export function getCursorPosition(element, { clientX, clientY }) {
+export function getCursorPosition(
+	element: HTMLElement,
+	{ clientX, clientY }: CursorCoordinates
+): Position {
 	const rect = element.getBoundingClientRect();
 	const { width, height } = rect;
 
@@ -196,10 +210,10 @@ export function getCursorPosition(element, { clientX, clientY }) {
 /**
  * Check if the position is one of the main positions (top, right, bottom, left, or center)
  *
- * @param {string} position - The position to check
- * @returns {boolean} True if the position is one of the main positions
+ * @param position - The position to check
+ * @returns True if the position is one of the main positions
  */
-export function isTopRightBottomLeftOrCenter(position) {
+export function isTopRightBottomLeftOrCenter(position: Position): boolean {
 	return (
 		position === Position.Top ||
 		position === Position.Right ||

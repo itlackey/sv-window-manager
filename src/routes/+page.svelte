@@ -37,6 +37,7 @@
 	}
 
 	async function addSession(sessionType: string) {
+		console.log('[addSession] Called with sessionType:', sessionType);
 		if (!bwinRef) {
 			console.warn('[addSession] BinaryWindow not initialized');
 			return;
@@ -46,8 +47,10 @@
 			// Generate unique session ID
 			sessionCounter++;
 			const sessionId = `${sessionType}${sessionCounter}`;
+			console.log('[addSession] Session ID:', sessionId);
 
 			const info = await fetchSessionInfo(sessionType);
+			console.log('[addSession] Session info:', info);
 
 			// Component mapping - type-safe and extensible
 			const componentMap: Record<string, Component<any>> = {
@@ -58,9 +61,11 @@
 			};
 
 			const component = componentMap[info.type] || ChatSession;
+			console.log('[addSession] Component:', component);
 
 			// Get the root sash to start traversal
 			const rootSash = bwinRef.getRootSash();
+			console.log('[addSession] Root sash:', rootSash);
 			if (!rootSash) {
 				console.warn('[addSession] Root sash not found');
 				return;
@@ -69,6 +74,7 @@
 			// Find a LEAF pane (a sash with no children) using getAllLeafDescendants
 			// This is more reliable than manual traversal and guaranteed to find a leaf
 			const leafNodes = rootSash.getAllLeafDescendants();
+			console.log('[addSession] Leaf nodes:', leafNodes);
 			if (leafNodes.length === 0) {
 				console.error('[addSession] No leaf nodes found in tree');
 				return;
@@ -76,8 +82,15 @@
 
 			// Use the last leaf node (typically the rightmost/bottommost pane)
 			const targetSash = leafNodes[leafNodes.length - 1];
+			console.log('[addSession] Target sash:', targetSash);
 
 			// Add the pane with the component
+			console.log('[addSession] Calling addPane with:', {
+				id: sessionId,
+				position: 'right',
+				component,
+				title: `${info.type.charAt(0).toUpperCase() + info.type.slice(1)} - ${sessionId}`
+			});
 			bwinRef.addPane(targetSash.id, {
 				id: sessionId,
 				position: 'right',
@@ -88,6 +101,7 @@
 				},
 				title: `${info.type.charAt(0).toUpperCase() + info.type.slice(1)} - ${sessionId}`
 			});
+			console.log('[addSession] addPane completed');
 		} catch (error) {
 			console.error('[addSession] Failed to add session:', error);
 			// In production, you might want to show a user-visible error message
@@ -95,9 +109,11 @@
 	}
 
 	async function startDemo() {
+		console.log('[startDemo] Starting demo...');
 		demoStarted = true;
 		// Wait a tick to ensure BinaryWindow is mounted and bound
 		await new Promise((resolve) => setTimeout(resolve, 50));
+		console.log('[startDemo] BinaryWindow should be ready, adding sessions...');
 		// Add initial sessions to demonstrate the window manager
 		await addSession('chat');
 		setTimeout(() => addSession('terminal'), 200);
@@ -195,6 +211,7 @@
 					<BinaryWindow
 						bind:this={bwinRef}
 						settings={{ width: 900, height: 500, fitContainer: true }}
+						debug={true}
 					/>
 				</div>
 

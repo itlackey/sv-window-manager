@@ -22,24 +22,32 @@
 	 *
 	 * @property {SashConfig | ConfigRoot | Record<string, unknown>} settings - Initial layout configuration
 	 * @property {boolean} [debug=false] - Enable debug logging to console
-	 * @property {Function} [onPaneRender] - @deprecated Use on:panerender event. Callback when a pane is rendered, receives (paneEl, sash)
-	 * @property {Function} [onMuntinRender] - @deprecated Use on:muntinrender event. Callback when a muntin is rendered, receives (muntinEl, sash)
+	 * @property {Function} [onPaneRender] - @deprecated Use onpanerender event. Callback when a pane is rendered, receives (paneEl, sash)
+	 * @property {Function} [onMuntinRender] - @deprecated Use onmuntinrender event. Callback when a muntin is rendered, receives (muntinEl, sash)
+	 * @property {Function} [onpanerender] - Callback when a pane is rendered (Svelte 5 event)
+	 * @property {Function} [onmuntinrender] - Callback when a muntin is rendered (Svelte 5 event)
 	 * @property {Function} [onPaneDrop] - Callback when a drop occurs on a pane, receives (event, sash, dropArea)
 	 * @property {Snippet} [paneContent] - Optional snippet to render custom content inside each pane (receives sash as parameter)
 	 */
 	interface FrameProps {
 		settings: SashConfig | ConfigRoot | Record<string, unknown>;
 		debug?: boolean;
-		/** @deprecated Use on:panerender event instead. Will be removed in v2.0 */
+		/** @deprecated Use onpanerender event instead. Will be removed in v2.0 */
 		onPaneRender?: (paneEl: HTMLElement, sash: Sash) => void;
-		/** @deprecated Use on:muntinrender event instead. Will be removed in v2.0 */
+		/** @deprecated Use onmuntinrender event instead. Will be removed in v2.0 */
 		onMuntinRender?: (muntinEl: HTMLElement, sash: Sash) => void;
+		/** Svelte 5 event handler for pane render */
+		onpanerender?: (event: CustomEvent) => void;
+		/** Svelte 5 event handler for muntin render */
+		onmuntinrender?: (event: CustomEvent) => void;
 		onPaneDrop?: (event: DragEvent, sash: Sash, dropArea: string) => void;
 		/** Optional snippet to render custom content inside each pane */
 		paneContent?: Snippet<[Sash]>;
+		/** Tree version counter to trigger reactivity when tree structure changes */
+		treeVersion?: number;
 	}
 
-	let { settings, debug = false, onPaneRender, onMuntinRender, onPaneDrop, paneContent }: FrameProps = $props();
+	let { settings, debug = false, onPaneRender, onMuntinRender, onpanerender, onmuntinrender, onPaneDrop, paneContent, treeVersion = 0 }: FrameProps = $props();
 
 	// Initialize sash tree from settings
 	let rootSash = $derived.by(() => {
@@ -51,7 +59,10 @@
 	});
 
 	// Collect panes and muntins from tree
+	// Include treeVersion in the derivation to trigger reactivity when tree structure changes
 	const panes = $derived.by(() => {
+		// Access treeVersion to make this reactive to tree changes
+		const _ = treeVersion;
 		if (!rootSash) return [];
 		const result: Sash[] = [];
 		rootSash.walk((sash) => {
@@ -61,6 +72,8 @@
 	});
 
 	const muntins = $derived.by(() => {
+		// Access treeVersion to make this reactive to tree changes
+		const _ = treeVersion;
 		if (!rootSash) return [];
 		const result: Sash[] = [];
 		rootSash.walk((sash) => {
@@ -264,7 +277,7 @@
 			<Pane
 				{sash}
 				{onPaneRender}
-				on:panerender
+				{onpanerender}
 			>
 				{#if paneContent}
 					{@render paneContent(sash)}
@@ -276,7 +289,7 @@
 			<Muntin
 				{sash}
 				{onMuntinRender}
-				on:muntinrender
+				{onmuntinrender}
 			/>
 		{/each}
 	</div>

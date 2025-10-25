@@ -26,7 +26,8 @@ export { default as Glass } from './bwin/binary-window/Glass.svelte';
  * Example components demonstrating library features.
  * Use these as references for your own implementations.
  */
-export { default as SnippetExample } from './bwin/examples/SnippetExample.svelte';
+// TODO: Add SnippetExample once created
+// export { default as SnippetExample } from './bwin/examples/SnippetExample.svelte';
 
 // ============================================================================
 // SVELTE ACTIONS

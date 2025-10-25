@@ -3,10 +3,10 @@ import { BwinErrors } from './errors.js';
 /**
  * Generate a random color string in the format of "rgba(r, g, b, a)"
  *
- * @param {number} maxOpacity - The maximum opacity value (0 to 1)
- * @returns {string}
+ * @param maxOpacity - The maximum opacity value (0 to 1)
+ * @returns The generated RGBA color string
  */
-export function genColor(maxOpacity = 0.5) {
+export function genColor(maxOpacity: number = 0.5): string {
 	const r = Math.floor(Math.random() * 256);
 	const g = Math.floor(Math.random() * 256);
 	const b = Math.floor(Math.random() * 256);
@@ -18,10 +18,11 @@ export function genColor(maxOpacity = 0.5) {
 /**
  * Generate a bright random color string in the format of "rgba(r, g, b, a)"
  *
- * @param {number} maxOpacity - The maximum opacity value (0.5 to 1)
- * @returns {string}
+ * @param maxOpacity - The maximum opacity value (0.5 to 1)
+ * @param minBrightness - The minimum brightness value (0 to 255)
+ * @returns The generated bright RGBA color string
  */
-export function genBrightColor(maxOpacity = 0.7, minBrightness = 128) {
+export function genBrightColor(maxOpacity: number = 0.7, minBrightness: number = 128): string {
 	const brightnessRange = 256 - minBrightness;
 
 	const r = Math.floor(Math.random() * brightnessRange + minBrightness);
@@ -35,10 +36,11 @@ export function genBrightColor(maxOpacity = 0.7, minBrightness = 128) {
 /**
  * Generate a random string of digits
  *
- * @param {number} length - The length of the string
- * @returns {string}
+ * @param length - The length of the string
+ * @returns The generated digit string
+ * @throws {BwinError} PARAMS_NOT_POSITIVE_INTEGER - If length is not a positive integer
  */
-export function genDigits(length = 5) {
+export function genDigits(length: number = 5): string {
 	if (length <= 0 || !Number.isInteger(length)) {
 		throw BwinErrors.parameterMustBePositiveInteger();
 	}
@@ -55,9 +57,9 @@ export function genDigits(length = 5) {
  * separated by a hyphen. Used throughout the library for sash IDs when
  * custom IDs are not provided.
  *
- * @param {number} alphabetLength - The length of the alphabet part (default: 2)
- * @param {number} digitLength - The length of the digit part (default: 3)
- * @returns {string} The generated ID (e.g., "XY-789", "AB-123")
+ * @param alphabetLength - The length of the alphabet part (default: 2)
+ * @param digitLength - The length of the digit part (default: 3)
+ * @returns The generated ID (e.g., "XY-789", "AB-123")
  *
  * @throws {BwinError} PARAMS_NOT_NON_NEGATIVE - If either length parameter is negative
  *
@@ -72,7 +74,7 @@ export function genDigits(length = 5) {
  * console.log(newSash.id); // → "MK-472" (auto-generated)
  * ```
  */
-export function genId(alphabetLength = 2, digitLength = 3) {
+export function genId(alphabetLength: number = 2, digitLength: number = 3): string {
 	if (alphabetLength < 0 || digitLength < 0) {
 		throw BwinErrors.parametersMustBeNonNegative();
 	}
@@ -99,10 +101,10 @@ export function genId(alphabetLength = 2, digitLength = 3) {
 /**
  * Move all child nodes from one DOM element to another
  *
- * @param {HTMLElement} toNode - The destination node
- * @param {HTMLElement} fromNode - The source node
+ * @param toNode - The destination node
+ * @param fromNode - The source node
  */
-export function moveChildNodes(toNode, fromNode) {
+export function moveChildNodes(toNode: HTMLElement, fromNode: HTMLElement): void {
 	while (fromNode.firstChild) {
 		toNode.appendChild(fromNode.firstChild);
 	}
@@ -111,10 +113,10 @@ export function moveChildNodes(toNode, fromNode) {
 /**
  * Swap two DOM nodes' child nodes
  *
- * @param {HTMLElement} parentNode1 - The parent node
- * @param {HTMLElement} parentNode2 - Another parent node
+ * @param parentNode1 - The parent node
+ * @param parentNode2 - Another parent node
  */
-export function swapChildNodes(parentNode1, parentNode2) {
+export function swapChildNodes(parentNode1: HTMLElement, parentNode2: HTMLElement): void {
 	const tempNode = document.createElement('div');
 
 	moveChildNodes(tempNode, parentNode1);
@@ -133,8 +135,8 @@ export function swapChildNodes(parentNode1, parentNode2) {
  *
  * Returns NaN for invalid inputs.
  *
- * @param {string | number} size - The size value to parse
- * @returns {number} The parsed size (px values and bare numbers as-is, percentages as 0-1 ratio)
+ * @param size - The size value to parse
+ * @returns The parsed size (px values and bare numbers as-is, percentages as 0-1 ratio)
  *
  * @example
  * ```javascript
@@ -150,7 +152,7 @@ export function swapChildNodes(parentNode1, parentNode2) {
  * const paneWidth = size < 1 ? targetWidth * size : size; // 320px
  * ```
  */
-export function parseSize(size) {
+export function parseSize(size: string | number): number {
 	if (typeof size === 'number' && !isNaN(size)) {
 		return size;
 	}
@@ -181,10 +183,10 @@ export function parseSize(size) {
 /**
  * Check if a value is a plain object, not array, null, etc
  *
- * @param {*} value - The value to check
- * @returns {boolean}
+ * @param value - The value to check
+ * @returns True if the value is a plain object
  */
-export function isPlainObject(value) {
+export function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return (
 		value !== null &&
 		typeof value === 'object' &&
@@ -196,33 +198,39 @@ export function isPlainObject(value) {
 /**
  * Assign properties from source object if they don't already exist in target object
  *
- * @param {Record<string, any>} target - The target object
- * @param {Record<string, any>} source - The source object
- * @returns {Record<string, any>}
+ * @param target - The target object
+ * @param source - The source object
+ * @returns The target object with assigned properties
+ * @throws {BwinError} KEY_ALREADY_EXISTS - If a key from source already exists in target
  */
-export function strictAssign(target, source) {
+export function strictAssign<T extends Record<string, unknown>, S extends Record<string, unknown>>(
+	target: T,
+	source: S
+): T & S {
 	for (const key in source) {
 		if (Object.hasOwn(target, key)) {
 			throw BwinErrors.keyAlreadyExists(key);
 		}
-		target[key] = source[key];
+		(target as Record<string, unknown>)[key] = source[key];
 	}
-	return target;
+	return target as T & S;
 }
 
 /**
  * Throttle a function to run at most once every `limit` milliseconds
  *
- * @param {Function} func - The function to throttle
- * @param {number} limit - The time limit in milliseconds
- * @returns {Function}
+ * @param func - The function to throttle
+ * @param limit - The time limit in milliseconds
+ * @returns The throttled function
  */
-export function throttle(func, limit) {
+export function throttle<T extends (...args: any[]) => any>(
+	func: T,
+	limit: number
+): (...args: Parameters<T>) => void {
 	let inThrottle = false;
 
-	return function (/** @type {any[]} */ ...args) {
+	return function (this: unknown, ...args: Parameters<T>): void {
 		if (!inThrottle) {
-			// @ts-ignore - this context is intentional
 			func.apply(this, args);
 			inThrottle = true;
 
@@ -236,10 +244,10 @@ export function throttle(func, limit) {
 /**
  * Create a DocumentFragment from an HTML string
  *
- * @param {string} htmlString - The HTML string
- * @returns {DocumentFragment}
+ * @param htmlString - The HTML string
+ * @returns The created DocumentFragment
  */
-export function createFragment(htmlString) {
+export function createFragment(htmlString: string): DocumentFragment {
 	const templateEl = document.createElement('template');
 	templateEl.innerHTML = htmlString.trim();
 	return templateEl.content;
@@ -248,10 +256,10 @@ export function createFragment(htmlString) {
 /**
  * Create a DOM node from a string or a node
  *
- * @param {*} content - The content to create a node from
- * @returns {Node | null} - A DOM node or null if the content is empty
+ * @param content - The content to create a node from
+ * @returns A DOM node or null if the content is empty
  */
-export function createDomNode(content) {
+export function createDomNode(content: unknown): Node | null {
 	if (content === null || content === undefined || content === '') {
 		return null;
 	}
@@ -278,6 +286,16 @@ export function createDomNode(content) {
 }
 
 /**
+ * Metrics object representing position and size of an element
+ */
+export interface ElementMetrics {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+}
+
+/**
  * Get the metrics (position and size) from an element's inline styles.
  *
  * Extracts the left, top, width, and height values from an element's inline
@@ -287,8 +305,8 @@ export function createDomNode(content) {
  * Note: This reads from inline styles, NOT computed styles. Elements must
  * have their metrics set via element.style.* properties.
  *
- * @param {HTMLElement} element - The element to get metrics from
- * @returns {{ left: number; top: number; width: number; height: number }} Metrics object in pixels
+ * @param element - The element to get metrics from
+ * @returns Metrics object in pixels
  *
  * @example
  * ```javascript
@@ -306,7 +324,7 @@ export function createDomNode(content) {
  * rootSash.width = containerMetrics.width;
  * ```
  */
-export function getMetricsFromElement(element) {
+export function getMetricsFromElement(element: HTMLElement): ElementMetrics {
 	// Try inline styles first (for positioned elements)
 	const left = parseFloat(element.style.left) || 0;
 	const top = parseFloat(element.style.top) || 0;

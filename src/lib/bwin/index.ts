@@ -1,11 +1,12 @@
+// CSS imports (side effects - must be imported for styling to work)
 import './css/vars.css';
 import './css/body.css';
 import './css/frame.css';
 import './css/glass.css';
 import './css/sill.css';
 
-// Core utilities and types (used by both legacy and new code)
-export { Sash } from './sash';
+// Core utilities and types
+export { Sash } from './sash.js';
 export { SashConfig } from './config/sash-config.js';
 export { ConfigRoot } from './config/config-root.js';
 export { Position } from './position.js';
@@ -13,13 +14,13 @@ export { Position } from './position.js';
 // Error handling utilities
 export { BwinError, BwinErrors } from './errors.js';
 
-// Type definitions and constants (Workstream 1.2)
+// Type definitions and constants
 export * from './types.js';
 export * from './constants.js';
 export { BWIN_CONTEXT, FRAME_CONTEXT } from './context.js';
 // Note: BwinContext and FrameContext types are exported from types.js
 
-// Individual action modules (modern approach)
+// Individual action modules
 export { default as closeAction } from './binary-window/actions.close.js';
 export { default as minimizeAction } from './binary-window/actions.minimize.js';
 export { default as maximizeAction } from './binary-window/actions.maximize.js';
@@ -32,6 +33,6 @@ export { default as MuntinSvelte } from './frame/Muntin.svelte';
 export { default as GlassSvelte } from './binary-window/Glass.svelte';
 
 // Svelte action exports
-export { resize } from './actions/resize.svelte';
-export { drag } from './actions/drag.svelte';
-export { drop } from './actions/drop.svelte';
+export { resize } from './actions/resize.svelte.js';
+export { drag } from './actions/drag.svelte.js';
+export { drop } from './actions/drop.svelte.js';

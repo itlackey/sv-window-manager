@@ -1,5 +1,5 @@
 import { parseSize, isPlainObject } from '../utils.js';
-import { Sash } from '../sash';
+import { Sash, type SashConstructorParams } from '../sash';
 import { Position, getOppositePosition } from '../position.js';
 import { BwinErrors } from '../errors.js';
 
@@ -8,43 +8,50 @@ const PRIMARY_NODE_DEFAULTS = {
 	position: Position.Left
 };
 
-/**
- * @typedef {Object} ParentRect
- * @property {number} left - Left position
- * @property {number} top - Top position
- * @property {number} width - Width
- * @property {number} height - Height
- */
+export interface ParentRect {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+}
 
-/**
- * @typedef {Object} ConfigNodeParams
- * @property {ParentRect} parentRect - Parent rectangle dimensions
- * @property {any} [children] - Child configuration
- * @property {ConfigNode} [siblingConfigNode] - Sibling config node
- * @property {string} [id] - Unique identifier
- * @property {number} [minWidth] - Minimum width
- * @property {number} [minHeight] - Minimum height
- * @property {string} [position] - Position relative to parent
- * @property {string | number} [size] - Size (percentage or absolute)
- * @property {string} [resizeStrategy] - Resize strategy
- */
+export interface ConfigNodeParams {
+	parentRect: ParentRect;
+	children?: unknown;
+	siblingConfigNode?: ConfigNode;
+	id?: string;
+	minWidth?: number;
+	minHeight?: number;
+	position?: Position | string;
+	size?: string | number;
+	resizeStrategy?: string;
+	[key: string]: unknown;
+}
+
+export interface SashCreationOptions {
+	resizeStrategy?: string;
+}
 
 /**
  * ConfigNode class - represents configuration for a sash node before it's created
  */
-export class ConfigNode {
-	/** @type {number} */
+export class ConfigNode implements ParentRect {
 	left = 0;
-	/** @type {number} */
 	top = 0;
-	/** @type {number} */
 	width = 0;
-	/** @type {number} */
 	height = 0;
 
-	/**
-	 * @param {ConfigNodeParams & Record<string, any>} params
-	 */
+	parentRect: ParentRect;
+	children?: unknown;
+	siblingConfigNode?: ConfigNode;
+	id?: string;
+	minWidth?: number;
+	minHeight?: number;
+	position: Position;
+	size: number;
+	resizeStrategy?: string;
+	nonCoreData: Record<string, unknown>;
+
 	constructor({
 		parentRect,
 		children,
@@ -56,7 +63,7 @@ export class ConfigNode {
 		size,
 		resizeStrategy,
 		...rest
-	}) {
+	}: ConfigNodeParams) {
 		this.parentRect = parentRect;
 		this.children = children;
 		this.siblingConfigNode = siblingConfigNode;
@@ -74,12 +81,12 @@ export class ConfigNode {
 	/**
 	 * Get the position, validating against sibling if present
 	 *
-	 * @param {string | undefined} position - The position to validate
-	 * @returns {string} The validated position
+	 * @param position - The position to validate
+	 * @returns The validated position
 	 */
-	getPosition(position) {
+	getPosition(position: Position | string | undefined): Position {
 		if (!this.siblingConfigNode) {
-			return position || '';
+			return (position as Position) || Position.Left;
 		}
 
 		const oppositePositionOfSibling = getOppositePosition(this.siblingConfigNode.position);
@@ -93,16 +100,16 @@ export class ConfigNode {
 			throw BwinErrors.siblingsNotOpposite();
 		}
 
-		return position;
+		return position as Position;
 	}
 
 	/**
 	 * Get the size, validating against sibling if present
 	 *
-	 * @param {string | number | undefined} size - The size to validate
-	 * @returns {number} The validated size
+	 * @param size - The size to validate
+	 * @returns The validated size
 	 */
-	getSize(size) {
+	getSize(size: string | number | undefined): number {
 		if (!this.siblingConfigNode) {
 			return parseSize(size || 0);
 		}
@@ -154,7 +161,7 @@ export class ConfigNode {
 	/**
 	 * Set the bounds (left, top, width, height) based on position and size
 	 */
-	setBounds() {
+	setBounds(): void {
 		if (this.position === Position.Root) {
 			this.left = 0;
 			this.top = 0;
@@ -190,10 +197,10 @@ export class ConfigNode {
 	/**
 	 * Create a Sash instance from this config node
 	 *
-	 * @param {{ resizeStrategy?: string }} [options] - Options for sash creation
-	 * @returns {Sash} The created sash
+	 * @param options - Options for sash creation
+	 * @returns The created sash
 	 */
-	createSash({ resizeStrategy } = {}) {
+	createSash({ resizeStrategy }: SashCreationOptions = {}): Sash {
 		return new Sash({
 			left: this.left,
 			top: this.top,
@@ -205,18 +212,18 @@ export class ConfigNode {
 			minHeight: this.minHeight,
 			resizeStrategy: resizeStrategy || this.resizeStrategy,
 			store: this.nonCoreData
-		});
+		} as SashConstructorParams);
 	}
 
 	/**
 	 * Normalize configuration to a standard object format
 	 *
-	 * @param {any} config - Configuration in various formats
-	 * @returns {Record<string, any>} Normalized configuration object
+	 * @param config - Configuration in various formats
+	 * @returns Normalized configuration object
 	 */
-	normConfig(config) {
+	normConfig(config: unknown): Record<string, unknown> {
 		if (isPlainObject(config)) {
-			return config;
+			return config as Record<string, unknown>;
 		} else if (Array.isArray(config)) {
 			return {
 				children: config
@@ -240,18 +247,26 @@ export class ConfigNode {
 	/**
 	 * Create the primary (first) config node from this parent
 	 *
-	 * @param {Record<string, any>} params - Configuration parameters
-	 * @returns {ConfigNode} The created config node
+	 * @param params - Configuration parameters
+	 * @returns The created config node
 	 */
-	createPrimaryConfigNode({ size, position, children, id, minWidth, minHeight, ...rest }) {
+	createPrimaryConfigNode({
+		size,
+		position,
+		children,
+		id,
+		minWidth,
+		minHeight,
+		...rest
+	}: Record<string, unknown>): ConfigNode {
 		return new ConfigNode({
 			parentRect: this,
-			size: size ?? PRIMARY_NODE_DEFAULTS.size,
-			position: position ?? PRIMARY_NODE_DEFAULTS.position,
+			size: (size as string | number | undefined) ?? PRIMARY_NODE_DEFAULTS.size,
+			position: (position as Position | string | undefined) ?? PRIMARY_NODE_DEFAULTS.position,
 			children,
-			id,
-			minWidth,
-			minHeight,
+			id: id as string | undefined,
+			minWidth: minWidth as number | undefined,
+			minHeight: minHeight as number | undefined,
 			...rest
 		});
 	}
@@ -259,23 +274,23 @@ export class ConfigNode {
 	/**
 	 * Create the secondary (second) config node from this parent
 	 *
-	 * @param {Record<string, any>} params - Configuration parameters
-	 * @param {ConfigNode} primaryConfigNode - The primary sibling node
-	 * @returns {ConfigNode} The created config node
+	 * @param params - Configuration parameters
+	 * @param primaryConfigNode - The primary sibling node
+	 * @returns The created config node
 	 */
 	createSecondaryConfigNode(
-		{ size, position, children, id, minWidth, minHeight, ...rest },
-		primaryConfigNode
-	) {
+		{ size, position, children, id, minWidth, minHeight, ...rest }: Record<string, unknown>,
+		primaryConfigNode: ConfigNode
+	): ConfigNode {
 		return new ConfigNode({
 			parentRect: this,
-			size,
-			position,
+			size: size as string | number | undefined,
+			position: position as Position | string | undefined,
 			children,
 			siblingConfigNode: primaryConfigNode,
-			id,
-			minWidth,
-			minHeight,
+			id: id as string | undefined,
+			minWidth: minWidth as number | undefined,
+			minHeight: minHeight as number | undefined,
 			...rest
 		});
 	}
@@ -283,10 +298,10 @@ export class ConfigNode {
 	/**
 	 * Build a sash tree from this configuration
 	 *
-	 * @param {{ resizeStrategy?: string }} [options] - Options for tree building
-	 * @returns {Sash} The root sash of the built tree
+	 * @param options - Options for tree building
+	 * @returns The root sash of the built tree
 	 */
-	buildSashTree({ resizeStrategy } = {}) {
+	buildSashTree({ resizeStrategy }: SashCreationOptions = {}): Sash {
 		const sash = this.createSash({ resizeStrategy });
 
 		if (!Array.isArray(this.children) || this.children.length === 0) {
@@ -296,8 +311,8 @@ export class ConfigNode {
 		const firstChildConfig = this.normConfig(this.children[0]);
 		const secondChildConfig = this.normConfig(this.children.at(1));
 
-		let primaryChildConfigNode;
-		let secondaryChildConfigNode;
+		let primaryChildConfigNode: ConfigNode;
+		let secondaryChildConfigNode: ConfigNode;
 
 		// Use second child as primary if first child is like e.g. [[0.3, 0.7], 0.6]
 		if (!firstChildConfig.size && !firstChildConfig.position && secondChildConfig) {

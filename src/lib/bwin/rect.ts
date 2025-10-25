@@ -1,19 +1,21 @@
 /**
- * @typedef {Object} Rect
- * @property {number} left
- * @property {number} top
- * @property {number} width
- * @property {number} height
+ * Rect interface representing a rectangle with position and dimensions
  */
+export interface Rect {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+}
 
 /**
  * Get the intersect rect of two rects
  *
- * @param {Rect} rect1 - Rect 1
- * @param {Rect} rect2 - Rect 2
- * @returns {Rect | null} - The intersection rect or null if there is no intersection
+ * @param rect1 - First rectangle
+ * @param rect2 - Second rectangle
+ * @returns The intersection rectangle or null if there is no intersection
  */
-export function getIntersectRect(rect1, rect2) {
+export function getIntersectRect(rect1: Rect, rect2: Rect): Rect | null {
 	const rect1Right = rect1.left + rect1.width;
 	const rect1Bottom = rect1.top + rect1.height;
 	const rect2Right = rect2.left + rect2.width;

@@ -264,9 +264,9 @@
 		}
 
 		// Validate position is one of the valid directional values
-		const validPositions = [Position.Top, Position.Right, Position.Bottom, Position.Left];
-		if (!validPositions.includes(position)) {
-			throw BwinErrors.invalidPosition(position);
+		const validPositions: Position[] = [Position.Top, Position.Right, Position.Bottom, Position.Left];
+		if (!validPositions.includes(position as Position)) {
+			throw BwinErrors.invalidPosition(position as string);
 		}
 
 		// Validate component/componentProps combination
@@ -680,8 +680,9 @@
 		bind:this={frameComponent}
 		{settings}
 		{debug}
-		onPaneRender={USE_DECLARATIVE_GLASS_RENDERING ? undefined : handlePaneRender}
-		onMuntinRender={handleMuntinRender}
+		{treeVersion}
+		onpanerender={USE_DECLARATIVE_GLASS_RENDERING ? undefined : handlePaneRender}
+		onmuntinrender={handleMuntinRender}
 		onPaneDrop={handlePaneDrop}
 	>
 		{#snippet paneContent(sash)}
