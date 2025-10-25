@@ -1,4 +1,5 @@
 import type { Action } from 'svelte/action';
+import { on } from 'svelte/events';
 import type { Sash } from '../sash.js';
 import { getCursorPosition } from '../position.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
@@ -75,9 +76,10 @@ export const drop: Action<HTMLElement, DropActionParams> = (node, params) => {
 		activeDropPaneEl = null;
 	}
 
-	node.addEventListener('dragover', handleDragOver);
-	node.addEventListener('dragleave', handleDragLeave);
-	node.addEventListener('drop', handleDrop);
+	// Use svelte/events for automatic cleanup
+	const cleanupDragOver = on(node, 'dragover', handleDragOver);
+	const cleanupDragLeave = on(node, 'dragleave', handleDragLeave);
+	const cleanupDrop = on(node, 'drop', handleDrop);
 
 	return {
 		update(newParams: DropActionParams) {
@@ -85,9 +87,9 @@ export const drop: Action<HTMLElement, DropActionParams> = (node, params) => {
 			onDrop = newParams.onDrop;
 		},
 		destroy() {
-			node.removeEventListener('dragover', handleDragOver);
-			node.removeEventListener('dragleave', handleDragLeave);
-			node.removeEventListener('drop', handleDrop);
+			cleanupDragOver();
+			cleanupDragLeave();
+			cleanupDrop();
 			if (activeDropPaneEl) {
 				activeDropPaneEl.removeAttribute(DATA_ATTRIBUTES.DROP_AREA);
 			}
