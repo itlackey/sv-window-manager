@@ -6,9 +6,10 @@
 	import { getSashIdFromPane } from '../frame/frame-utils.js';
 	import { getIntersectRect } from '../rect.js';
 	import Frame from '../frame/Frame.svelte';
+	import Glass from './Glass.svelte';
 	import { drag } from '../actions/drag.svelte';
 	import { setContext } from 'svelte';
-	import type { Sash } from '../sash.js';
+	import type { Sash } from '../sash';
 	import {
 		BWIN_CONTEXT,
 		type BwinContext,
@@ -23,6 +24,11 @@
 	import { SillManager } from '../managers/sill-manager.svelte.js';
 	import '../css/index.css';
 	const DEBUG = import.meta.env.VITE_DEBUG == 'true' ? true : false;
+
+	// Feature flag: Workstream 2.3 - Declarative Glass Rendering
+	// When true, renders Glass components declaratively using {#each panes}
+	// When false, uses imperative GlassManager.createGlass() (legacy behavior)
+	const USE_DECLARATIVE_GLASS_RENDERING = import.meta.env.VITE_USE_DECLARATIVE_GLASS_RENDERING === 'true';
 
 	// Throttle timeout for ResizeObserver
 	let resizeTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -674,10 +680,26 @@
 		bind:this={frameComponent}
 		{settings}
 		{debug}
-		onPaneRender={handlePaneRender}
+		onPaneRender={USE_DECLARATIVE_GLASS_RENDERING ? undefined : handlePaneRender}
 		onMuntinRender={handleMuntinRender}
 		onPaneDrop={handlePaneDrop}
-	/>
+	>
+		{#snippet paneContent(sash)}
+			{#if USE_DECLARATIVE_GLASS_RENDERING}
+				<Glass
+					title={sash.store.title}
+					content={sash.store.content}
+					tabs={sash.store.tabs}
+					actions={sash.store.actions}
+					draggable={sash.store.draggable !== false}
+					{sash}
+					binaryWindow={bwinContext}
+					component={sash.store.component}
+					componentProps={sash.store.componentProps}
+				/>
+			{/if}
+		{/snippet}
+	</Frame>
 </div>
 
 <style>

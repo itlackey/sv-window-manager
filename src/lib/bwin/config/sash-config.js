@@ -1,4 +1,4 @@
-import { Sash, DEFAULTS as SASH_DEFAULTS } from '../sash.js';
+import { Sash, DEFAULTS as SASH_DEFAULTS } from '../sash';
 import { FEAT_DEFAULTS } from './config-root.js';
 import { Position } from '../position.js';
 
@@ -7,7 +7,7 @@ import { Position } from '../position.js';
  */
 export class SashConfig extends Sash {
 	/**
-	 * @param {import('../sash.js').SashConstructorParams} [params]
+	 * @param {import('../sash').SashConstructorParams} [params]
 	 */
 	constructor(params = SASH_DEFAULTS) {
 		super({ ...params, position: Position.Root });

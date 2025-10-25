@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Sash } from '../sash.js';
+	import type { Sash } from '../sash';
+	import type { Snippet } from 'svelte';
 	import { SashConfig } from '../config/sash-config.js';
 	import { ConfigRoot } from '../config/config-root.js';
 	import { setContext } from 'svelte';
@@ -24,6 +25,7 @@
 	 * @property {Function} [onPaneRender] - @deprecated Use on:panerender event. Callback when a pane is rendered, receives (paneEl, sash)
 	 * @property {Function} [onMuntinRender] - @deprecated Use on:muntinrender event. Callback when a muntin is rendered, receives (muntinEl, sash)
 	 * @property {Function} [onPaneDrop] - Callback when a drop occurs on a pane, receives (event, sash, dropArea)
+	 * @property {Snippet} [paneContent] - Optional snippet to render custom content inside each pane (receives sash as parameter)
 	 */
 	interface FrameProps {
 		settings: SashConfig | ConfigRoot | Record<string, unknown>;
@@ -33,29 +35,11 @@
 		/** @deprecated Use on:muntinrender event instead. Will be removed in v2.0 */
 		onMuntinRender?: (muntinEl: HTMLElement, sash: Sash) => void;
 		onPaneDrop?: (event: DragEvent, sash: Sash, dropArea: string) => void;
+		/** Optional snippet to render custom content inside each pane */
+		paneContent?: Snippet<[Sash]>;
 	}
 
-	let { settings, debug = false, onPaneRender, onMuntinRender, onPaneDrop }: FrameProps = $props();
-
-	/**
-	 * Force re-render trigger using updateCounter pattern
-	 *
-	 * Why this approach is necessary:
-	 * - The sash tree structure is mutated imperatively (addPane, removePane operations)
-	 * - Svelte 5's reactivity system doesn't track deep mutations in complex object graphs
-	 * - Using $state on rootSash alone doesn't detect child/position/dimension changes
-	 * - This counter creates an explicit dependency that forces $derived blocks to recompute
-	 * - The {#key} directive in the template uses this to force DOM recreation when needed
-	 *
-	 * Alternative considered but rejected:
-	 * - Deep $state wrapping: Would require wrapping entire Sash class hierarchy
-	 * - Manual $state.snapshot: Overhead of deep cloning large tree structures
-	 * - Event emitters: Would add complexity without improving testability
-	 */
-	let updateCounter = $state(0);
-	function triggerUpdate() {
-		updateCounter++;
-	}
+	let { settings, debug = false, onPaneRender, onMuntinRender, onPaneDrop, paneContent }: FrameProps = $props();
 
 	// Initialize sash tree from settings
 	let rootSash = $derived.by(() => {
@@ -68,8 +52,6 @@
 
 	// Collect panes and muntins from tree
 	const panes = $derived.by(() => {
-		// Access updateCounter to create dependency
-		updateCounter;
 		if (!rootSash) return [];
 		const result: Sash[] = [];
 		rootSash.walk((sash) => {
@@ -79,8 +61,6 @@
 	});
 
 	const muntins = $derived.by(() => {
-		// Access updateCounter to create dependency
-		updateCounter;
 		if (!rootSash) return [];
 		const result: Sash[] = [];
 		rootSash.walk((sash) => {
@@ -135,7 +115,6 @@
 			size: size as string | number | undefined,
 			id: id as string | undefined
 		});
-		triggerUpdate();
 		return newSash || null;
 	}
 
@@ -185,8 +164,6 @@
 				}
 			}
 		}
-
-		triggerUpdate();
 	}
 
 	/**
@@ -223,13 +200,10 @@
 			const targetSash = rootSash.getById(targetSashId);
 
 			if (sourceSash && targetSash) {
-				// Swap stores
+				// Swap stores - reactive Sash will automatically trigger re-render
 				const tempStore = sourceSash.store;
 				sourceSash.store = targetSash.store;
 				targetSash.store = tempStore;
-
-				// Trigger a re-render so Glass components get recreated with swapped stores
-				triggerUpdate();
 			}
 		}
 	}
@@ -271,38 +245,39 @@
 		if (!containerElement || !rootSash) return;
 		rootSash.width = containerElement.clientWidth;
 		rootSash.height = containerElement.clientHeight;
-		triggerUpdate();
 	}
 
-	export { rootSash, windowElement, containerElement };
+	export { rootSash, windowElement, containerElement, panes };
 </script>
 
 {#if rootSash}
-	{#key updateCounter}
-		<div
-			bind:this={windowElement}
-			class="window"
-			data-root-sash-id={rootSash.id}
-			role="application"
-			aria-label="Window manager"
-			use:resize={{ rootSash, onUpdate: triggerUpdate }}
-			use:drop={{ rootSash, onDrop: onPaneDrop }}
-		>
-			{#each panes as sash (sash.id)}
-				<Pane
-					{sash}
-					{onPaneRender}
-					on:panerender
-				/>
-			{/each}
+	<div
+		bind:this={windowElement}
+		class="window"
+		data-root-sash-id={rootSash.id}
+		role="application"
+		aria-label="Window manager"
+		use:resize={{ rootSash }}
+		use:drop={{ rootSash, onDrop: onPaneDrop }}
+	>
+		{#each panes as sash (sash.id)}
+			<Pane
+				{sash}
+				{onPaneRender}
+				on:panerender
+			>
+				{#if paneContent}
+					{@render paneContent(sash)}
+				{/if}
+			</Pane>
+		{/each}
 
-			{#each muntins as sash (sash.id)}
-				<Muntin
-					{sash}
-					{onMuntinRender}
-					on:muntinrender
-				/>
-			{/each}
-		</div>
-	{/key}
+		{#each muntins as sash (sash.id)}
+			<Muntin
+				{sash}
+				{onMuntinRender}
+				on:muntinrender
+			/>
+		{/each}
+	</div>
 {/if}

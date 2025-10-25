@@ -59,7 +59,7 @@ export { default as maximizeAction } from './bwin/binary-window/actions.maximize
 /**
  * Core utilities for working with sashes, positions, and configurations.
  */
-export { Sash } from './bwin/sash.js';
+export { Sash } from './bwin/sash';
 export { Position } from './bwin/position.js';
 export { SashConfig } from './bwin/config/sash-config.js';
 export { ConfigRoot } from './bwin/config/config-root.js';

@@ -5,7 +5,7 @@ import './css/glass.css';
 import './css/sill.css';
 
 // Core utilities and types (used by both legacy and new code)
-export { Sash } from './sash.js';
+export { Sash } from './sash';
 export { SashConfig } from './config/sash-config.js';
 export { ConfigRoot } from './config/config-root.js';
 export { Position } from './position.js';

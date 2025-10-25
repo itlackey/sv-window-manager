@@ -1,5 +1,5 @@
 import type { Component } from 'svelte';
-import type { Sash } from '../sash.js';
+import type { Sash } from '../sash';
 
 /**
  * Represents a mounted Glass component instance

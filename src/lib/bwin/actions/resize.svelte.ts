@@ -1,11 +1,11 @@
 import type { Action } from 'svelte/action';
 import { on } from 'svelte/events';
-import type { Sash } from '../sash.js';
+import type { Sash } from '../sash';
 import { MUNTIN_SIZE, TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 
 interface ResizeActionParams {
 	rootSash: Sash;
-	onUpdate: () => void;
+	onUpdate?: () => void;
 }
 
 export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) => {
@@ -226,9 +226,9 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
 				rafId = null;
 			}
 
-			// Call onUpdate only once when resize is complete
-			// This ensures the sash tree state is properly saved
-			onUpdate();
+			// Call optional onUpdate callback for backward compatibility
+			// With reactive Sash, state is automatically saved
+			onUpdate?.();
 		}
 
 		isResizeStarted = false;

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { Sash } from '../sash.js';
+	import type { Sash } from '../sash';
 	import type { GlassAction, BwinContext } from '../types.js';
-	import type { Snippet } from 'svelte';
+	import type { Snippet, Component } from 'svelte';
+	import { mount as svelteMount, unmount, onDestroy } from 'svelte';
 	import closeAction from './actions.close.js';
 	import minimizeAction from './actions.minimize.js';
 	import maximizeAction from './actions.maximize.js';
@@ -14,12 +15,14 @@
 	 * with title/tabs and action buttons, plus a content area for arbitrary DOM.
 	 *
 	 * @property {string | HTMLElement | Snippet | null} [title] - Title text, element, or snippet for the header
-	 * @property {string | HTMLElement | Snippet | null} [content] - Content to render (HTML string, DOM element, or snippet)
+	 * @property {string | HTMLElement | Snippet | null} [content] - Content to render (HTML string, DOM element, or snippet). Ignored if component is provided.
 	 * @property {Array<string | {label: string}>} [tabs] - Tab labels for tabbed interface
 	 * @property {GlassAction[] | boolean} [actions] - Action buttons or false to hide defaults
 	 * @property {boolean} [draggable=true] - Whether the glass can be dragged to reposition
 	 * @property {Sash} [sash] - The sash this glass is attached to
 	 * @property {BwinContext} binaryWindow - Reference to the parent BinaryWindow context
+	 * @property {Component} [component] - Svelte component to mount in the content area
+	 * @property {Record<string, unknown>} [componentProps] - Props to pass to the component
 	 */
 	interface GlassProps {
 		title?: string | HTMLElement | Snippet | null;
@@ -29,6 +32,8 @@
 		draggable?: boolean;
 		sash?: Sash;
 		binaryWindow: BwinContext;
+		component?: Component;
+		componentProps?: Record<string, unknown>;
 	}
 
 	let {
@@ -39,7 +44,9 @@
 		draggable = true,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		sash: _sash,
-		binaryWindow
+		binaryWindow,
+		component = undefined,
+		componentProps = {}
 	}: GlassProps = $props();
 
 	// Helper to check if value is a Snippet
@@ -49,11 +56,58 @@
 
 	let contentElement = $state<HTMLElement>();
 
+	// Track mounted component instance for cleanup
+	let mountedComponent: Record<string, unknown> | null = null;
+	let componentContainer: HTMLElement | null = null;
+
 	// Determine if content is a snippet (needs to be rendered in template)
 	// vs DOM content (needs to be mounted via $effect)
 	const isContentSnippet = $derived(isSnippet(content));
 
-	// REFACTORED: Use $effect for DOM side effect (content mounting) - only for non-snippet content
+	// Mount user component when provided
+	// This effect runs when component/componentProps change or contentElement is ready
+	$effect(() => {
+		// Skip if no component or no content element
+		if (!component || !contentElement) return;
+
+		// Create container for user component
+		const container = document.createElement('div');
+		container.style.height = '100%';
+		container.style.width = '100%';
+		container.style.overflow = 'hidden';
+
+		try {
+			// Mount the user component
+			const instance = svelteMount(component, {
+				target: container,
+				props: componentProps
+			});
+
+			// Clear previous content and append component container
+			contentElement.innerHTML = '';
+			contentElement.appendChild(container);
+
+			// Track for cleanup
+			mountedComponent = instance;
+			componentContainer = container;
+		} catch (error) {
+			console.error('[Glass] Failed to mount component:', error);
+		}
+
+		// Cleanup function
+		return () => {
+			if (mountedComponent) {
+				unmount(mountedComponent);
+				mountedComponent = null;
+			}
+			if (componentContainer) {
+				componentContainer.remove();
+				componentContainer = null;
+			}
+		};
+	});
+
+	// REFACTORED: Use $effect for DOM side effect (content mounting) - only for non-snippet, non-component content
 	// This is a legitimate use of $effect because:
 	// 1. It performs DOM manipulation (appendChild, innerHTML)
 	// 2. It doesn't update reactive state
@@ -63,8 +117,10 @@
 	// 2. Sanitizing HTML strings with DOMPurify to remove malicious scripts
 	// 3. Using strict sanitization config to prevent all script execution vectors
 	// Note: Snippets are rendered declaratively in the template, so they skip this effect
+	// Note: User components are handled by the component mounting effect above
 	$effect(() => {
-		if (!contentElement || isContentSnippet) return;
+		// Skip if no content element, content is a snippet, or a component is being mounted
+		if (!contentElement || isContentSnippet || component) return;
 
 		// Clear previous content (only for DOM-based content)
 		contentElement.innerHTML = '';
@@ -156,6 +212,14 @@
 			lastTab?.focus();
 		}
 	}
+
+	// Cleanup mounted component on destroy (backup safety)
+	onDestroy(() => {
+		if (mountedComponent) {
+			unmount(mountedComponent);
+			mountedComponent = null;
+		}
+	});
 </script>
 
 <div class="glass" role="region" aria-label={title ? String(title) : 'Window pane'}>

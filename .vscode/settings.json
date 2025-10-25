@@ -12,10 +12,12 @@
     },
     "cSpell.words": [
         "bwin",
+        "muntinrender",
         "oncreated",
         "onpaneadded",
         "onpaneremoved",
         "onready",
-        "onupdated"
+        "onupdated",
+        "panerender"
     ]
 }

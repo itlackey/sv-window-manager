@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Sash } from '../sash.js';
+	import type { Sash } from '../sash';
 	import type { MuntinEvents } from '../types.js';
 	import { MUNTIN_SIZE, DATA_ATTRIBUTES } from '../constants.js';
 	import { onMount, createEventDispatcher } from 'svelte';

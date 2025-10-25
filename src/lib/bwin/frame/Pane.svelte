@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Sash } from '../sash.js';
+	import type { Sash } from '../sash';
 	import type { Snippet } from 'svelte';
 	import type { PaneEvents } from '../types.js';
 	import { getContext, onMount, createEventDispatcher } from 'svelte';
@@ -51,14 +51,15 @@
 	style:width="{sash.width}px"
 	style:height="{sash.height}px"
 >
+	{#if children}
+		{@render children()}
+	{/if}
 	{#if debug}
-		<pre style="font-size: 10px;">{sash.id}
+		<pre style="font-size: 10px; position: absolute; top: 0; left: 0; z-index: 9999; background: rgba(255,255,0,0.8); padding: 2px; margin: 0;">{sash.id}
 {sash.position}
 top: {sash.top}px
 left: {sash.left}px
 width: {sash.width}px
 height: {sash.height}px</pre>
-	{:else if children}
-		{@render children()}
 	{/if}
 </div>

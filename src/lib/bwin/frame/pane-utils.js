@@ -1,11 +1,11 @@
 import { parseSize, genId } from '../utils.js';
 import { Position } from '../position.js';
-import { Sash } from '../sash.js';
+import { Sash } from '../sash';
 
 /**
  * Create a pane element for a sash
  *
- * @param {import('../sash.js').Sash} sash - The sash to create a pane for
+ * @param {import('../sash').Sash} sash - The sash to create a pane for
  * @returns {HTMLElement} The created pane element
  */
 export function createPaneElement(sash) {
@@ -23,7 +23,7 @@ export function createPaneElement(sash) {
 /**
  * Update a pane element to match sash dimensions
  *
- * @param {import('../sash.js').Sash} sash - The sash with updated dimensions
+ * @param {import('../sash').Sash} sash - The sash with updated dimensions
  * @returns {HTMLElement | null} The updated pane element
  */
 export function updatePaneElement(sash) {
@@ -39,9 +39,9 @@ export function updatePaneElement(sash) {
 }
 
 /**
- * @param {import('../sash.js').Sash} targetPaneSash
+ * @param {import('../sash').Sash} targetPaneSash
  * @param {{ size?: string | number; id?: string }} options
- * @returns {import('../sash.js').Sash}
+ * @returns {import('../sash').Sash}
  */
 function addPaneSashToLeft(targetPaneSash, { size, id }) {
 	const sizeParsed = size !== undefined ? parseSize(size) : null;
@@ -83,9 +83,9 @@ function addPaneSashToLeft(targetPaneSash, { size, id }) {
 }
 
 /**
- * @param {import('../sash.js').Sash} targetPaneSash
+ * @param {import('../sash').Sash} targetPaneSash
  * @param {{ size?: string | number; id?: string }} options
- * @returns {import('../sash.js').Sash}
+ * @returns {import('../sash').Sash}
  */
 function addPaneSashToRight(targetPaneSash, { size, id }) {
 	const sizeParsed = size !== undefined ? parseSize(size) : null;
@@ -126,9 +126,9 @@ function addPaneSashToRight(targetPaneSash, { size, id }) {
 }
 
 /**
- * @param {import('../sash.js').Sash} targetPaneSash
+ * @param {import('../sash').Sash} targetPaneSash
  * @param {{ size?: string | number; id?: string }} options
- * @returns {import('../sash.js').Sash}
+ * @returns {import('../sash').Sash}
  */
 function addPaneSashToTop(targetPaneSash, { size, id }) {
 	const sizeParsed = size !== undefined ? parseSize(size) : null;
@@ -169,9 +169,9 @@ function addPaneSashToTop(targetPaneSash, { size, id }) {
 }
 
 /**
- * @param {import('../sash.js').Sash} targetPaneSash
+ * @param {import('../sash').Sash} targetPaneSash
  * @param {{ size?: string | number; id?: string }} options
- * @returns {import('../sash.js').Sash}
+ * @returns {import('../sash').Sash}
  */
 function addPaneSashToBottom(targetPaneSash, { size, id }) {
 	const sizeParsed = size !== undefined ? parseSize(size) : null;
@@ -214,9 +214,9 @@ function addPaneSashToBottom(targetPaneSash, { size, id }) {
 /**
  * Add a pane sash to a target pane sash
  *
- * @param {import('../sash.js').Sash} targetPaneSash - The target pane sash
+ * @param {import('../sash').Sash} targetPaneSash - The target pane sash
  * @param {{ position: string; size?: string | number; id?: string }} options - Options for the new pane
- * @returns {import('../sash.js').Sash | undefined} The new sash
+ * @returns {import('../sash').Sash | undefined} The new sash
  * @todo add pane with more Sash props e.g. minWidth, minHeight, etc.
  */
 export function addPaneSash(targetPaneSash, { position, size, id }) {
