@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mount as svelteMount, unmount, untrack, onDestroy } from 'svelte';
+	import { mount as svelteMount, unmount, onDestroy } from 'svelte';
 	import type { Component } from 'svelte';
 	import { Position } from '../position.js';
 	import { getMetricsFromElement } from '../utils.js';
@@ -373,70 +373,48 @@
 		frameComponent?.mount(containerEl);
 	}
 
-	// Update disabled state of action buttons
-	function updateDisabledStateOfActionButtons() {
-		updateDisabledState('.glass-action--close');
-		updateDisabledState('.glass-action--minimize');
-		updateDisabledState('.glass-action--maximize');
-	}
+	// Track pane count reactively using DOM query
+	// This $derived recalculates whenever the windowElement changes or treeVersion updates
+	const paneCount = $derived(
+		frameComponent?.windowElement?.querySelectorAll(`.${CSS_CLASSES.PANE}`).length || 0
+	);
 
-	function updateDisabledState(cssSelector: string) {
-		if (!frameComponent?.windowElement) return;
-
-		const paneCount = frameComponent.windowElement.querySelectorAll(`.${CSS_CLASSES.PANE}`).length;
-
-		if (paneCount === 1) {
-			const el = frameComponent.windowElement.querySelector(cssSelector);
-			el && el.setAttribute('disabled', '');
-		} else {
-			frameComponent.windowElement.querySelectorAll(cssSelector).forEach((el) => {
-				(el as HTMLElement).removeAttribute('disabled');
-			});
-		}
-	}
-
-	// REFACTORED: $effect for MutationObserver is CORRECT
-	// This is a legitimate use of $effect because:
-	// 1. It sets up DOM observation (side effect)
-	// 2. It has proper cleanup
-	// 3. It doesn't directly update reactive state (only calls updateDisabledStateOfActionButtons)
-	// 4. It reacts to frameComponent.windowElement changes
+	// Update action button disabled states when pane count changes
+	// Single-pane windows disable close/minimize/maximize buttons
+	// Multi-pane windows enable all buttons
 	$effect(() => {
 		if (!frameComponent?.windowElement) return;
 
-		updateDisabledStateOfActionButtons();
+		// Access paneCount to make this effect reactive to pane count changes
+		const count = paneCount;
 
-		const paneCountObserver = new MutationObserver((mutations) => {
-			mutations.forEach((mutation) => {
-				if (mutation.type === 'childList') {
-					updateDisabledStateOfActionButtons();
-				}
-			});
-		});
-
-		paneCountObserver.observe(frameComponent.windowElement, {
-			childList: true
-		});
-
-		return () => {
-			paneCountObserver.disconnect();
+		const updateButton = (cssSelector: string) => {
+			if (count === 1) {
+				const el = frameComponent.windowElement?.querySelector(cssSelector);
+				el && el.setAttribute('disabled', '');
+			} else {
+				frameComponent.windowElement?.querySelectorAll(cssSelector).forEach((el) => {
+					(el as HTMLElement).removeAttribute('disabled');
+				});
+			}
 		};
+
+		updateButton('.glass-action--close');
+		updateButton('.glass-action--minimize');
+		updateButton('.glass-action--maximize');
 	});
 
-	// REFACTORED: $effect for sill mounting is CORRECT
-	// This is a legitimate use of $effect because:
-	// 1. It performs initialization (mounting sill to DOM)
-	// 2. It reacts to windowElement becoming available
-	// 3. Uses untrack() to prevent reactive loops from sillManager.mount()
+	// Mount sill element when window element becomes available
+	// The sill displays minimized glass buttons at the bottom of the window
+	// This runs once when frameComponent.windowElement is first set
 	$effect(() => {
 		if (frameComponent?.windowElement) {
-			untrack(() => sillManager.mount());
+			sillManager.mount();
 		}
 	});
 
-	// REFACTORED: Use onDestroy for cleanup instead of $effect
-	// Per Svelte 5 docs: "onDestroy runs immediately before component is unmounted"
-	// This is more appropriate than $effect for cleanup-only logic
+	// Cleanup managers when component is destroyed
+	// Ensures proper teardown of observers, event listeners, and DOM elements
 	onDestroy(() => {
 		glassManager.destroy();
 		sillManager.destroy();
@@ -525,14 +503,11 @@
 		};
 	}
 
-	// REFACTORED: $effect for ResizeObserver is CORRECT
-	// This is a legitimate use of $effect because:
-	// 1. It sets up ResizeObserver (side effect)
-	// 2. It has proper cleanup via setupFitContainer's return function
-	// 3. It reacts to rootElement and frameComponent.rootSash changes
-	// 4. It doesn't create reactive loops (uses direct property assignment, not $state updates)
+	// Setup automatic container fitting when fitContainer is enabled
+	// Observes parent container size changes and adjusts window dimensions accordingly
+	// This effect runs when rootElement or rootSash becomes available
+	// The cleanup function disconnects the ResizeObserver
 	$effect(() => {
-		// setupFitContainer always returns a cleanup function (or noop)
 		return setupFitContainer();
 	});
 
