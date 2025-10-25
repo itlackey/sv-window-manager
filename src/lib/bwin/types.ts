@@ -95,3 +95,29 @@ export interface DropActionParams {
 	rootSash: Sash;
 	onDrop: (event: DragEvent, sash: Sash, dropArea: string) => void;
 }
+
+// Event Types for Frame component events
+export interface PaneRenderEvent {
+	paneElement: HTMLElement;
+	sash: Sash;
+}
+
+export interface MuntinRenderEvent {
+	muntinElement: HTMLElement;
+	sash: Sash;
+}
+
+export interface PaneDropEvent {
+	event: DragEvent;
+	sash: Sash;
+	dropArea: string;
+}
+
+// Event map for createEventDispatcher
+export interface PaneEvents {
+	panerender: PaneRenderEvent;
+}
+
+export interface MuntinEvents {
+	muntinrender: MuntinRenderEvent;
+}
