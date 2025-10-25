@@ -1,4 +1,5 @@
 import type { Action } from 'svelte/action';
+import { on } from 'svelte/events';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 
 interface DragActionParams {
@@ -75,17 +76,18 @@ export const drag: Action<HTMLElement, DragActionParams> = (node, params = {}) =
 		}
 	}
 
-	document.addEventListener('mousedown', handleMouseDown);
-	document.addEventListener('mouseup', handleMouseUp);
-	node.addEventListener('dragstart', handleDragStart);
-	node.addEventListener('dragend', handleDragEnd);
+	// Use svelte/events for automatic cleanup
+	const cleanupMouseDown = on(document, 'mousedown', handleMouseDown);
+	const cleanupMouseUp = on(document, 'mouseup', handleMouseUp);
+	const cleanupDragStart = on(node, 'dragstart', handleDragStart);
+	const cleanupDragEnd = on(node, 'dragend', handleDragEnd);
 
 	return {
 		destroy() {
-			document.removeEventListener('mousedown', handleMouseDown);
-			document.removeEventListener('mouseup', handleMouseUp);
-			node.removeEventListener('dragstart', handleDragStart);
-			node.removeEventListener('dragend', handleDragEnd);
+			cleanupMouseDown();
+			cleanupMouseUp();
+			cleanupDragStart();
+			cleanupDragEnd();
 		}
 	};
 };

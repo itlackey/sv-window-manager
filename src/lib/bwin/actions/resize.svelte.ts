@@ -1,4 +1,5 @@
 import type { Action } from 'svelte/action';
+import { on } from 'svelte/events';
 import type { Sash } from '../sash.js';
 import { MUNTIN_SIZE, TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 
@@ -240,9 +241,10 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
 		revertResizeStyles();
 	}
 
-	document.addEventListener('mousedown', handleMouseDown);
-	document.addEventListener('mousemove', handleMouseMove);
-	document.addEventListener('mouseup', handleMouseUp);
+	// Use svelte/events for automatic cleanup
+	const cleanupMouseDown = on(document, 'mousedown', handleMouseDown);
+	const cleanupMouseMove = on(document, 'mousemove', handleMouseMove);
+	const cleanupMouseUp = on(document, 'mouseup', handleMouseUp);
 
 	return {
 		update(newParams: ResizeActionParams) {
@@ -259,9 +261,9 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
 			// Clear DOM cache
 			domCache.clear();
 
-			document.removeEventListener('mousedown', handleMouseDown);
-			document.removeEventListener('mousemove', handleMouseMove);
-			document.removeEventListener('mouseup', handleMouseUp);
+			cleanupMouseDown();
+			cleanupMouseMove();
+			cleanupMouseUp();
 			revertResizeStyles();
 		}
 	};
