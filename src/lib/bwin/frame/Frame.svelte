@@ -10,7 +10,11 @@
 	import Muntin from './Muntin.svelte';
 	import { resize } from '../actions/resize.svelte';
 	import { drop } from '../actions/drop.svelte';
-	import { FRAME_CONTEXT, type FrameContext } from '../context.js';
+	import {
+		FRAME_CONTEXT,
+		type FrameContext,
+		setLayoutContext
+	} from '../context.js';
 
 	/**
 	 * Props for the Frame component
@@ -87,9 +91,10 @@
 	let windowElement = $state<HTMLElement | undefined>();
 	let containerElement = $state<HTMLElement | undefined>();
 
-	// Share context
+	// Share context using both old and new APIs for backward compatibility
 	const frameContext: FrameContext = { debug };
-	setContext(FRAME_CONTEXT, frameContext);
+	setContext(FRAME_CONTEXT, frameContext); // DEPRECATED: For backward compatibility
+	setLayoutContext(frameContext); // NEW: Type-safe context API
 
 	/**
 	 * Adds a new pane to the layout tree at the specified position.

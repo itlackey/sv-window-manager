@@ -91,8 +91,36 @@ export { DATA_ATTRIBUTES } from './bwin/constants.js';
 
 /**
  * Svelte context keys for accessing window manager state.
+ * @deprecated BWIN_CONTEXT and FRAME_CONTEXT are deprecated.
+ * Use the new type-safe context utilities instead (see below).
  */
 export { BWIN_CONTEXT, FRAME_CONTEXT } from './bwin/context.js';
+
+/**
+ * Type-safe context utilities for Svelte 5 (RECOMMENDED)
+ *
+ * These functions provide better type safety and runtime validation
+ * compared to the legacy symbol-based context approach.
+ *
+ * Usage:
+ * ```typescript
+ * // In BinaryWindow.svelte
+ * import { setWindowContext } from 'sv-window-manager';
+ * setWindowContext(bwinContext);
+ *
+ * // In child components
+ * import { getWindowContext } from 'sv-window-manager';
+ * const bwin = getWindowContext();
+ * ```
+ */
+export {
+	setWindowContext,
+	getWindowContext,
+	tryGetWindowContext,
+	setLayoutContext,
+	getLayoutContext,
+	tryGetLayoutContext
+} from './bwin/context.js';
 
 // ============================================================================
 // ERROR HANDLING
