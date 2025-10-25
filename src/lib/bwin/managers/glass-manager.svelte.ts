@@ -6,6 +6,7 @@ import type { Sash } from '../sash.js';
 import type { BwinContext } from '../context.js';
 import type { GlassInstance, UserComponentInstance, CreateGlassProps} from './types.js';
 import { CSS_CLASSES } from '../constants.js';
+import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
 
 /**
  * Manages Glass component lifecycle using Svelte 5 reactive state
@@ -67,11 +68,11 @@ export class GlassManager {
 	// ============================================================================
 
 	private bwinContext: BwinContext;
-	private debug: boolean;
+	private debugger: Debugger;
 
 	constructor(bwinContext: BwinContext, debug = false) {
 		this.bwinContext = bwinContext;
-		this.debug = debug;
+		this.debugger = createDebugger('GlassManager', debug);
 	}
 
 	// ============================================================================
@@ -345,14 +346,10 @@ export class GlassManager {
 	// ============================================================================
 
 	private debugLog(...args: unknown[]): void {
-		if (this.debug) {
-			console.log('[GlassManager]', ...args);
-		}
+		this.debugger.log(...args);
 	}
 
 	private debugWarn(...args: unknown[]): void {
-		if (this.debug) {
-			console.warn('[GlassManager]', ...args);
-		}
+		this.debugger.warn(...args);
 	}
 }

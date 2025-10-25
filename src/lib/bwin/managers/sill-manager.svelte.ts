@@ -5,6 +5,7 @@ import { getMetricsFromElement } from '../utils.js';
 import { getIntersectRect } from '../rect.js';
 import { Position } from '../position.js';
 import { BwinErrors } from '../errors.js';
+import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
 
 /**
  * Manages the sill element and minimized glasses using Svelte 5 reactive state
@@ -44,11 +45,11 @@ export class SillManager {
 	// ============================================================================
 
 	private bwinContext: BwinContext;
-	private debug: boolean;
+	private debugger: Debugger;
 
 	constructor(bwinContext: BwinContext, debug = false) {
 		this.bwinContext = bwinContext;
-		this.debug = debug;
+		this.debugger = createDebugger('SillManager', debug);
 	}
 
 	// ============================================================================
@@ -342,14 +343,10 @@ export class SillManager {
 	// ============================================================================
 
 	private debugLog(...args: unknown[]): void {
-		if (this.debug) {
-			console.log('[SillManager]', ...args);
-		}
+		this.debugger.log(...args);
 	}
 
 	private debugWarn(...args: unknown[]): void {
-		if (this.debug) {
-			console.warn('[SillManager]', ...args);
-		}
+		this.debugger.warn(...args);
 	}
 }
