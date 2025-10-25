@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Sash } from '../sash.js';
 	import type { Snippet } from 'svelte';
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import { FRAME_CONTEXT, type FrameContext } from '../context.js';
 
 	interface PaneProps {
@@ -18,8 +18,10 @@
 
 	let paneElement = $state<HTMLElement>();
 
-	// Call the render callback when the pane mounts or updates
-	$effect(() => {
+	// REFACTORED: Use onMount lifecycle hook instead of $effect
+	// This runs ONCE when the pane mounts, preventing infinite loops
+	// The callback is responsible for managing state, not the effect
+	onMount(() => {
 		if (paneElement && onPaneRender) {
 			onPaneRender(paneElement, sash);
 		}

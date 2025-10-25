@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Sash } from '../sash.js';
 	import { MUNTIN_SIZE, DATA_ATTRIBUTES } from '../constants.js';
+	import { onMount } from 'svelte';
 
 	interface MuntinProps {
 		sash: Sash;
@@ -16,8 +17,9 @@
 
 	let muntinElement = $state<HTMLElement>();
 
-	// Call the render callback when the muntin mounts or updates
-	$effect(() => {
+	// REFACTORED: Use onMount lifecycle hook instead of $effect
+	// This runs ONCE when the muntin mounts, preventing infinite loops
+	onMount(() => {
 		if (muntinElement && onMuntinRender) {
 			onMuntinRender(muntinElement, sash);
 		}

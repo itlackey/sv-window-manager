@@ -55,6 +55,16 @@ export { SashConfig } from './bwin/config/sash-config.js';
 export { ConfigRoot } from './bwin/config/config-root.js';
 
 // ============================================================================
+// MANAGERS
+// ============================================================================
+
+/**
+ * Manager classes for handling glass and sill lifecycle with Svelte 5 reactive state.
+ */
+export { GlassManager } from './bwin/managers/glass-manager.svelte.js';
+export { SillManager } from './bwin/managers/sill-manager.svelte.js';
+
+// ============================================================================
 // CONSTANTS
 // ============================================================================
 
@@ -117,3 +127,11 @@ export type {
 	DragActionParams,
 	DropActionParams
 } from './bwin/types.js';
+
+// Manager types (from src/lib/bwin/managers/types.ts)
+export type {
+	GlassInstance,
+	UserComponentInstance,
+	CreateGlassProps,
+	MinimizedGlassData
+} from './bwin/managers/types.js';

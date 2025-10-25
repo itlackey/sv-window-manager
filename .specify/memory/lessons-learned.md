@@ -27,6 +27,7 @@ This document captures critical lessons learned during the implementation of the
 8. [Documentation & Communication](#documentation--communication)
 9. [Process Improvements](#process-improvements)
 10. [Anti-Patterns to Avoid](#anti-patterns-to-avoid)
+11. [Debugging Async Component Architectures](#debugging-async-component-architectures)
 
 ---
 
@@ -960,6 +961,217 @@ dispatch('close', { tabId: tab.id });
 
 ---
 
+## Debugging Async Component Architectures
+
+### 🔍 Verify Issues Exist Before Deep Investigation
+
+**Critical Lesson**: Always verify a reported issue exists in the running application before investing time in deep code analysis.
+
+**Case Study - Component Rendering Investigation (October 25, 2025)**:
+
+**Reported Issue**: "Demo components not rendering on main page (src/routes/+page.svelte)"
+
+**Investigation Process**:
+1. Reviewed code architecture (BinaryWindow → Frame → Pane → Glass → GlassManager)
+2. Traced data flow from addSession() through component mounting
+3. Added extensive debug logging
+4. Captured console output and browser screenshots
+5. **Result**: Components were rendering correctly—no bug existed
+
+**What Actually Happened**:
+- User tested and confirmed: "this appears to be working"
+- The async architecture was functioning as designed
+- Console warning "No domNode on newPaneSash" was **expected behavior**, not an error
+
+**Key Takeaways**:
+
+1. **Test First, Investigate Second**
+   ```bash
+   # Before diving into code
+   npm run dev
+   # Open browser, test the actual feature
+   # Only investigate if bug is reproducible
+   ```
+
+2. **Understand Async Callback Patterns**
+   - BinaryWindow stores component/props in `sash.store`
+   - Frame **asynchronously** creates pane DOM element
+   - `handlePaneRender` callback fires when DOM is ready
+   - GlassManager mounts component into the now-available DOM
+   - This async pattern is by design, not a bug
+
+3. **Expected Warnings vs. Actual Errors**
+   ```typescript
+   // This is EXPECTED behavior:
+   if (!newPaneSash.domNode) {
+     debugLog('No domNode on newPaneSash - will be created by Frame');
+     // Not an error! DOM creation happens async via callback
+   }
+   ```
+
+4. **Architecture Understanding Prevents False Positives**
+   - Read CLAUDE.md and architecture docs BEFORE debugging
+   - Understand the async lifecycle of components
+   - Know the difference between immediate vs. callback-based initialization
+   - Empty initial state (fitContainer: true, no children) is valid
+
+---
+
+### 🏗️ Understanding BinaryWindow Async Architecture
+
+**Pattern**: Component mounting uses callback pattern, not synchronous initialization.
+
+**Flow**:
+```typescript
+// 1. User calls addPane with component
+bwinRef.addPane(targetSash.id, {
+  component: ChatSession,
+  componentProps: { sessionId, data }
+});
+
+// 2. BinaryWindow stores props in sash
+newPaneSash.store = { component, componentProps, title, ...glassProps };
+
+// 3. Frame asynchronously creates DOM (not immediate!)
+// (Frame renders pane elements in next tick)
+
+// 4. Callback fires when DOM ready
+handlePaneRender(paneEl, sash) {
+  glassManager.createGlass(paneEl, sash, sash.store);
+  // NOW component mounts with sash.store props
+}
+```
+
+**Why This Pattern?**:
+- Frame uses Svelte's reactive rendering
+- DOM elements don't exist until Svelte's next render cycle
+- Callbacks provide the DOM element once it's ready
+- Prevents race conditions and timing issues
+
+**Common Confusion**:
+```typescript
+// ❌ WRONG ASSUMPTION - DOM exists immediately
+const newSash = bwinRef.addPane(...);
+expect(newSash.domNode).toBeDefined(); // FAILS - DOM not ready yet!
+
+// ✅ CORRECT UNDERSTANDING - DOM created async
+const newSash = bwinRef.addPane(...);
+// domNode is undefined here - that's expected
+// handlePaneRender callback will fire when DOM is ready
+```
+
+---
+
+### 🧪 Manual Testing is Part of Debugging
+
+**Pattern**: Before deep code analysis, manually test the feature.
+
+**Debugging Checklist**:
+1. ✅ **Run the app**: `npm run dev`
+2. ✅ **Reproduce the issue**: Click buttons, test workflows
+3. ✅ **Check browser console**: Look for actual errors (not just warnings)
+4. ✅ **Use browser DevTools**: Inspect DOM, check element rendering
+5. ✅ **Test different scenarios**: Multiple sessions, rapid clicks, etc.
+6. ⚠️ **Only then**: Dive into code if issue confirmed
+
+**Time Saved**: Manual testing takes 2-5 minutes. Deep code investigation can take hours. Always validate first.
+
+---
+
+### 📚 Read Architecture Docs Before Debugging
+
+**Pattern**: Understand the system design before assuming something is broken.
+
+**Critical Documents**:
+- `CLAUDE.md` - Project overview and architecture
+- Component JSDoc comments - Method contracts and behavior
+- Related `.md` files - Previous bug fixes and decisions
+
+**Example from This Session**:
+If we had read BinaryWindow.svelte's JSDoc comments first:
+```typescript
+/**
+ * Adds a new pane to the window at the specified position relative to a target pane.
+ *
+ * This method creates a new pane with a Glass component and inserts it into the window
+ * layout tree. The new pane is positioned relative to an existing pane and can optionally
+ * have a custom size and ID. The method automatically creates and mounts the Glass component
+ * with any provided properties (title, content, tabs, actions, etc.).
+ *
+ * You can provide either a static content element/string OR a Svelte component to render
+ * in the pane. If a component is provided, it will be mounted automatically and cleaned up
+ * when the pane is removed.
+ */
+export function addPane(targetPaneSashId: string, props: Record<string, unknown>)
+```
+
+**Lesson**: The docs explained component mounting is automatic. Reading first would have prevented false bug report.
+
+---
+
+### 🎯 Console Warnings vs. Errors
+
+**Pattern**: Not all console output indicates a bug.
+
+**Console Output Categories**:
+
+```typescript
+// 🔴 ERROR - Actual problem
+console.error('[Component] Failed to mount:', error);
+// Action: Investigate and fix
+
+// ⚠️ WARNING - Potential issue or expected condition
+console.warn('[Component] No domNode - waiting for callback');
+// Action: Understand if this is expected behavior
+
+// 🔵 INFO/LOG - Diagnostic information
+console.log('[Component] Starting initialization');
+// Action: Use for debugging, not error indication
+
+// 🟢 DEBUG - Development-only diagnostics
+debugLog('[Component] State updated:', newState);
+// Action: Controlled by debug flag, ignored in production
+```
+
+**From This Session**:
+The log "No domNode on newPaneSash" was at INFO level, not ERROR level. It described expected async behavior, not a failure condition.
+
+---
+
+### 🚨 Red Flags That Indicate Real Issues
+
+**Patterns to Watch For**:
+
+1. **Uncaught Exceptions**
+   ```
+   Uncaught TypeError: Cannot read property 'x' of undefined
+   ```
+
+2. **Multiple Repeated Errors**
+   ```
+   [Component] Mount failed (tried 3 times)
+   ```
+
+3. **User-Visible Failures**
+   - Buttons don't respond to clicks
+   - Content doesn't render after waiting
+   - Console shows actual errors (red in browser)
+
+4. **Test Failures**
+   ```
+   FAIL src/lib/component.test.ts
+   Expected: component to render
+   Received: undefined
+   ```
+
+**Green Flags (Not Issues)**:
+- Debug logs describing internal state
+- Info logs about async operations in progress
+- Warnings about expected timing delays
+- Empty initial state before async operations complete
+
+---
+
 ## Quick Reference: Key Learnings
 
 | Category | Key Lesson |
@@ -974,6 +1186,9 @@ dispatch('close', { tabId: tab.id });
 | **Architecture** | Context menus as siblings, not nested children |
 | **Documentation** | Write decision docs for bugs and architectural choices |
 | **Process** | Independent user stories enable early delivery |
+| **Debugging** | Test in browser FIRST before deep code investigation |
+| **Async Patterns** | Understand callback-based initialization vs. synchronous patterns |
+| **Console Output** | Distinguish warnings (expected) from errors (actual problems) |
 
 ---
 
@@ -997,8 +1212,8 @@ The Tab Bar implementation was successful due to:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: October 14, 2025  
+**Document Version**: 1.1
+**Last Updated**: October 25, 2025
 **Related Documents**:
 - `specs/002-tab-bar-lifecycle/spec.md`
 - `specs/002-tab-bar-lifecycle/tasks.md`
@@ -1006,3 +1221,7 @@ The Tab Bar implementation was successful due to:
 - `TAB-ACTIVATION-FIXED.md`
 - `TAB-REORDER-FIX.md`
 - `BUGFIX-EVENT-LOG-DUPLICATE-KEYS.md`
+
+**Version History**:
+- v1.1 (Oct 25, 2025): Added "Debugging Async Component Architectures" section documenting lessons from component rendering investigation
+- v1.0 (Oct 14, 2025): Initial document from Tab Bar Lifecycle & Customization feature implementation

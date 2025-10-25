@@ -43,7 +43,11 @@
 
 	let contentElement = $state<HTMLElement>();
 
-	// Handle content mounting - supports both DOM nodes and HTML strings
+	// REFACTORED: Use $effect for true DOM side effect (content mounting)
+	// This is a legitimate use of $effect because:
+	// 1. It performs DOM manipulation (appendChild, innerHTML)
+	// 2. It doesn't update reactive state
+	// 3. It reacts to content prop changes
 	// Security: This approach eliminates XSS vulnerabilities by:
 	// 1. Directly appending DOM nodes without parsing (most common case via BwinHost)
 	// 2. Sanitizing HTML strings with DOMPurify to remove malicious scripts

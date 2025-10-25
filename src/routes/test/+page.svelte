@@ -49,7 +49,7 @@
 			},
 			{
 				position: Position.Bottom,
-				size: 400,
+				size: 300, // Fixed: 200 + 300 = 500 (container height)
 				children: [
 					{
 						position: Position.Left,
@@ -82,19 +82,16 @@
 	let binaryWindowComponent = $state<any>();
 
 	// State for adding panes
-	let newPaneTitle = $state('');
 	let newPanePosition = $state<string>(Position.Right);
 	let targetSashId = $state('');
 	let errorMessage = $state('');
-	let nextPaneNumber = $state(1);
+	let customPaneTitle = $state(''); // User-provided title (can be empty)
 
-	// Initialize pane counter based on current pane count
-	$effect(() => {
-		const panes = getAvailablePanes();
-		const currentCount = panes.length;
-		nextPaneNumber = currentCount + 1;
-		newPaneTitle = `New Pane ${nextPaneNumber}`;
-	});
+	// Use $derived for computed values instead of $effect to avoid circular dependency
+	// This pattern is declarative and doesn't create effect loops
+	let nextPaneNumber = $derived(getAvailablePanes().length + 1);
+	let defaultPaneTitle = $derived(`New Pane ${nextPaneNumber}`);
+	let newPaneTitle = $derived(customPaneTitle || defaultPaneTitle);
 
 	// Get available pane sash IDs
 	function getAvailablePanes(): Array<{ id: string; title: string }> {
@@ -150,8 +147,8 @@
 		}
 
 		try {
-			// Determine final title - use provided or default
-			const finalTitle = newPaneTitle || `Pane ${nextPaneNumber}`;
+			// Use the computed title directly (newPaneTitle is now $derived)
+			const finalTitle = newPaneTitle;
 
 			const content = `<div style="padding: 1rem;">
 				<h3 style="margin: 0 0 0.5rem 0;">${finalTitle}</h3>
@@ -168,7 +165,7 @@
 				resizable: true
 			});
 
-			// Counter will auto-update via $effect based on pane count
+			// Counter auto-updates via $derived based on pane count
 		} catch (error) {
 			errorMessage = error instanceof Error ? error.message : 'Failed to add pane';
 			console.error('Error adding pane:', error);
@@ -248,8 +245,8 @@
 					<input
 						id="pane-title"
 						type="text"
-						bind:value={newPaneTitle}
-						placeholder="Enter pane title"
+						bind:value={customPaneTitle}
+						placeholder={defaultPaneTitle}
 					/>
 				</div>
 

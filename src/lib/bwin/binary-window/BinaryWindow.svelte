@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { mount as svelteMount, unmount } from 'svelte';
+	import { mount as svelteMount, unmount, untrack, onDestroy } from 'svelte';
 	import type { Component } from 'svelte';
 	import { Position } from '../position.js';
 	import { getMetricsFromElement } from '../utils.js';
 	import { getSashIdFromPane } from '../frame/frame-utils.js';
 	import { getIntersectRect } from '../rect.js';
 	import Frame from '../frame/Frame.svelte';
-	import Glass from './Glass.svelte';
 	import { drag } from '../actions/drag.svelte';
 	import { setContext } from 'svelte';
 	import type { Sash } from '../sash.js';
@@ -16,6 +15,8 @@
 	import type { ConfigRoot } from '../config/config-root.js';
 	import { TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 	import { BwinErrors } from '../errors.js';
+	import { GlassManager } from '../managers/glass-manager.svelte.js';
+	import { SillManager } from '../managers/sill-manager.svelte.js';
 	import '../css/index.css';
 	const DEBUG = import.meta.env.VITE_DEBUG == 'true' ? true : false;
 
@@ -57,7 +58,6 @@
 
 	// Frame component binding
 	let frameComponent = $state<FrameComponent>();
-	let sillElement = $state<HTMLElement | undefined>();
 	let rootElement = $state<HTMLElement | undefined>();
 
 	// State for muntin size (needed for trim)
@@ -67,16 +67,12 @@
 	// This allows parent components to reactively track tree changes
 	let treeVersion = $state(0);
 
-	// Track glasses by sash ID
-	let glassesBySashId = $state(
-		new Map<string, { container: HTMLElement; instance: Record<string, unknown> }>()
-	);
-
-	// Track user-mounted components by sash ID for cleanup
-	let userComponentsBySashId = $state(new Map<string, Record<string, unknown>>());
-
 	// Drag state
 	let activeDragGlassEl = $state<HTMLElement | null>(null);
+
+	// Forward declarations for managers (needed for bwinContext)
+	let glassManager: GlassManager;
+	let sillManager: SillManager;
 
 	// Provide context for child components via Frame
 	// Use getters to ensure reactive values are always fresh
@@ -85,68 +81,32 @@
 			return frameComponent?.windowElement;
 		},
 		get sillElement() {
-			return sillElement;
+			return sillManager?.sillElement;
 		},
 		get rootSash() {
 			return frameComponent?.rootSash;
 		},
 		removePane,
 		addPane,
-		getMinimizedGlassElementBySashId,
-		getSillElement: () => sillElement,
-		ensureSillElement: () => {
-			if (!sillElement) {
-				setupSillElement();
-			}
-			return sillElement;
-		}
+		getMinimizedGlassElementBySashId: (sashId: string) =>
+			sillManager?.getMinimizedGlassElement(sashId),
+		getSillElement: () => sillManager?.sillElement,
+		ensureSillElement: () => sillManager?.ensureSillElement()
 	};
 
 	setContext(BWIN_CONTEXT, bwinContext);
 
-	// Create glass component for a pane
-	function createGlassForPane(paneEl: HTMLElement, sash: Sash) {
-		if (!paneEl) return;
+	// Initialize managers - must happen after bwinContext is created
+	glassManager = new GlassManager(bwinContext, debug);
+	sillManager = new SillManager(bwinContext, debug);
 
-		// Cleanup existing glass instance for this sash if it exists
-		// This happens when Frame re-renders and recreates pane elements
-		const existingGlass = glassesBySashId.get(sash.id);
-		if (existingGlass) {
-			unmount(existingGlass.instance);
-			glassesBySashId.delete(sash.id);
-		}
+	// Share managers via context for child components
+	setContext('glassManager', glassManager);
+	setContext('sillManager', sillManager);
 
-		const glassProps = sash.store;
-		const container = document.createElement('div');
-
-		const glassInstance = svelteMount(Glass, {
-			target: container,
-			props: {
-				...glassProps,
-				sash,
-				binaryWindow: bwinContext
-			}
-		});
-
-		glassesBySashId.set(sash.id, { container, instance: glassInstance });
-
-		paneEl.innerHTML = '';
-		const glassElement = container.firstElementChild;
-		if (glassElement) {
-			paneEl.append(glassElement);
-		}
-
-		if (debug) {
-			const contentEl = paneEl.querySelector(`.${CSS_CLASSES.GLASS_CONTENT}`);
-			if (contentEl) {
-				contentEl.prepend(document.createTextNode(sash.id));
-			}
-		}
-	}
-
-	// Pane render callback
+	// Pane render callback - delegate to GlassManager
 	function handlePaneRender(paneEl: HTMLElement, sash: Sash) {
-		createGlassForPane(paneEl, sash);
+		glassManager.createGlass(paneEl, sash, sash.store);
 	}
 
 	// Muntin render callback - apply trim
@@ -310,36 +270,14 @@
 			throw BwinErrors.paneNotFound(targetPaneSashId);
 		}
 
-		// If a Svelte component is provided, mount it and use as content
-		if (component) {
-			const contentElem = document.createElement('div');
-			contentElem.style.height = '100%';
-			contentElem.style.width = '100%';
-			contentElem.style.overflow = 'hidden';
-
-			const componentInstance = svelteMount(component as Component, {
-				target: contentElem,
-				props: componentProps || {}
-			});
-
-			// Store component instance for cleanup
-			userComponentsBySashId.set(newPaneSash.id, componentInstance);
-
-			// Use the mounted component's container as content
-			glassProps.content = contentElem;
-
-			// Preserve component info for potential restore after minimize
-			glassProps.component = component;
-			glassProps.componentProps = componentProps;
-		}
-
 		// Store glass props (title, content, etc.) in the sash's store
-		newPaneSash.store = glassProps;
+		// IMPORTANT: Include component and componentProps so handlePaneRender can access them
+		const fullGlassProps = { ...glassProps, component, componentProps };
+		newPaneSash.store = fullGlassProps;
 
-		// Create and mount Glass component
-		if (newPaneSash.domNode) {
-			createGlassForPane(newPaneSash.domNode, newPaneSash as unknown as Sash);
-		}
+		// Note: domNode is not available yet - it's created asynchronously by Frame
+		// The Glass component will be created via handlePaneRender callback when Frame renders the pane
+		// This is the correct flow and not an error
 
 		// Increment tree version to trigger reactive updates
 		treeVersion++;
@@ -377,19 +315,8 @@
 		);
 
 		if (paneEl) {
-			// Cleanup user component if it exists
-			const userComponent = userComponentsBySashId.get(sashId);
-			if (userComponent) {
-				unmount(userComponent);
-				userComponentsBySashId.delete(sashId);
-			}
-
-			// Cleanup glass component if it exists
-			const glassData = glassesBySashId.get(sashId);
-			if (glassData) {
-				unmount(glassData.instance);
-				glassesBySashId.delete(sashId);
-			}
+			// Cleanup glass and user component via GlassManager
+			glassManager.removeGlass(sashId);
 
 			frameComponent.removePane(sashId);
 
@@ -399,7 +326,7 @@
 		}
 
 		// Remove minimized glass element if pane is minimized
-		const minimizedGlassEl = getMinimizedGlassElementBySashId(sashId);
+		const minimizedGlassEl = sillManager.getMinimizedGlassElement(sashId);
 		if (minimizedGlassEl) {
 			(minimizedGlassEl as HTMLElement).remove();
 			// Increment tree version to trigger reactive updates
@@ -446,118 +373,6 @@
 		frameComponent?.mount(containerEl);
 	}
 
-	// Restore minimized glass
-	function restoreGlass(
-		minimizedGlassEl: HTMLElement & {
-			bwOriginalBoundingRect?: DOMRect;
-			bwOriginalSashId?: string;
-			bwOriginalPosition?: string;
-			bwGlassElement?: HTMLElement;
-			bwOriginalStore?: Record<string, unknown>;
-		}
-	) {
-		debugLog('[restoreGlass] Starting restore:', {
-			minimizedGlassEl,
-			hasWindowElement: !!frameComponent?.windowElement,
-			hasRootSash: !!frameComponent?.rootSash,
-			originalBoundingRect: minimizedGlassEl.bwOriginalBoundingRect,
-			originalSashId: minimizedGlassEl.bwOriginalSashId,
-			originalPosition: minimizedGlassEl.bwOriginalPosition,
-			glassElement: minimizedGlassEl.bwGlassElement
-		});
-
-		if (!frameComponent?.windowElement || !frameComponent?.rootSash) {
-			debugWarn('[restoreGlass] Missing required components');
-			return;
-		}
-
-		const originalRect = minimizedGlassEl.bwOriginalBoundingRect;
-		if (!originalRect) {
-			debugWarn('[restoreGlass] Missing original bounding rect');
-			return;
-		}
-
-		let biggestIntersectArea = 0;
-		let targetPaneEl: HTMLElement | null = null;
-
-		frameComponent.windowElement.querySelectorAll(`.${CSS_CLASSES.PANE}`).forEach((paneEl) => {
-			const paneRect = getMetricsFromElement(paneEl as HTMLElement);
-			const intersectRect = getIntersectRect(originalRect, paneRect);
-
-			if (intersectRect) {
-				const intersectArea = intersectRect.width * intersectRect.height;
-
-				if (intersectArea > biggestIntersectArea) {
-					biggestIntersectArea = intersectArea;
-					targetPaneEl = paneEl as HTMLElement;
-				}
-			}
-		});
-
-		debugLog('[restoreGlass] Target pane found:', {
-			targetPaneEl,
-			biggestIntersectArea
-		});
-
-		if (targetPaneEl && frameComponent?.rootSash) {
-			const newPosition = minimizedGlassEl.bwOriginalPosition;
-			const targetRect = getMetricsFromElement(targetPaneEl);
-			const targetPaneSashId = (targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID);
-			if (!targetPaneSashId) {
-				debugWarn('[restoreGlass] Target pane missing sash ID');
-				return;
-			}
-
-			const targetPaneSash = frameComponent.rootSash.getById(targetPaneSashId);
-			if (!targetPaneSash) {
-				debugWarn('[restoreGlass] Target pane sash not found');
-				return;
-			}
-
-			debugLog('[restoreGlass] Restoring to pane:', {
-				targetPaneSashId,
-				newPosition,
-				targetRect
-			});
-
-			let newSize = 0;
-
-			if (newPosition === Position.Left || newPosition === Position.Right) {
-				newSize =
-					targetRect.width - originalRect.width < targetPaneSash.minWidth
-						? targetRect.width / 2
-						: originalRect.width;
-			} else if (newPosition === Position.Top || newPosition === Position.Bottom) {
-				newSize =
-					targetRect.height - originalRect.height < targetPaneSash.minHeight
-						? targetRect.height / 2
-						: originalRect.height;
-			} else {
-				throw BwinErrors.invalidPosition(newPosition || 'unknown');
-			}
-
-			const originalSashId = minimizedGlassEl.bwOriginalSashId;
-			const originalStore = minimizedGlassEl.bwOriginalStore || {};
-
-			// addPane will create a new Glass component with the preserved store
-			addPane((targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID)!, {
-				id: originalSashId,
-				position: newPosition,
-				size: newSize,
-				...originalStore // Preserve title, content, and other Glass props
-			});
-		}
-	}
-
-	// Get minimized glass element by sash ID
-	function getMinimizedGlassElementBySashId(sashId: string) {
-		if (!frameComponent?.windowElement) return null;
-		const els = frameComponent.windowElement.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`);
-		return Array.from(els).find(
-			(el) => (el as HTMLElement & { bwOriginalSashId?: string }).bwOriginalSashId === sashId
-		);
-	}
-
 	// Update disabled state of action buttons
 	function updateDisabledStateOfActionButtons() {
 		updateDisabledState('.glass-action--close');
@@ -580,7 +395,12 @@
 		}
 	}
 
-	// Observe action buttons to update disabled state
+	// REFACTORED: $effect for MutationObserver is CORRECT
+	// This is a legitimate use of $effect because:
+	// 1. It sets up DOM observation (side effect)
+	// 2. It has proper cleanup
+	// 3. It doesn't directly update reactive state (only calls updateDisabledStateOfActionButtons)
+	// 4. It reacts to frameComponent.windowElement changes
 	$effect(() => {
 		if (!frameComponent?.windowElement) return;
 
@@ -603,117 +423,23 @@
 		};
 	});
 
-	/**
-	 * Setup sill element inside window element
-	 * Creates or reuses existing sill, preserving minimized glasses
-	 */
-	function setupSillElement() {
-		const winEl = frameComponent?.windowElement;
-		if (!winEl) {
-			sillElement = undefined;
-			return;
-		}
-
-		// Check if sill already exists in this windowElement
-		const existingSill = winEl.querySelector(`.${CSS_CLASSES.SILL}`);
-		if (existingSill) {
-			sillElement = existingSill as HTMLElement;
-			debugLog('[Sill] Found existing sill in windowElement:', sillElement);
-			return;
-		}
-
-		// Create new sill
-		const sillEl = document.createElement('div');
-		sillEl.className = CSS_CLASSES.SILL;
-
-		// Preserve minimized glass buttons from old sill if it exists
-		if (sillElement) {
-			const minimizedGlasses = Array.from(
-				sillElement.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`)
-			);
-			debugLog('[Sill] Preserving minimized glasses:', minimizedGlasses.length);
-			minimizedGlasses.forEach((glassBtn) => {
-				sillEl.append(glassBtn);
-			});
-		}
-
-		winEl.append(sillEl);
-		sillElement = sillEl;
-		debugLog('[Sill] Created and appended sill element');
-	}
-
-	// Create and append sill element inside window element
-	// Need to recreate sill whenever windowElement changes (e.g., when Frame re-renders due to {#key})
+	// REFACTORED: $effect for sill mounting is CORRECT
+	// This is a legitimate use of $effect because:
+	// 1. It performs initialization (mounting sill to DOM)
+	// 2. It reacts to windowElement becoming available
+	// 3. Uses untrack() to prevent reactive loops from sillManager.mount()
 	$effect(() => {
-		setupSillElement();
+		if (frameComponent?.windowElement) {
+			untrack(() => sillManager.mount());
+		}
 	});
 
-	/**
-	 * Setup click handler for restoring minimized glasses from sill
-	 * Returns cleanup function to remove event listener
-	 */
-	function setupSillClickHandler() {
-		if (!sillElement) {
-			debugWarn('[Sill Click Handler] No sill element');
-			return undefined;
-		}
-
-		debugLog('[Sill Click Handler] Setting up click handler on sill:', sillElement);
-
-		function handleClick(event: MouseEvent) {
-			debugLog('[Sill Click] Click detected on sill:', {
-				target: event.target,
-				targetMatches: (event.target as HTMLElement).matches(`.${CSS_CLASSES.MINIMIZED_GLASS}`),
-				targetClassName: (event.target as HTMLElement).className
-			});
-
-			if (!(event.target as HTMLElement).matches(`.${CSS_CLASSES.MINIMIZED_GLASS}`)) {
-				debugLog('[Sill Click] Target is not a minimized glass, ignoring');
-				return;
-			}
-
-			debugLog('[Sill Click] Restoring minimized glass...');
-			const minimizedGlassEl = event.target as HTMLElement;
-			restoreGlass(minimizedGlassEl);
-			minimizedGlassEl.remove();
-			debugLog('[Sill Click] Minimized glass removed');
-		}
-
-		sillElement.addEventListener('click', handleClick);
-		debugLog('[Sill Click Handler] Click listener attached to sill');
-
-		// Return cleanup function
-		return () => {
-			sillElement?.removeEventListener('click', handleClick);
-			debugLog('[Sill Click Handler] Click listener removed from sill');
-		};
-	}
-
-	// Handle sill click for minimized glasses
-	$effect(() => {
-		const cleanup = setupSillClickHandler();
-		// Return cleanup function or noop if sillElement not yet available
-		return cleanup || (() => {});
-	});
-
-	// Cleanup all glasses on destroy
-	$effect(() => {
-		return () => {
-			glassesBySashId.forEach((glassData) => {
-				unmount(glassData.instance);
-			});
-			glassesBySashId.clear();
-		};
-	});
-
-	// Cleanup all user components on destroy
-	$effect(() => {
-		return () => {
-			userComponentsBySashId.forEach((instance) => {
-				unmount(instance);
-			});
-			userComponentsBySashId.clear();
-		};
+	// REFACTORED: Use onDestroy for cleanup instead of $effect
+	// Per Svelte 5 docs: "onDestroy runs immediately before component is unmounted"
+	// This is more appropriate than $effect for cleanup-only logic
+	onDestroy(() => {
+		glassManager.destroy();
+		sillManager.destroy();
 	});
 
 	/**
@@ -751,10 +477,8 @@
 					return;
 				}
 
-				// Set defaults if not provided
-				if (!settings.width) settings.width = width;
-				if (!settings.height) settings.height = height;
-
+				// Set dimensions directly on rootSash without modifying settings prop
+				// Modifying settings would trigger Frame's $derived rootSash and cause effect loop
 				frameComponent.rootSash.width = width;
 				frameComponent.rootSash.height = height;
 				frameComponent.fit();
@@ -801,8 +525,12 @@
 		};
 	}
 
-	// Observe parent container size changes and update rootSash dimensions
-	// This matches the bwin.js fitContainer feature implementation
+	// REFACTORED: $effect for ResizeObserver is CORRECT
+	// This is a legitimate use of $effect because:
+	// 1. It sets up ResizeObserver (side effect)
+	// 2. It has proper cleanup via setupFitContainer's return function
+	// 3. It reacts to rootElement and frameComponent.rootSash changes
+	// 4. It doesn't create reactive loops (uses direct property assignment, not $state updates)
 	$effect(() => {
 		// setupFitContainer always returns a cleanup function (or noop)
 		return setupFitContainer();
@@ -885,7 +613,7 @@
 	 * ```
 	 */
 	export function getSillElement() {
-		return sillElement;
+		return sillManager.sillElement;
 	}
 
 	/**
@@ -907,10 +635,7 @@
 	 * ```
 	 */
 	export function ensureSillElement() {
-		if (!sillElement) {
-			setupSillElement();
-		}
-		return sillElement;
+		return sillManager.ensureSillElement();
 	}
 
 	/**
