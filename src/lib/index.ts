@@ -19,6 +19,16 @@ export { default as Muntin } from './bwin/frame/Muntin.svelte';
 export { default as Glass } from './bwin/binary-window/Glass.svelte';
 
 // ============================================================================
+// EXAMPLES
+// ============================================================================
+
+/**
+ * Example components demonstrating library features.
+ * Use these as references for your own implementations.
+ */
+export { default as SnippetExample } from './bwin/examples/SnippetExample.svelte';
+
+// ============================================================================
 // SVELTE ACTIONS
 // ============================================================================
 
@@ -153,7 +163,12 @@ export type {
 	FrameContext,
 	ResizeActionParams,
 	DragActionParams,
-	DropActionParams
+	DropActionParams,
+	PaneRenderEvent,
+	MuntinRenderEvent,
+	PaneDropEvent,
+	PaneEvents,
+	MuntinEvents
 } from './bwin/types.js';
 
 // Manager types (from src/lib/bwin/managers/types.ts)
