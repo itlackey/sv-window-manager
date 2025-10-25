@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GlassManager } from './glass-manager.svelte.js';
 import type { BwinContext } from '../context.js';
-import type { Sash } from '../sash';
+import type { Sash } from '../sash.js';
 
 describe('GlassManager - Reactive State', () => {
 	let mockBwinContext: BwinContext;

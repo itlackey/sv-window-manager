@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Sash, DEFAULTS } from './sash';
+import { Sash, DEFAULTS } from './sash.js';
 import { Position } from './position.js';
 import { BwinErrors } from './errors.js';
 

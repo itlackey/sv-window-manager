@@ -1,5 +1,5 @@
 import type { BwinContext } from '../context.js';
-import type { Sash } from '../sash';
+import type { Sash } from '../sash.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { getMetricsFromElement } from '../utils.js';
 import { getIntersectRect } from '../rect.js';

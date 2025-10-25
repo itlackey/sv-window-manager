@@ -9,7 +9,7 @@
 	import Glass from './Glass.svelte';
 	import { drag } from '../actions/drag.svelte';
 	import { setContext } from 'svelte';
-	import type { Sash } from '../sash';
+	import type { Sash } from '../sash.js';
 	import {
 		BWIN_CONTEXT,
 		type BwinContext,

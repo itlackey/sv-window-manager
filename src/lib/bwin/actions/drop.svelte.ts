@@ -1,6 +1,6 @@
 import type { Action } from 'svelte/action';
 import { on } from 'svelte/events';
-import type { Sash } from '../sash';
+import type { Sash } from '../sash.js';
 import { getCursorPosition } from '../position.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 

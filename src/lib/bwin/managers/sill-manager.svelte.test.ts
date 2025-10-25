@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SillManager } from './sill-manager.svelte.js';
 import type { BwinContext } from '../context.js';
-import type { Sash } from '../sash';
+import type { Sash } from '../sash.js';
 import { CSS_CLASSES } from '../constants.js';
 
 describe('SillManager - Reactive State', () => {

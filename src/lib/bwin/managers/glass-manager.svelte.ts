@@ -2,7 +2,7 @@ import { mount as svelteMount, unmount } from 'svelte';
 import { SvelteMap } from 'svelte/reactivity';
 import type { Component } from 'svelte';
 import Glass from '../binary-window/Glass.svelte';
-import type { Sash } from '../sash';
+import type { Sash } from '../sash.js';
 import type { BwinContext } from '../context.js';
 import type { GlassInstance, UserComponentInstance, CreateGlassProps} from './types.js';
 import { CSS_CLASSES } from '../constants.js';

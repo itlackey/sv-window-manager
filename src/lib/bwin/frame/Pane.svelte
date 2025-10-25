@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Sash } from '../sash';
+	import type { Sash } from '../sash.js';
 	import type { Snippet } from 'svelte';
 	import { getContext, onMount } from 'svelte';
 	import { FRAME_CONTEXT, type FrameContext } from '../context.js';

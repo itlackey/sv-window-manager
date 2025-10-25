@@ -15,7 +15,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { render, cleanup } from 'vitest-browser-svelte';
 import BinaryWindow from '../binary-window/BinaryWindow.svelte';
-import { Sash } from '../sash';
+import { Sash } from '../sash.js';
 import { Position } from '../position';
 
 describe('Reactive Sash Integration with BinaryWindow', () => {

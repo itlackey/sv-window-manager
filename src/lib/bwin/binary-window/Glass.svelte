@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Sash } from '../sash';
+	import type { Sash } from '../sash.js';
 	import type { GlassAction, BwinContext } from '../types.js';
 	import type { Snippet, Component } from 'svelte';
 	import { mount as svelteMount, unmount, onDestroy } from 'svelte';

@@ -1,5 +1,5 @@
 import { parseSize, isPlainObject } from '../utils.js';
-import { Sash, type SashConstructorParams } from '../sash';
+import { Sash, type SashConstructorParams } from '../sash.js';
 import { Position, getOppositePosition } from '../position.js';
 import { BwinErrors } from '../errors.js';
 

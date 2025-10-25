@@ -18,7 +18,7 @@
 
 import { describe, bench } from 'vitest';
 import { ReactiveSash } from './sash.svelte.js';
-import { Sash } from './sash';
+import { Sash } from './sash.js';
 import { Position } from './position.js';
 
 describe('ReactiveSash POC - Performance Benchmarks', () => {

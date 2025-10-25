@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Sash } from '../sash';
+	import type { Sash } from '../sash.js';
 	import type { Snippet } from 'svelte';
 	import { SashConfig } from '../config/sash-config.js';
 	import { ConfigRoot } from '../config/config-root.js';
@@ -32,14 +32,14 @@
 	interface FrameProps {
 		settings: SashConfig | ConfigRoot | Record<string, unknown>;
 		debug?: boolean;
-		/** @deprecated Use onpanerender event instead. Will be removed in v2.0 */
+		/** @deprecated Use onpanerender callback instead. Will be removed in v2.0 */
 		onPaneRender?: (paneEl: HTMLElement, sash: Sash) => void;
-		/** @deprecated Use onmuntinrender event instead. Will be removed in v2.0 */
+		/** @deprecated Use onmuntinrender callback instead. Will be removed in v2.0 */
 		onMuntinRender?: (muntinEl: HTMLElement, sash: Sash) => void;
-		/** Svelte 5 event handler for pane render */
-		onpanerender?: (event: CustomEvent) => void;
-		/** Svelte 5 event handler for muntin render */
-		onmuntinrender?: (event: CustomEvent) => void;
+		/** Svelte 5 callback for pane render */
+		onpanerender?: (paneEl: HTMLElement, sash: Sash) => void;
+		/** Svelte 5 callback for muntin render */
+		onmuntinrender?: (muntinEl: HTMLElement, sash: Sash) => void;
 		onPaneDrop?: (event: DragEvent, sash: Sash, dropArea: string) => void;
 		/** Optional snippet to render custom content inside each pane */
 		paneContent?: Snippet<[Sash]>;
