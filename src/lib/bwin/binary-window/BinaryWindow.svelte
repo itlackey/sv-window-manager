@@ -9,7 +9,11 @@
 	import { drag } from '../actions/drag.svelte';
 	import { setContext } from 'svelte';
 	import type { Sash } from '../sash.js';
-	import { BWIN_CONTEXT, type BwinContext } from '../context.js';
+	import {
+		BWIN_CONTEXT,
+		type BwinContext,
+		setWindowContext
+	} from '../context.js';
 	import type { FrameComponent } from '../types.js';
 	import type { SashConfig } from '../config/sash-config.js';
 	import type { ConfigRoot } from '../config/config-root.js';
@@ -94,7 +98,9 @@
 		ensureSillElement: () => sillManager?.ensureSillElement()
 	};
 
-	setContext(BWIN_CONTEXT, bwinContext);
+	// Set context using both old and new APIs for backward compatibility
+	setContext(BWIN_CONTEXT, bwinContext); // DEPRECATED: For backward compatibility
+	setWindowContext(bwinContext); // NEW: Type-safe context API
 
 	// Initialize managers - must happen after bwinContext is created
 	glassManager = new GlassManager(bwinContext, debug);
@@ -383,17 +389,18 @@
 	// Single-pane windows disable close/minimize/maximize buttons
 	// Multi-pane windows enable all buttons
 	$effect(() => {
-		if (!frameComponent?.windowElement) return;
+		const windowEl = frameComponent?.windowElement;
+		if (!windowEl) return;
 
 		// Access paneCount to make this effect reactive to pane count changes
 		const count = paneCount;
 
 		const updateButton = (cssSelector: string) => {
 			if (count === 1) {
-				const el = frameComponent.windowElement?.querySelector(cssSelector);
+				const el = windowEl.querySelector(cssSelector);
 				el && el.setAttribute('disabled', '');
 			} else {
-				frameComponent.windowElement?.querySelectorAll(cssSelector).forEach((el) => {
+				windowEl.querySelectorAll(cssSelector).forEach((el) => {
 					(el as HTMLElement).removeAttribute('disabled');
 				});
 			}
