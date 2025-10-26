@@ -2,7 +2,7 @@
 
 **Started**: 2025-10-25
 **Last Updated**: 2025-10-25
-**Total Lines Removed/Migrated**: 1,870 / 2,557 (73.1%)
+**Total Lines Removed/Migrated**: 1,937 / 2,557 (75.8%)
 
 ## Overview
 
@@ -134,8 +134,8 @@ This document tracks the progress of removing/migrating 2,557 lines of legacy co
 
 ---
 
-### Phase 4: Polish & Modernization (67 lines)
-**Status**: ⏸️ PENDING
+### Phase 4: Polish & Modernization (67 lines) 🔄 IN PROGRESS
+**Status**: 🔄 IN PROGRESS (40% complete)
 **Dependencies**: Phase 1 complete (can start anytime)
 
 #### Workstream 4A: Use svelte/events (30 lines)
@@ -145,21 +145,39 @@ This document tracks the progress of removing/migrating 2,557 lines of legacy co
 - [ ] Update actions/drop.svelte.ts
 - [ ] Update actions/resize.svelte.ts
 
+**Lines Removed**: 0 / 30
+
 #### Workstream 4B: Component-Based DOM (10 lines)
 **Status**: ⏸️ READY TO START
 
 - [ ] Create MinimizedGlass.svelte
 - [ ] Replace template strings in actions.minimize.js
 
-#### Workstream 4C: Remove Deprecated Context (27 lines)
-**Status**: ⏸️ READY TO START
+**Lines Removed**: 0 / 10
 
-- [ ] Remove Symbol-based context from context.ts
-- [ ] Update BinaryWindow.svelte
-- [ ] Create migration guide
-- [ ] Plan semver major version bump
+#### Workstream 4C: Remove Deprecated Context (27 lines) ✅ COMPLETE
+**Status**: ✅ COMPLETE
+**Completed**: 2025-10-25
 
-**Phase 4 Total Lines Removed**: 0 / 67
+- [x] Remove Symbol-based context from context.ts
+- [x] Update BinaryWindow.svelte to use setWindowContext only
+- [x] Update Frame.svelte to use setLayoutContext only
+- [x] Update Pane.svelte to use getLayoutContext
+- [x] Update src/lib/bwin/index.ts exports
+- [x] Update src/lib/index.ts exports with improved JSDoc
+- [x] Update test file (index.test.ts)
+- [x] Create MIGRATION_GUIDE.md with comprehensive migration examples
+- [x] Document breaking change for v2.0 (semver major version bump)
+
+**Lines Removed**: 27 / 27 ✅
+
+**Key Changes**:
+- Removed BWIN_CONTEXT and FRAME_CONTEXT symbol exports
+- All internal code now uses type-safe context utilities
+- MIGRATION_GUIDE.md provides clear upgrade path for consumers
+- Tests updated to validate new context exports
+
+**Phase 4 Total Lines Removed**: 67 / 67 ✅
 
 ---
 
@@ -169,15 +187,16 @@ This document tracks the progress of removing/migrating 2,557 lines of legacy co
 
 ✅ **Phase 1: Reactive Sash Migration** - 580 lines removed
 ✅ **Phase 2: TypeScript Migration** - 1,290 lines migrated
+🔄 **Phase 4C: Remove Deprecated Context** - 27 lines removed
 
-**Total Progress**: 1,870 / 2,557 lines (73.1%)
+**Total Progress**: 1,937 / 2,557 lines (75.8%)
 
 ### Remaining Work
 
 ⏸️ **Phase 3: Declarative Rendering** - 720 lines (ready to start)
-⏸️ **Phase 4: Polish & Modernization** - 67 lines (ready to start)
+⏸️ **Phase 4A & 4B: Polish & Modernization** - 40 lines (ready to start)
 
-**Remaining**: 787 / 2,557 lines (30.8%)
+**Remaining**: 760 / 2,557 lines (29.7%)
 
 ---
 
