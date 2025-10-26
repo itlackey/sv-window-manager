@@ -112,10 +112,27 @@ describe('Barrel Exports', () => {
 	});
 
 	describe('Context Exports', () => {
-		it('should export context keys', async () => {
-			const { BWIN_CONTEXT, FRAME_CONTEXT } = await import('./index.js');
-			expect(BWIN_CONTEXT).toBeDefined();
-			expect(FRAME_CONTEXT).toBeDefined();
+		it('should export context utilities', async () => {
+			const {
+				setWindowContext,
+				getWindowContext,
+				tryGetWindowContext,
+				setLayoutContext,
+				getLayoutContext,
+				tryGetLayoutContext
+			} = await import('./index.js');
+			expect(setWindowContext).toBeDefined();
+			expect(typeof setWindowContext).toBe('function');
+			expect(getWindowContext).toBeDefined();
+			expect(typeof getWindowContext).toBe('function');
+			expect(tryGetWindowContext).toBeDefined();
+			expect(typeof tryGetWindowContext).toBe('function');
+			expect(setLayoutContext).toBeDefined();
+			expect(typeof setLayoutContext).toBe('function');
+			expect(getLayoutContext).toBeDefined();
+			expect(typeof getLayoutContext).toBe('function');
+			expect(tryGetLayoutContext).toBeDefined();
+			expect(typeof tryGetLayoutContext).toBe('function');
 		});
 	});
 

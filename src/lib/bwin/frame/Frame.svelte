@@ -3,7 +3,6 @@
 	import type { Snippet } from 'svelte';
 	import { SashConfig } from '../config/sash-config.js';
 	import { ConfigRoot } from '../config/config-root.js';
-	import { setContext } from 'svelte';
 	import { addPaneSash } from './pane-utils.js';
 	import { genId } from '../utils.js';
 	import { Position } from '../position.js';
@@ -12,7 +11,6 @@
 	import { resize } from '../actions/resize.svelte';
 	import { drop } from '../actions/drop.svelte';
 	import {
-		FRAME_CONTEXT,
 		type FrameContext,
 		setLayoutContext
 	} from '../context.js';
@@ -86,10 +84,9 @@
 	let windowElement = $state<HTMLElement | undefined>();
 	let containerElement = $state<HTMLElement | undefined>();
 
-	// Share context using both old and new APIs for backward compatibility
+	// Share context using type-safe context API
 	const frameContext: FrameContext = { debug };
-	setContext(FRAME_CONTEXT, frameContext); // DEPRECATED: For backward compatibility
-	setLayoutContext(frameContext); // NEW: Type-safe context API
+	setLayoutContext(frameContext);
 
 	/**
 	 * Adds a new pane to the layout tree at the specified position.

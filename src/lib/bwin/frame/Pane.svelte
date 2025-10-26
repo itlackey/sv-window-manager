@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Sash } from '../sash.js';
 	import type { Snippet } from 'svelte';
-	import { getContext, onMount } from 'svelte';
-	import { FRAME_CONTEXT, type FrameContext } from '../context.js';
+	import { onMount } from 'svelte';
+	import { getLayoutContext } from '../context.js';
 
 	interface PaneProps {
 		sash: Sash;
@@ -15,8 +15,8 @@
 
 	let { sash, children, onPaneRender, onpanerender }: PaneProps = $props();
 
-	const frame = getContext<FrameContext>(FRAME_CONTEXT);
-	const debug = $derived(frame?.debug ?? false);
+	const frame = getLayoutContext();
+	const debug = $derived(frame.debug ?? false);
 	const canDrop = $derived(sash.store.droppable !== false);
 
 	let paneElement = $state<HTMLElement>();

@@ -13,7 +13,7 @@
  */
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
-import { render, userEvent } from 'vitest-browser-svelte';
+import { render } from 'vitest-browser-svelte';
 import Frame from '../frame/Frame.svelte';
 import { Sash } from '../sash.js';
 import { Position } from '../position';

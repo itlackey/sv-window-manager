@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { mount as svelteMount, unmount, onDestroy } from 'svelte';
+	import { mount as svelteMount, unmount, onDestroy, setContext } from 'svelte';
 	import type { Component } from 'svelte';
 	import { Position } from '../position.js';
 	import { getMetricsFromElement } from '../utils.js';
@@ -8,10 +8,8 @@
 	import Frame from '../frame/Frame.svelte';
 	import Glass from './Glass.svelte';
 	import { drag } from '../actions/drag.svelte';
-	import { setContext } from 'svelte';
 	import type { Sash } from '../sash.js';
 	import {
-		BWIN_CONTEXT,
 		type BwinContext,
 		setWindowContext
 	} from '../context.js';
@@ -104,9 +102,8 @@
 		ensureSillElement: () => sillManager?.ensureSillElement()
 	};
 
-	// Set context using both old and new APIs for backward compatibility
-	setContext(BWIN_CONTEXT, bwinContext); // DEPRECATED: For backward compatibility
-	setWindowContext(bwinContext); // NEW: Type-safe context API
+	// Set context using type-safe context API
+	setWindowContext(bwinContext);
 
 	// Initialize managers - must happen after bwinContext is created
 	glassManager = new GlassManager(bwinContext, debug);

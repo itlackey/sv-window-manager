@@ -101,27 +101,42 @@ export { DATA_ATTRIBUTES } from './bwin/constants.js';
 // ============================================================================
 
 /**
- * Svelte context keys for accessing window manager state.
- * @deprecated BWIN_CONTEXT and FRAME_CONTEXT are deprecated.
- * Use the new type-safe context utilities instead (see below).
- */
-export { BWIN_CONTEXT, FRAME_CONTEXT } from './bwin/context.js';
-
-/**
- * Type-safe context utilities for Svelte 5 (RECOMMENDED)
+ * Type-safe context utilities for Svelte 5
  *
- * These functions provide better type safety and runtime validation
- * compared to the legacy symbol-based context approach.
+ * These functions provide type safety and runtime validation for accessing
+ * window manager context in Svelte components.
  *
- * Usage:
+ * **Window Context** - Access the BinaryWindow instance and its methods:
  * ```typescript
- * // In BinaryWindow.svelte
+ * // In BinaryWindow.svelte (sets the context)
  * import { setWindowContext } from 'sv-window-manager';
  * setWindowContext(bwinContext);
  *
- * // In child components
+ * // In child components (gets the context)
  * import { getWindowContext } from 'sv-window-manager';
  * const bwin = getWindowContext();
+ * bwin.addPane('root', { position: 'right', title: 'New Pane' });
+ * ```
+ *
+ * **Layout Context** - Access frame-level layout settings:
+ * ```typescript
+ * // In Frame.svelte (sets the context)
+ * import { setLayoutContext } from 'sv-window-manager';
+ * setLayoutContext(frameContext);
+ *
+ * // In child components (gets the context)
+ * import { getLayoutContext } from 'sv-window-manager';
+ * const frame = getLayoutContext();
+ * const isDebug = frame.debug;
+ * ```
+ *
+ * **Safe Context Access** - Use try* variants when context might not exist:
+ * ```typescript
+ * import { tryGetWindowContext } from 'sv-window-manager';
+ * const bwin = tryGetWindowContext(); // Returns undefined instead of throwing
+ * if (bwin) {
+ *   bwin.addPane(...);
+ * }
  * ```
  */
 export {

@@ -1,30 +1,38 @@
-import { createDomNode, getMetricsFromElement } from '../utils.js';
+import { mount } from 'svelte';
+import { getMetricsFromElement } from '../utils.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { BwinErrors } from '../errors.js';
+import MinimizedGlass from './MinimizedGlass.svelte';
+import type { BwinContext } from '../types.js';
 
 /**
- * @typedef {Object} BoundingRect
- * @property {number} left
- * @property {number} top
- * @property {number} width
- * @property {number} height
+ * Bounding rectangle coordinates
  */
+interface BoundingRect {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+}
 
 /**
- * Extended HTMLElement with custom bwin properties
- * @typedef {HTMLElement & {
- *   bwGlassElement?: Element | null;
- *   bwOriginalPosition?: string | null;
- *   bwOriginalBoundingRect?: BoundingRect;
- *   bwOriginalSashId?: string | null;
- *   bwOriginalStore?: Record<string, any>;
- * }} BwinMinimizedElement
+ * Extended HTMLElement with custom bwin properties for minimized glass restoration
  */
+interface BwinMinimizedElement extends HTMLElement {
+	bwGlassElement?: Element | null;
+	bwOriginalPosition?: string | null;
+	bwOriginalBoundingRect?: BoundingRect;
+	bwOriginalSashId?: string | null;
+	bwOriginalStore?: Record<string, unknown>;
+}
 
+/**
+ * Glass action configuration for minimizing panes
+ */
 export default {
 	label: '',
 	className: 'glass-action glass-action--minimize',
-	onClick: (/** @type {MouseEvent} */ event, /** @type {any} */ binaryWindow) => {
+	onClick: (event: MouseEvent, binaryWindow: BwinContext) => {
 		if (!(event.target instanceof HTMLElement)) return;
 
 		let sillEl = binaryWindow.getSillElement?.();
@@ -48,7 +56,7 @@ export default {
 		const panePosition = paneEl?.getAttribute(DATA_ATTRIBUTES.POSITION);
 
 		// Preserve the store (title, content, etc.) before removing the pane
-		const rootSash = binaryWindow.getRootSash?.();
+		const rootSash = binaryWindow.rootSash;
 		const sash = rootSash?.getById(paneSashId);
 		const store = { ...(sash?.store || {}) };
 
@@ -63,18 +71,33 @@ export default {
 			store.content = glassContentEl.innerHTML;
 		}
 
-		const paneTitle = store.title || 'Untitled';
-		const minimizedGlassNode = createDomNode(
-			`<button class="${CSS_CLASSES.MINIMIZED_GLASS}" type="button" aria-label="Restore ${paneTitle}" title="Restore ${paneTitle}" />`
-		);
+		const paneTitle = (store.title as string) || 'Untitled';
+
+		// Create MinimizedGlass component using Svelte's mount API
+		const minimizedContainer = document.createElement('div');
+
+		mount(MinimizedGlass, {
+			target: minimizedContainer,
+			props: {
+				title: paneTitle,
+				onclick: (clickEvent: MouseEvent) => {
+					// Restore logic will be handled by the sill manager's click handler
+					// which queries for .bw-minimized-glass elements
+				}
+			}
+		});
+
+		// Extract the button element from the container
+		const minimizedGlassNode = minimizedContainer.firstElementChild;
+
 		if (!(minimizedGlassNode instanceof HTMLElement)) {
 			throw BwinErrors.minimizedGlassCreationFailed();
 		}
 
-		/** @type {BwinMinimizedElement} */
-		const minimizedGlassEl = minimizedGlassNode;
+		const minimizedGlassEl = minimizedGlassNode as BwinMinimizedElement;
 		sillEl.append(minimizedGlassEl);
 
+		// Store restoration data on the element
 		minimizedGlassEl.bwGlassElement = glassEl;
 		minimizedGlassEl.bwOriginalPosition = panePosition;
 		minimizedGlassEl.bwOriginalBoundingRect =

@@ -17,8 +17,17 @@ export { BwinError, BwinErrors } from './errors.js';
 // Type definitions and constants
 export * from './types.js';
 export * from './constants.js';
-export { BWIN_CONTEXT, FRAME_CONTEXT } from './context.js';
 // Note: BwinContext and FrameContext types are exported from types.js
+
+// Type-safe context utilities (recommended)
+export {
+	setWindowContext,
+	getWindowContext,
+	tryGetWindowContext,
+	setLayoutContext,
+	getLayoutContext,
+	tryGetLayoutContext
+} from './context.js';
 
 // Individual action modules
 export { default as closeAction } from './binary-window/actions.close.js';
@@ -31,6 +40,7 @@ export { default as BinaryWindowSvelte } from './binary-window/BinaryWindow.svel
 export { default as PaneSvelte } from './frame/Pane.svelte';
 export { default as MuntinSvelte } from './frame/Muntin.svelte';
 export { default as GlassSvelte } from './binary-window/Glass.svelte';
+export { default as MinimizedGlass } from './binary-window/MinimizedGlass.svelte';
 
 // Svelte action exports
 export { resize } from './actions/resize.svelte.js';
