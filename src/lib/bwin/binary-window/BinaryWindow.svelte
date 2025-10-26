@@ -28,20 +28,17 @@
 	 * Props for the BinaryWindow component
 	 *
 	 * @property {SashConfig | ConfigRoot | Record<string, unknown>} settings - Initial window configuration
-	 * @property {boolean} [debug=false] - Enable debug logging to console
-	 * @property {boolean} [fitContainer=true] - Automatically resize to fit parent container
 	 */
 	interface BinaryWindowProps {
 		settings: SashConfig | ConfigRoot | Record<string, unknown>;
-		debug?: boolean;
-		fitContainer?: boolean;
 	}
 
-	let {
-		settings,
-		debug = DEBUG,
-		fitContainer = true // Default to true for responsive behavior
-	}: BinaryWindowProps = $props();
+	let { settings }: BinaryWindowProps = $props();
+
+	// Get debug from settings, with fallback to DEBUG constant
+	const debug = $derived(
+		'debug' in settings && typeof settings.debug === 'boolean' ? settings.debug : DEBUG
+	);
 
 	// Debug utility to gate console logs
 	function debugLog(...args: any[]) {
@@ -52,9 +49,9 @@
 		if (debug) console.warn('[BinaryWindow]', ...args);
 	}
 
-	// Support fitContainer from settings object or from prop
+	// Support fitContainer from settings object, defaulting to true
 	const shouldFitContainer = $derived(
-		'fitContainer' in settings ? settings.fitContainer : fitContainer
+		'fitContainer' in settings ? settings.fitContainer : true
 	);
 
 	// Frame component binding
@@ -178,7 +175,7 @@
 	 * This method creates a new pane with a Glass component and inserts it into the window
 	 * layout tree. The new pane is positioned relative to an existing pane and can optionally
 	 * have a custom size and ID. The method automatically creates and mounts the Glass component
-	 * with any provided properties (title, tabs, actions, etc.).
+	 * with any provided properties (title, actions, etc.).
 	 *
 	 * A Svelte component must be provided to render in the pane. The component will be mounted
 	 * automatically and cleaned up when the pane is removed.
@@ -191,7 +188,6 @@
 	 * @param {Component} props.component - Svelte component class to mount in the pane (required)
 	 * @param {Object} [props.componentProps] - Props to pass to the mounted component
 	 * @param {string|HTMLElement} [props.title] - Title text or element for the Glass header
-	 * @param {Array} [props.tabs] - Array of tab labels for tabbed interface
 	 * @param {Array|boolean} [props.actions] - Custom action buttons or false to hide defaults
 	 * @param {boolean} [props.draggable=true] - Whether the Glass can be dragged to reposition
 	 * @returns {Sash} The newly created sash representing the pane
@@ -212,14 +208,13 @@
 	 *   componentProps: { data: myData, onUpdate: handleUpdate }
 	 * });
 	 *
-	 * // Add a pane with tabs and custom actions
+	 * // Add a pane with custom actions
 	 * import EditorComponent from './EditorComponent.svelte';
 	 * binaryWindow.addPane('pane-1', {
 	 *   position: 'bottom',
 	 *   size: 200, // 200px
 	 *   component: EditorComponent,
 	 *   componentProps: { filename: 'README.md' },
-	 *   tabs: ['Tab 1', 'Tab 2', 'Tab 3'],
 	 *   actions: [
 	 *     { label: 'Save', onClick: handleSave },
 	 *     { label: 'Close', onClick: handleClose }
@@ -359,27 +354,6 @@
 	 */
 	export function fit() {
 		frameComponent?.fit();
-	}
-
-	/**
-	 * Mounts the window to a specific container element.
-	 *
-	 * This method associates the window with a container element, enabling the window
-	 * to read the container's dimensions for layout calculations. This is typically
-	 * called automatically when fitContainer is enabled, but can be called manually
-	 * if you need explicit control over the mounting process.
-	 *
-	 * @param {HTMLElement} containerEl - The container element to mount the window into
-	 *
-	 * @example
-	 * ```typescript
-	 * // Mount to a specific container
-	 * const container = document.getElementById('window-container');
-	 * binaryWindow.mount(container);
-	 * ```
-	 */
-	export function mount(containerEl: HTMLElement) {
-		frameComponent?.mount(containerEl);
 	}
 
 	// Track pane count reactively using DOM query
@@ -541,25 +515,6 @@
 	}
 
 	/**
-	 * Gets the window element containing all panes and muntins.
-	 *
-	 * The window element is the DOM container that holds the frame layout.
-	 * Useful for querying panes, adding event listeners, or inspecting the DOM structure.
-	 *
-	 * @returns {HTMLElement | undefined} The window element, or undefined if frame not initialized
-	 *
-	 * @example
-	 * ```typescript
-	 * // Query all panes
-	 * const windowEl = binaryWindow.getWindowElement();
-	 * const panes = windowEl?.querySelectorAll('.pane');
-	 * ```
-	 */
-	export function getWindowElement() {
-		return frameComponent?.windowElement;
-	}
-
-	/**
 	 * Gets the container element that the window is mounted to.
 	 *
 	 * This is the parent container element passed to mount() or automatically
@@ -679,7 +634,6 @@
 			{#snippet paneContent(sash)}
 				<Glass
 					title={sash.store.title}
-					tabs={sash.store.tabs}
 					actions={sash.store.actions}
 					draggable={sash.store.draggable !== false}
 					{sash}

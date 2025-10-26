@@ -210,8 +210,7 @@
 				<div class="demo-container">
 					<BinaryWindow
 						bind:this={bwinRef}
-						settings={{ width: 900, height: 500, fitContainer: true }}
-						debug={false}
+						settings={{ width: 900, height: 500, fitContainer: true, debug: false }}
 					/>
 				</div>
 
@@ -341,17 +340,42 @@
 							<tr>
 								<td><code>settings</code></td>
 								<td><code>SashConfig | ConfigRoot | Record&lt;string, unknown&gt;</code></td>
-								<td>Configuration options (e.g., <code>{'{'}fitContainer: true{'}'}</code>)</td>
+								<td>Configuration object for the window manager. Can include properties like <code>width</code>, <code>height</code>, <code>fitContainer</code>, <code>debug</code>, and other layout options.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h4>Common Settings Properties</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Property</th>
+								<th>Type</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>width</code></td>
+								<td><code>number</code></td>
+								<td>Width of the window container in pixels</td>
 							</tr>
 							<tr>
-								<td><code>debug</code></td>
-								<td><code>boolean</code></td>
-								<td>Enable debug logging to console (default: false)</td>
+								<td><code>height</code></td>
+								<td><code>number</code></td>
+								<td>Height of the window container in pixels</td>
 							</tr>
 							<tr>
 								<td><code>fitContainer</code></td>
 								<td><code>boolean</code></td>
 								<td>Automatically resize to fit parent container (default: true)</td>
+							</tr>
+							<tr>
+								<td><code>debug</code></td>
+								<td><code>boolean</code></td>
+								<td>Enable debug logging to console (default: false)</td>
 							</tr>
 						</tbody>
 					</table>
@@ -391,19 +415,9 @@
 								<td>Get the root sash of the layout tree</td>
 							</tr>
 							<tr>
-								<td><code>getWindowElement</code></td>
-								<td><code>getWindowElement(): HTMLElement | undefined</code></td>
-								<td>Get the window element containing all panes and muntins</td>
-							</tr>
-							<tr>
 								<td><code>fit</code></td>
 								<td><code>fit(): void</code></td>
 								<td>Reflow the window layout to fit current container dimensions</td>
-							</tr>
-							<tr>
-								<td><code>mount</code></td>
-								<td><code>mount(containerEl: HTMLElement): void</code></td>
-								<td>Mount the window to a specific container element</td>
 							</tr>
 						</tbody>
 					</table>
@@ -432,7 +446,6 @@ interface AddPaneProps {'{'}
   // Optional - Glass properties
   title?: string | HTMLElement; // Header title
   content?: string | HTMLElement;  // Static content
-  tabs?: string[];              // Tab labels
   actions?: Array | boolean;    // Action buttons
   draggable?: boolean;          // Enable drag-and-drop
 

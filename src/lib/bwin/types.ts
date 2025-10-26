@@ -46,7 +46,6 @@ import type { Component } from 'svelte';
 // Glass Component Props
 export interface GlassProps {
 	title?: string | HTMLElement | Snippet | null;
-	tabs?: (string | { label: string })[];
 	actions?: GlassAction[] | boolean;
 	draggable?: boolean;
 	sash: Sash;

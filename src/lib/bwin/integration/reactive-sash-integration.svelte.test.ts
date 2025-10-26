@@ -24,7 +24,6 @@ interface BinaryWindowInstance {
 	removePane: (sashId: string) => void;
 	fit: () => void;
 	getRootSash: () => Sash | undefined;
-	getWindowElement: () => HTMLElement | undefined;
 	getSashById: (sashId: string) => Sash | null;
 	getTreeVersion: () => number;
 }

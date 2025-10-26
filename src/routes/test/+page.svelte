@@ -74,7 +74,10 @@
 	let selectedConfig = $state<'simple' | 'complex'>('simple');
 	let debugMode = $state(false);
 
-	const config = $derived(selectedConfig === 'simple' ? testConfig : complexConfig);
+	const config = $derived({
+		...(selectedConfig === 'simple' ? testConfig : complexConfig),
+		debug: debugMode
+	});
 
 	// Use a unique key that changes with selectedConfig
 	const componentKey = $derived(`${selectedConfig}-${debugMode}`);
@@ -269,7 +272,7 @@
 
 	<div class="frame-container">
 		{#key componentKey}
-			<BinaryWindow bind:this={binaryWindowComponent} settings={config} debug={debugMode} />
+			<BinaryWindow bind:this={binaryWindowComponent} settings={config} />
 		{/key}
 	</div>
 

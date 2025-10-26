@@ -12,10 +12,9 @@
 	 * Props for the Glass component
 	 *
 	 * Glass represents the content container within a pane, providing a header
-	 * with title/tabs and action buttons, plus a content area for Svelte components.
+	 * with title and action buttons, plus a content area for Svelte components.
 	 *
 	 * @property {string | HTMLElement | Snippet | null} [title] - Title text, element, or snippet for the header
-	 * @property {Array<string | {label: string}>} [tabs] - Tab labels for tabbed interface
 	 * @property {GlassAction[] | boolean} [actions] - Action buttons or false to hide defaults
 	 * @property {boolean} [draggable=true] - Whether the glass can be dragged to reposition
 	 * @property {Sash} [sash] - The sash this glass is attached to
@@ -25,7 +24,6 @@
 	 */
 	interface GlassProps {
 		title?: string | HTMLElement | Snippet | null;
-		tabs?: (string | { label: string })[];
 		actions?: GlassAction[] | boolean;
 		draggable?: boolean;
 		sash?: Sash;
@@ -36,7 +34,6 @@
 
 	let {
 		title = null,
-		tabs = [],
 		actions = undefined,
 		draggable = true,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -121,35 +118,6 @@
 		return action.label || 'Action';
 	}
 
-	// Handle keyboard events for tab navigation
-	function handleTabKeyDown(event: KeyboardEvent, index: number) {
-		if (!tabs || tabs.length === 0) return;
-		if (!(event.currentTarget instanceof HTMLElement)) return;
-
-		const key = event.key;
-		const tabCount = tabs.length;
-
-		if (key === 'ArrowLeft') {
-			event.preventDefault();
-			const prevIndex = index === 0 ? tabCount - 1 : index - 1;
-			const prevTab = event.currentTarget.parentElement?.children[prevIndex] as HTMLElement;
-			prevTab?.focus();
-		} else if (key === 'ArrowRight') {
-			event.preventDefault();
-			const nextIndex = index === tabCount - 1 ? 0 : index + 1;
-			const nextTab = event.currentTarget.parentElement?.children[nextIndex] as HTMLElement;
-			nextTab?.focus();
-		} else if (key === 'Home') {
-			event.preventDefault();
-			const firstTab = event.currentTarget.parentElement?.children[0] as HTMLElement;
-			firstTab?.focus();
-		} else if (key === 'End') {
-			event.preventDefault();
-			const lastTab = event.currentTarget.parentElement?.children[tabCount - 1] as HTMLElement;
-			lastTab?.focus();
-		}
-	}
-
 	// Cleanup mounted component on destroy (backup safety)
 	onDestroy(() => {
 		if (mountedComponent) {
@@ -161,22 +129,7 @@
 
 <div class="glass" role="region" aria-label={title ? String(title) : 'Window pane'}>
 	<header class="glass-header" data-can-drag={draggable}>
-		{#if Array.isArray(tabs) && tabs.length > 0}
-			<div class="glass-tabs" role="tablist">
-				{#each tabs as tab, index (index)}
-					<button
-						class="glass-tab"
-						role="tab"
-						aria-selected={index === 0}
-						tabindex={index === 0 ? 0 : -1}
-						onkeydown={(e) => handleTabKeyDown(e, index)}
-						type="button"
-					>
-						{typeof tab === 'string' ? tab : tab.label}
-					</button>
-				{/each}
-			</div>
-		{:else if title}
+		{#if title}
 			<div class="glass-title">
 				{#if isSnippet(title)}
 					{@render title()}
@@ -201,7 +154,7 @@
 	</header>
 
 	<!-- Content rendering: component is mounted via $effect -->
-	<div class="glass-content" bind:this={contentElement} role="tabpanel" tabindex="0"></div>
+	<div class="glass-content" bind:this={contentElement}></div>
 </div>
 
 <style>
@@ -225,11 +178,6 @@
 	}
 
 	.glass-actions {
-		display: flex;
-		gap: 0.25rem;
-	}
-
-	.glass-tabs {
 		display: flex;
 		gap: 0.25rem;
 	}
