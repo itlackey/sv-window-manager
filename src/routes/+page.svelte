@@ -211,7 +211,7 @@
 					<BinaryWindow
 						bind:this={bwinRef}
 						settings={{ width: 900, height: 500, fitContainer: true }}
-						debug={true}
+						debug={false}
 					/>
 				</div>
 
@@ -779,9 +779,10 @@ interface AddPaneProps {'{'}
 		height: 500px;
 		border: 2px solid var(--border-color);
 		border-radius: 8px;
-		overflow: hidden;
-		margin: 2rem 0;
+		overflow: visible;
+		margin: 2rem 0 3rem 0; /* Extra bottom margin for sill */
 		background: var(--bg-color);
+		padding-bottom: 48px; /* Space for sill below window */
 	}
 
 	.demo-instructions {
