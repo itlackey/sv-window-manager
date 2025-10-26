@@ -50,9 +50,7 @@
 	}
 
 	// Support fitContainer from settings object, defaulting to true
-	const shouldFitContainer = $derived(
-		'fitContainer' in settings ? settings.fitContainer : true
-	);
+	const shouldFitContainer = $derived('fitContainer' in settings ? settings.fitContainer : true);
 
 	// Frame component binding
 	let frameComponent = $state<FrameComponent>();

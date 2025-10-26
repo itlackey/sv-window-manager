@@ -1,29 +1,45 @@
 :root {
+	/* ===== Global Font & Typography ===== */
 	--bw-font-family: system-ui;
 	--bw-font-size: 14px;
+
+	/* ===== Colors ===== */
 	--bw-accent-color: hsl(210, 100%, 50%);
+
+	/* ===== Pane & Window ===== */
+	--bw-pane-bg-color: hsl(0, 0%, 95%); /* Light gray background for panes */
 	--bw-drop-area-bg-color: color-mix(in srgb, black 5%, transparent);
 
+	/* ===== Glass (Individual Pane Chrome) ===== */
 	--bw-glass-clearance: 2px;
 	--bw-glass-border-radius: 2px;
 	--bw-glass-border-color: hsl(0, 0%, 10%);
 	--bw-glass-border-color-disabled: hsl(0, 0%, 80%);
+	--bw-glass-bg-color: white; /* Main glass background */
 	--bw-glass-bg-color-disabled: hsl(0, 0%, 97%);
 
+	/* Glass Header */
 	--bw-glass-header-height: 30px;
 	--bw-glass-header-gap: 4px;
 	--bw-glass-header-bg-color: hsl(0, 0%, 97%);
+
+	/* Glass Actions (Buttons) */
+	--bw-action-gap: 2px;
 	--bw-glass-action-bg-color: transparent;
 	--bw-glass-action-hover-bg: transparent;
 	--bw-glass-action-hover-color: var(--bw-accent-color);
 	--bw-glass-action-border: none;
 
-	/* Sill (taskbar) variables */
+	/* ===== Muntin (Dividers/Splitters) ===== */
+	--bw-muntin-bg-color: hsl(0, 0%, 80%); /* Gray divider between panes */
+
+	/* ===== Sill (Taskbar) ===== */
 	--bw-sill-height: 32px;
 	--bw-sill-gap: 8px;
 	--bw-sill-padding: 4px 8px;
 	--bw-sill-bg-color: rgba(0, 0, 0, 0.05);
 	--bw-sill-border-color: hsl(0, 0%, 80%);
 
+	/* ===== Minimized Glass ===== */
 	--bw-minimized-glass-height: 10px;
 }

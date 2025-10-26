@@ -332,6 +332,7 @@ When running `npm run dev` or `npm run build`, you may see:
 4. Only the library code from `src/lib/` is packaged and published to npm (via `dist/`)
 
 The warning does not affect:
+
 - The library package build (`npm pack`)
 - The published npm package functionality
 - Library consumers who install the package

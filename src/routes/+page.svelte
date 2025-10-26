@@ -298,13 +298,13 @@
     const rootSash = bwin.getRootSash();
     if (!rootSash) return;
 
-    // Find the rightmost leaf pane (a sash with no children)
-    // Each sash can only have 2 children max, so we need to find
-    // an actual pane (leaf node) to add relative to
-    let targetSash = rootSash;
-    while (targetSash.children.length > 0) {'{'}
-      targetSash = targetSash.rightChild || targetSash.bottomChild || targetSash.children[0];
-    {'}'}
+    // Find a leaf pane (a sash with no children) using getAllLeafDescendants
+    // This is more reliable than manual traversal
+    const leafNodes = rootSash.getAllLeafDescendants();
+    if (leafNodes.length === 0) return;
+
+    // Use the last leaf node (typically the rightmost/bottommost pane)
+    const targetSash = leafNodes[leafNodes.length - 1];
 
     bwin.addPane(targetSash.id, {'{'}
       id,
@@ -340,7 +340,12 @@
 							<tr>
 								<td><code>settings</code></td>
 								<td><code>SashConfig | ConfigRoot | Record&lt;string, unknown&gt;</code></td>
-								<td>Configuration object for the window manager. Can include properties like <code>width</code>, <code>height</code>, <code>fitContainer</code>, <code>debug</code>, and other layout options.</td>
+								<td
+									>Configuration object for the window manager. Can include properties like <code
+										>width</code
+									>, <code>height</code>, <code>fitContainer</code>, <code>debug</code>, and other
+									layout options.</td
+								>
 							</tr>
 						</tbody>
 					</table>
@@ -401,7 +406,8 @@
 								</td>
 								<td
 									>Add a new pane relative to a target pane. Props include position, size, id,
-									component, componentProps, title, content, and other Glass properties.</td
+									component (required), componentProps, title, actions, draggable, and other Glass
+									properties.</td
 								>
 							</tr>
 							<tr>
@@ -432,24 +438,23 @@
 				<pre><code
 						>// Props accepted by the addPane method
 interface AddPaneProps {'{'}
-  // Required
+  // Required (unless replacing a placeholder pane)
   position: 'top' | 'right' | 'bottom' | 'left';
 
   // Optional - Pane configuration
   id?: string;                  // Custom pane ID
   size?: string | number;       // Pane size (px, %, or ratio)
 
-  // Optional - Svelte component integration
-  component?: Component;        // Svelte component to mount
+  // Required - Svelte component integration
+  component: Component;         // Svelte component to mount (required)
   componentProps?: Record&lt;string, any&gt;;  // Props for component
 
   // Optional - Glass properties
-  title?: string | HTMLElement; // Header title
-  content?: string | HTMLElement;  // Static content
-  actions?: Array | boolean;    // Action buttons
-  draggable?: boolean;          // Enable drag-and-drop
+  title?: string | HTMLElement | Snippet; // Header title
+  actions?: GlassAction[] | boolean;      // Action buttons or false to hide
+  draggable?: boolean;                     // Enable drag-and-drop (default: true)
 
-  // Additional Glass props
+  // Additional Glass props can be passed as needed
   [key: string]: any;
 {'}'}</code
 					></pre>
@@ -460,43 +465,284 @@ interface AddPaneProps {'{'}
 			<section class="section">
 				<h2>Styling</h2>
 
-				<p>Customize the appearance using CSS custom properties:</p>
+				<p>
+					Customize the appearance using CSS custom properties. All variables are prefixed with <code
+						>--bw-</code
+					> to avoid naming conflicts.
+				</p>
 
 				<h3>Available CSS Variables</h3>
-				<pre><code
-						>:root {'{'}
-  /* Colors */
-  --bw-drop-area-bg-color: hsla(226, 50%, 75%, 0.6);
-  --bw-pane-bg-color: hsla(0, 0%, 20%, 1);
-  --bw-muntin-bg-color: hsla(226, 80%, 27%, 0.9);
-  --bw-glass-bg-color: hsla(0, 0%, 95%, 1);
-  --bw-glass-border-color: hsla(226, 80%, 27%, 0.9);
-  --bw-glass-header-bg-color: hsla(226, 80%, 27%, 0.6);
-  --bw-glass-tab-hover-bg: hsla(226, 50%, 75%, 0.6);
 
-  /* Sizing & Spacing */
-  --bw-container-width: stretch;
-  --bw-container-height: 100vh;
-  --bw-glass-clearance: 2px;
-  --bw-glass-border-radius: 5px;
-  --bw-glass-header-height: 30px;
-  --bw-glass-header-gap: 4px;
-  --bw-sill-gap: 6px;
+				<h4>Typography</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Variable</th>
+								<th>Default Value</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>--bw-font-family</code></td>
+								<td><code>system-ui</code></td>
+								<td>Font family for all window manager text</td>
+							</tr>
+							<tr>
+								<td><code>--bw-font-size</code></td>
+								<td><code>14px</code></td>
+								<td>Base font size for window manager components</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
-  /* Typography */
-  --bw-font-family: inherit;
-  --bw-font-size: inherit;
-{'}'}</code
-					></pre>
+				<h4>Accent & Colors</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Variable</th>
+								<th>Default Value</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>--bw-accent-color</code></td>
+								<td><code>hsl(210, 100%, 50%)</code></td>
+								<td>Primary accent color used for focus states and hover highlights</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h4>Pane & Background</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Variable</th>
+								<th>Default Value</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>--bw-pane-bg-color</code></td>
+								<td><code>hsl(0, 0%, 95%)</code></td>
+								<td>Background color for panes (visible when glass is transparent or absent)</td>
+							</tr>
+							<tr>
+								<td><code>--bw-drop-area-bg-color</code></td>
+								<td><code>color-mix(in srgb, black 5%, transparent)</code></td>
+								<td>Background color for drop target areas during drag operations</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h4>Glass (Window) Styling</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Variable</th>
+								<th>Default Value</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>--bw-glass-bg-color</code></td>
+								<td><code>white</code></td>
+								<td>Background color for glass (window) content area</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-bg-color-disabled</code></td>
+								<td><code>hsl(0, 0%, 97%)</code></td>
+								<td>Background color for disabled glass elements</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-border-color</code></td>
+								<td><code>hsl(0, 0%, 10%)</code></td>
+								<td>Border color for glass windows</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-border-color-disabled</code></td>
+								<td><code>hsl(0, 0%, 80%)</code></td>
+								<td>Border color for disabled glass elements</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-border-radius</code></td>
+								<td><code>2px</code></td>
+								<td>Border radius for glass windows</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-clearance</code></td>
+								<td><code>2px</code></td>
+								<td>Spacing between glass windows and pane edges</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h4>Glass Header</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Variable</th>
+								<th>Default Value</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>--bw-glass-header-height</code></td>
+								<td><code>30px</code></td>
+								<td>Height of glass window headers</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-header-gap</code></td>
+								<td><code>4px</code></td>
+								<td>Gap between header elements (title, actions)</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-header-bg-color</code></td>
+								<td><code>hsl(0, 0%, 97%)</code></td>
+								<td>Background color for glass window headers</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h4>Glass Actions (Buttons)</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Variable</th>
+								<th>Default Value</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>--bw-action-gap</code></td>
+								<td><code>2px</code></td>
+								<td>Gap between action buttons in glass header</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-action-bg-color</code></td>
+								<td><code>transparent</code></td>
+								<td>Background color for glass action buttons</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-action-hover-bg</code></td>
+								<td><code>transparent</code></td>
+								<td>Background color for glass action buttons on hover</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-action-hover-color</code></td>
+								<td><code>var(--bw-accent-color)</code></td>
+								<td>Text color for glass action buttons on hover</td>
+							</tr>
+							<tr>
+								<td><code>--bw-glass-action-border</code></td>
+								<td><code>none</code></td>
+								<td>Border style for glass action buttons</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h4>Muntin (Dividers/Splitters)</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Variable</th>
+								<th>Default Value</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>--bw-muntin-bg-color</code></td>
+								<td><code>hsl(0, 0%, 80%)</code></td>
+								<td>Background color for muntins (dividers between panes)</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<h4>Sill (Taskbar for Minimized Windows)</h4>
+				<div class="props-table">
+					<table>
+						<thead>
+							<tr>
+								<th>Variable</th>
+								<th>Default Value</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><code>--bw-sill-height</code></td>
+								<td><code>32px</code></td>
+								<td>Height of the sill (taskbar) for minimized windows</td>
+							</tr>
+							<tr>
+								<td><code>--bw-sill-gap</code></td>
+								<td><code>8px</code></td>
+								<td>Gap between minimized window buttons in sill</td>
+							</tr>
+							<tr>
+								<td><code>--bw-sill-padding</code></td>
+								<td><code>4px 8px</code></td>
+								<td>Padding inside the sill container</td>
+							</tr>
+							<tr>
+								<td><code>--bw-sill-bg-color</code></td>
+								<td><code>rgba(0, 0, 0, 0.05)</code></td>
+								<td>Background color for the sill</td>
+							</tr>
+							<tr>
+								<td><code>--bw-sill-border-color</code></td>
+								<td><code>hsl(0, 0%, 80%)</code></td>
+								<td>Border color for the sill</td>
+							</tr>
+							<tr>
+								<td><code>--bw-minimized-glass-height</code></td>
+								<td><code>10px</code></td>
+								<td>Height of minimized glass buttons in the sill</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 
 				<h3>Example: Dark Theme</h3>
 				<pre><code
 						>:root {'{'}
-  --bw-glass-bg-color: #1e1e1e;
-  --bw-glass-border-color: #3a3a3a;
-  --bw-glass-header-bg-color: #252526;
-  --bw-muntin-bg-color: #2d2d30;
+  /* Override key colors for dark theme */
   --bw-pane-bg-color: #1e1e1e;
+  --bw-glass-bg-color: #252526;
+  --bw-glass-border-color: #3a3a3a;
+  --bw-glass-header-bg-color: #2d2d30;
+  --bw-muntin-bg-color: #3a3a3a;
+  --bw-sill-bg-color: rgba(255, 255, 255, 0.05);
+  --bw-accent-color: #0078d4;
+{'}'}</code
+					></pre>
+
+				<h3>Example: Custom Accent Color</h3>
+				<pre><code
+						>:root {'{'}
+  /* Purple accent theme */
+  --bw-accent-color: #7c3aed;
+  --bw-glass-action-hover-color: #7c3aed;
 {'}'}</code
 					></pre>
 			</section>
