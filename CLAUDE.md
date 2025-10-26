@@ -82,20 +82,20 @@ The project follows a **dual-purpose structure**:
 
 ### Core Components
 
-**BwinHost.svelte** - Primary integration component
+**BinaryWindow.svelte** - Primary window manager component
 
-- Wraps the bwin.js `BinaryWindow` class
+- Manages the binary space partitioning tree of panes
 - Provides `addPane()` method to dynamically add panes with Svelte components
-- Mounts bwin.js into a container element
+- Component-only architecture - all panes MUST use Svelte components (no HTML strings)
 - Uses Svelte 5's `mount()` API for imperative component instantiation
 
-**SessionComponentFactory.svelte.ts** - Dynamic session loader
+**Glass.svelte** - Individual pane component
 
-- Async factory for loading session components based on type
-- Maps session types (chat, terminal, filebrowser, fileeditor) to Svelte components
-- Uses `mount()` to create component instances and returns DOM elements for bwin.js
+- Renders the chrome (header, close button) and content for each pane
+- Accepts a Svelte component via the `component` prop
+- Props are passed to the component via `componentProps`
 
-**Session Components** - Pluggable pane content types:
+**Pane Components** - Example pluggable pane content types:
 
 - `ChatSession.svelte`
 - `TerminalSession.svelte`
@@ -104,24 +104,31 @@ The project follows a **dual-purpose structure**:
 
 ### Key Integration Pattern
 
-The library bridges **Svelte 5 components** with **vanilla JS bwin.js**:
+The library uses a **component-only architecture**:
 
-1. **BwinHost** creates the bwin.js `BinaryWindow` instance
-2. Components are mounted imperatively using Svelte 5's `mount()` API
-3. The mounted component's target element is passed to bwin.js as pane content
-4. bwin.js manages layout/tiling, Svelte handles reactive UI within each pane
+1. **BinaryWindow** manages the pane tree and provides an `addPane()` API
+2. All panes MUST be Svelte components (no HTML strings or DOM elements)
+3. Components are mounted imperatively using Svelte 5's `mount()` API
+4. The library manages layout/tiling while components handle reactive UI
 
 Example:
 
 ```typescript
-const contentElem = document.createElement('div');
-mount(Component, {
-	target: contentElem,
-	props: { sessionId, data }
-});
-manager.addPane(nodeId, {
+import MyComponent from './MyComponent.svelte';
+
+// Initial pane configuration
+const settings = {
+	id: 'root',
+	title: 'My Pane',
+	component: MyComponent,
+	componentProps: { message: 'Hello!' }
+};
+
+// Add additional panes programmatically
+bwin.addPane('root', {
 	position: 'right',
-	content: contentElem
+	component: MyComponent,
+	componentProps: { message: 'Split pane!' }
 });
 ```
 
@@ -246,13 +253,26 @@ The project uses **dual-environment testing** via Vitest:
 3. Export from `src/lib/index.ts`
 4. Update demo in `src/routes/+page.svelte`
 
-### Working with bwin.js
+### Working with BinaryWindow
 
-- **Read bwin.js docs:** https://bhjsdev.github.io/bwin-docs/
-- The `BinaryWindow` class manages the tree of sash/pane nodes
+- The `BinaryWindow` component manages the tree of sash/pane nodes
 - Panes are added relative to existing nodes (top/right/bottom/left)
-- Use `manager.addPane(nodeId, options)` to add panes
-- Content must be a DOM element (use Svelte's `mount()` to create)
+- Use `bwin.addPane(targetSashId, options)` to add panes
+- **Component-only**: Content MUST be a Svelte component (no HTML strings)
+- Pass component props via the `componentProps` object
+
+Example:
+
+```typescript
+import MyComponent from './MyComponent.svelte';
+
+bwin.addPane('pane-1', {
+	position: 'right',
+	title: 'New Pane',
+	component: MyComponent,
+	componentProps: { message: 'Hello!', count: 42 }
+});
+```
 
 ## File Organization
 

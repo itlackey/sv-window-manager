@@ -86,6 +86,7 @@ interface BwinContext {
 <script lang="ts">
   import { getWindowContext } from 'sv-window-manager';
   import type { Sash } from 'sv-window-manager';
+  import MyComponent from './MyComponent.svelte';
 
   let { sash }: { sash: Sash } = $props();
 
@@ -96,7 +97,8 @@ interface BwinContext {
       position: 'right',
       size: '50%',
       title: 'New Pane',
-      content: 'Split content'
+      component: MyComponent,
+      componentProps: { message: 'Split content' }
     });
   }
 </script>

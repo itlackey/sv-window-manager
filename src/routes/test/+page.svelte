@@ -6,6 +6,12 @@
 	import '$lib/bwin/css/glass.css';
 	import '$lib/bwin/css/sill.css';
 	import '$lib/bwin/css/body.css';
+	import TestPane from './components/TestPane.svelte';
+	import LeftPane from './components/LeftPane.svelte';
+	import RightPane from './components/RightPane.svelte';
+	import TopPane from './components/TopPane.svelte';
+	import BottomLeftPane from './components/BottomLeftPane.svelte';
+	import BottomRightPane from './components/BottomRightPane.svelte';
 
 	// Create a simple test configuration with 2 panes
 	const testConfig = {
@@ -17,8 +23,7 @@
 				position: Position.Left,
 				size: 400,
 				title: 'Left Pane',
-				content:
-					'<p style="padding: 1rem;">This is the left pane content. The Frame component positions this pane on the left side.</p>',
+				component: LeftPane,
 				droppable: true,
 				resizable: true
 			},
@@ -26,8 +31,7 @@
 				position: Position.Right,
 				size: 400,
 				title: 'Right Pane',
-				content:
-					'<p style="padding: 1rem;">This is the right pane content. Frame handles the layout declaratively using Svelte 5 runes.</p>',
+				component: RightPane,
 				droppable: true,
 				resizable: true
 			}
@@ -44,8 +48,7 @@
 				position: Position.Top,
 				size: 200,
 				title: 'Top Pane',
-				content:
-					'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Top Pane</h3><p style="margin: 0;">This is a top pane with nested children below.</p></div>'
+				component: TopPane
 			},
 			{
 				position: Position.Bottom,
@@ -55,15 +58,13 @@
 						position: Position.Left,
 						size: 400,
 						title: 'Bottom Left',
-						content:
-							'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Bottom Left</h3><p style="margin: 0;">Nested pane demonstrating complex layouts.</p></div>'
+						component: BottomLeftPane
 					},
 					{
 						position: Position.Right,
 						size: 400,
 						title: 'Bottom Right',
-						content:
-							'<div style="padding: 1rem;"><h3 style="margin: 0 0 0.5rem 0;">Bottom Right</h3><p style="margin: 0;">Try dragging the muntins (dividers) to resize!</p></div>'
+						component: BottomRightPane
 					}
 				]
 			}
@@ -149,18 +150,18 @@
 		try {
 			// Use the computed title directly (newPaneTitle is now $derived)
 			const finalTitle = newPaneTitle;
-
-			const content = `<div style="padding: 1rem;">
-				<h3 style="margin: 0 0 0.5rem 0;">${finalTitle}</h3>
-				<p style="margin: 0;">This is a dynamically added pane at position <strong>${newPanePosition}</strong>.</p>
-				<p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; color: #666;">Added at ${new Date().toLocaleTimeString()}</p>
-			</div>`;
+			const timestamp = new Date().toLocaleTimeString();
 
 			binaryWindowComponent.addPane(targetSashId, {
 				position: newPanePosition,
 				size: newPanePosition === Position.Top || newPanePosition === Position.Bottom ? 200 : 300,
 				title: finalTitle,
-				content,
+				component: TestPane,
+				componentProps: {
+					title: finalTitle,
+					position: newPanePosition,
+					timestamp
+				},
 				droppable: true,
 				resizable: true
 			});

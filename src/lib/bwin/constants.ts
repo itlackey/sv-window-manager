@@ -1,3 +1,5 @@
+import PlaceholderPane from './binary-window/PlaceholderPane.svelte';
+
 /**
  * Size of the muntin (divider) between panes in pixels.
  *
@@ -177,7 +179,7 @@ export const PLACEHOLDER_PANE_ID = '__bwin_placeholder__';
  *
  * @constant {Object}
  * @property {string} title - The title shown in the placeholder glass header
- * @property {string} content - HTML content shown in the placeholder glass body
+ * @property {Component} component - Svelte component shown in the placeholder glass body
  *
  * @example
  * ```typescript
@@ -190,11 +192,5 @@ export const PLACEHOLDER_PANE_ID = '__bwin_placeholder__';
  */
 export const PLACEHOLDER_CONTENT = {
 	title: 'Empty Window',
-	content: `
-		<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2rem; text-align: center; color: #6c757d;">
-			<h3 style="margin: 0 0 1rem 0; color: #495057;">No Panes Yet</h3>
-			<p style="margin: 0 0 0.5rem 0; line-height: 1.6;">This window has no panes yet.</p>
-			<p style="margin: 0; line-height: 1.6;">Use <code>addPane()</code> to add content.</p>
-		</div>
-	`
+	component: PlaceholderPane
 } as const;

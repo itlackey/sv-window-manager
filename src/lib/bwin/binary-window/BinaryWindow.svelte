@@ -180,21 +180,19 @@
 	 * This method creates a new pane with a Glass component and inserts it into the window
 	 * layout tree. The new pane is positioned relative to an existing pane and can optionally
 	 * have a custom size and ID. The method automatically creates and mounts the Glass component
-	 * with any provided properties (title, content, tabs, actions, etc.).
+	 * with any provided properties (title, tabs, actions, etc.).
 	 *
-	 * You can provide either a static content element/string OR a Svelte component to render
-	 * in the pane. If a component is provided, it will be mounted automatically and cleaned up
-	 * when the pane is removed.
+	 * A Svelte component must be provided to render in the pane. The component will be mounted
+	 * automatically and cleaned up when the pane is removed.
 	 *
 	 * @param {string} targetPaneSashId - The ID of the target pane to position relative to
 	 * @param {Object} props - Pane configuration object
 	 * @param {string} props.position - Position relative to target: 'top', 'right', 'bottom', 'left'
 	 * @param {string|number} [props.size] - Size of new pane (px, %, or ratio). If omitted, splits evenly
 	 * @param {string} [props.id] - Optional custom ID for the pane. Auto-generated if omitted
-	 * @param {Component} [props.component] - Svelte component class to mount in the pane
+	 * @param {Component} props.component - Svelte component class to mount in the pane (required)
 	 * @param {Object} [props.componentProps] - Props to pass to the mounted component
 	 * @param {string|HTMLElement} [props.title] - Title text or element for the Glass header
-	 * @param {string|HTMLElement} [props.content] - Content to render in the Glass body (ignored if component is provided)
 	 * @param {Array} [props.tabs] - Array of tab labels for tabbed interface
 	 * @param {Array|boolean} [props.actions] - Custom action buttons or false to hide defaults
 	 * @param {boolean} [props.draggable=true] - Whether the Glass can be dragged to reposition
@@ -206,14 +204,6 @@
 	 *
 	 * @example
 	 * ```typescript
-	 * // Add a pane with static content
-	 * const newPane = binaryWindow.addPane('root', {
-	 *   position: 'right',
-	 *   size: '40%',
-	 *   title: 'Editor',
-	 *   content: editorElement
-	 * });
-	 *
 	 * // Add a pane with a Svelte component
 	 * import MyComponent from './MyComponent.svelte';
 	 * binaryWindow.addPane('root', {
@@ -225,9 +215,12 @@
 	 * });
 	 *
 	 * // Add a pane with tabs and custom actions
+	 * import EditorComponent from './EditorComponent.svelte';
 	 * binaryWindow.addPane('pane-1', {
 	 *   position: 'bottom',
 	 *   size: 200, // 200px
+	 *   component: EditorComponent,
+	 *   componentProps: { filename: 'README.md' },
 	 *   tabs: ['Tab 1', 'Tab 2', 'Tab 3'],
 	 *   actions: [
 	 *     { label: 'Save', onClick: handleSave },
@@ -688,7 +681,6 @@
 		{#snippet paneContent(sash)}
 			<Glass
 				title={sash.store.title}
-				content={sash.store.content}
 				tabs={sash.store.tabs}
 				actions={sash.store.actions}
 				draggable={sash.store.draggable !== false}

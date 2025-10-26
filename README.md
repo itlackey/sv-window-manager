@@ -9,7 +9,7 @@ A modern Svelte 5 component library that provides tiling window management for w
 - **Dynamic Layouts**: Create tiling window layouts programmatically
 - **Resizable Panes**: Drag dividers to resize panes
 - **Flexible Positioning**: Add panes in any direction (top, right, bottom, left)
-- **Component Integration**: Mount any Svelte component as pane content
+- **Component-Only Architecture**: Type-safe, component-based pane content (no HTML strings)
 
 ## Installation
 
@@ -26,50 +26,65 @@ npm install sv-window-manager
 
 ```svelte
 <script lang="ts">
-	import BwinHost from 'sv-window-manager';
-	import type { BwinConfig, PaneConfig } from 'sv-window-manager';
-	import YourComponent from './YourComponent.svelte';
+	import { BinaryWindow } from 'sv-window-manager';
+	import MyComponent from './MyComponent.svelte';
 
-	let bwinHost = $state<BwinHost | undefined>();
-
-	const config: BwinConfig = {
-		fitContainer: true
+	const settings = {
+		id: 'root',
+		title: 'My Window',
+		component: MyComponent,
+		componentProps: { message: 'Hello!' }
 	};
 
+	let bwin = $state<BinaryWindow>();
+
 	function addPane() {
-		if (!bwinHost) return;
+		if (!bwin) return;
 
-		const paneConfig: PaneConfig = {
-			position: 'right'
-		};
-
-		bwinHost.addPane('pane-1', paneConfig, YourComponent, {
-			sessionId: 'session-1',
-			data: { title: 'My Pane' }
+		bwin.addPane('root', {
+			position: 'right',
+			title: 'New Pane',
+			component: MyComponent,
+			componentProps: { message: 'Split pane!' }
 		});
 	}
 </script>
 
-<BwinHost bind:this={bwinHost} {config} />
+<BinaryWindow bind:this={bwin} {settings} />
 <button onclick={addPane}>Add Pane</button>
 ```
 
 ## API Reference
 
-### BwinHost Component
+### BinaryWindow Component
 
 **Props:**
 
-| Prop     | Type         | Description                          |
-| -------- | ------------ | ------------------------------------ |
-| `config` | `BwinConfig` | Configuration for the window manager |
+| Prop          | Type                            | Description                                |
+| ------------- | ------------------------------- | ------------------------------------------ |
+| `settings`    | `SashConfig \| ConfigRoot`      | Initial window configuration and root pane |
+| `debug`       | `boolean`                       | Enable debug logging (default: false)      |
+| `fitContainer`| `boolean`                       | Auto-resize to fit parent (default: true)  |
 
 **Methods:**
 
-| Method    | Signature                                                                                                                   | Description                            |
-| --------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `addPane` | `addPane(sessionId: string, paneConfig: PaneConfig, Component: Component<any>, componentProps?: Record<string, any>): void` | Add a new pane with a Svelte component |
-| `getInfo` | `getInfo(): any`                                                                                                            | Get current window manager state       |
+| Method    | Signature                                                                    | Description                            |
+| --------- | ---------------------------------------------------------------------------- | -------------------------------------- |
+| `addPane` | `addPane(targetSashId: string, props: PaneProps): Sash \| null`              | Add a new pane with a Svelte component |
+| `removePane` | `removePane(sashId: string): void`                                        | Remove a pane by its sash ID           |
+
+**PaneProps Interface:**
+
+```typescript
+interface PaneProps {
+	position: 'top' | 'right' | 'bottom' | 'left';
+	component: Component;          // Required: Svelte component to render
+	componentProps?: Record<string, unknown>;  // Optional: Props for the component
+	title?: string;                // Optional: Pane title
+	size?: string;                 // Optional: Size (e.g., '50%', '300px')
+	id?: string;                   // Optional: Custom sash ID
+}
+```
 
 ## Customization
 

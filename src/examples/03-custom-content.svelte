@@ -32,49 +32,83 @@
 	onMount(() => {
 		if (!bwinHostRef) return;
 
+		const rootSash = bwinHostRef.getRootSash();
+		if (!rootSash) return;
+
 		// Add a chat session component
-		bwinHostRef.addPane('chat-1', { position: 'right' }, ChatSession, {
-			sessionId: 'chat-1',
-			data: { welcome: 'Hello! This is a custom Svelte component in a pane.' }
+		bwinHostRef.addPane(rootSash.id, {
+			id: 'chat-1',
+			position: 'right',
+			component: ChatSession,
+			componentProps: {
+				sessionId: 'chat-1',
+				data: { welcome: 'Hello! This is a custom Svelte component in a pane.' }
+			},
+			title: 'Chat - chat-1'
 		});
 
 		// Add a terminal session component
 		setTimeout(() => {
 			if (!bwinHostRef) return;
-			bwinHostRef.addPane('terminal-1', { position: 'bottom' }, TerminalSession, {
-				sessionId: 'terminal-1',
-				data: { initCommand: 'echo "Custom Svelte components in action!"' }
+			const root = bwinHostRef.getRootSash();
+			if (!root) return;
+			const leafNodes = root.getAllLeafDescendants();
+			const targetSash = leafNodes[leafNodes.length - 1];
+
+			bwinHostRef.addPane(targetSash.id, {
+				id: 'terminal-1',
+				position: 'bottom',
+				component: TerminalSession,
+				componentProps: {
+					sessionId: 'terminal-1',
+					data: { initCommand: 'echo "Custom Svelte components in action!"' }
+				},
+				title: 'Terminal - terminal-1'
 			});
 		}, 100);
 
 		// Add a file editor component
 		setTimeout(() => {
 			if (!bwinHostRef) return;
-			bwinHostRef.addPane('editor-1', { position: 'right' }, FileEditorSession, {
-				sessionId: 'editor-1',
-				data: {
-					filename: 'example.ts',
-					content: `// Custom Svelte Components Example
+			const root = bwinHostRef.getRootSash();
+			if (!root) return;
+			const leafNodes = root.getAllLeafDescendants();
+			const targetSash = leafNodes[leafNodes.length - 1];
+
+			bwinHostRef.addPane(targetSash.id, {
+				id: 'editor-1',
+				position: 'right',
+				component: FileEditorSession,
+				componentProps: {
+					sessionId: 'editor-1',
+					data: {
+						filename: 'example.ts',
+						content: `// Custom Svelte Components Example
 //
-// This demonstrates using BwinHost to mount
+// This demonstrates using BinaryWindow to mount
 // full Svelte components into panes.
 
-import BwinHost from 'sv-window-manager';
+import BinaryWindow from 'sv-window-manager';
 import MyComponent from './MyComponent.svelte';
 
 function addCustomPane() {
-  bwinHost.addPane(
-    'my-pane-id',
-    { position: 'right' },
-    MyComponent,
-    {
+  const rootSash = bwin.getRootSash();
+  if (!rootSash) return;
+
+  bwin.addPane(rootSash.id, {
+    position: 'right',
+    component: MyComponent,
+    componentProps: {
       sessionId: 'session-1',
       data: { /* custom props */ }
-    }
-  );
+    },
+    title: 'My Component'
+  });
 }
 `
-				}
+					}
+				},
+				title: 'Editor - example.ts'
 			});
 		}, 200);
 	});
@@ -83,10 +117,21 @@ function addCustomPane() {
 	function addChatPane() {
 		if (!bwinHostRef) return;
 
+		const rootSash = bwinHostRef.getRootSash();
+		if (!rootSash) return;
+		const leafNodes = rootSash.getAllLeafDescendants();
+		const targetSash = leafNodes[leafNodes.length - 1];
+
 		const chatId = `chat-${Date.now()}`;
-		bwinHostRef.addPane(chatId, { position: 'right' }, ChatSession, {
-			sessionId: chatId,
-			data: { welcome: 'Another chat session added dynamically!' }
+		bwinHostRef.addPane(targetSash.id, {
+			id: chatId,
+			position: 'right',
+			component: ChatSession,
+			componentProps: {
+				sessionId: chatId,
+				data: { welcome: 'Another chat session added dynamically!' }
+			},
+			title: `Chat - ${chatId}`
 		});
 	}
 
@@ -94,10 +139,21 @@ function addCustomPane() {
 	function addTerminalPane() {
 		if (!bwinHostRef) return;
 
+		const rootSash = bwinHostRef.getRootSash();
+		if (!rootSash) return;
+		const leafNodes = rootSash.getAllLeafDescendants();
+		const targetSash = leafNodes[leafNodes.length - 1];
+
 		const termId = `terminal-${Date.now()}`;
-		bwinHostRef.addPane(termId, { position: 'bottom' }, TerminalSession, {
-			sessionId: termId,
-			data: { initCommand: 'ls -la' }
+		bwinHostRef.addPane(targetSash.id, {
+			id: termId,
+			position: 'bottom',
+			component: TerminalSession,
+			componentProps: {
+				sessionId: termId,
+				data: { initCommand: 'ls -la' }
+			},
+			title: `Terminal - ${termId}`
 		});
 	}
 
@@ -105,13 +161,24 @@ function addCustomPane() {
 	function addEditorPane() {
 		if (!bwinHostRef) return;
 
+		const rootSash = bwinHostRef.getRootSash();
+		if (!rootSash) return;
+		const leafNodes = rootSash.getAllLeafDescendants();
+		const targetSash = leafNodes[leafNodes.length - 1];
+
 		const editorId = `editor-${Date.now()}`;
-		bwinHostRef.addPane(editorId, { position: 'right' }, FileEditorSession, {
-			sessionId: editorId,
-			data: {
-				filename: 'new-file.md',
-				content: '# New Document\n\nStart editing here...'
-			}
+		bwinHostRef.addPane(targetSash.id, {
+			id: editorId,
+			position: 'right',
+			component: FileEditorSession,
+			componentProps: {
+				sessionId: editorId,
+				data: {
+					filename: 'new-file.md',
+					content: '# New Document\n\nStart editing here...'
+				}
+			},
+			title: `Editor - ${editorId}`
 		});
 	}
 </script>
@@ -138,8 +205,8 @@ function addCustomPane() {
 		<h4>How It Works</h4>
 		<div class="info-content">
 			<div class="info-item">
-				<strong>1. Import BwinHost</strong>
-				<code>import BwinHost from 'sv-window-manager';</code>
+				<strong>1. Import BinaryWindow</strong>
+				<code>import BinaryWindow from 'sv-window-manager';</code>
 			</div>
 			<div class="info-item">
 				<strong>2. Import Your Components</strong>
@@ -147,7 +214,10 @@ function addCustomPane() {
 			</div>
 			<div class="info-item">
 				<strong>3. Add Panes with Components</strong>
-				<code>bwinHost.addPane(id, config, MyComponent, props);</code>
+				<code
+					>bwin.addPane(targetId, &#123; component: MyComponent, componentProps: &#123;...&#125;
+					&#125;);</code
+				>
 			</div>
 		</div>
 	</div>

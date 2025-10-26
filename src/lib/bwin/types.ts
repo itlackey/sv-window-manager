@@ -40,15 +40,19 @@ export interface GlassAction {
 // Import Snippet type from Svelte for type-safe content composition
 import type { Snippet } from 'svelte';
 
+// Import Component type from Svelte
+import type { Component } from 'svelte';
+
 // Glass Component Props
 export interface GlassProps {
 	title?: string | HTMLElement | Snippet | null;
-	content?: string | HTMLElement | Snippet | null;
 	tabs?: (string | { label: string })[];
 	actions?: GlassAction[] | boolean;
 	draggable?: boolean;
 	sash: Sash;
 	binaryWindow: BwinContext;
+	component: Component;
+	componentProps?: Record<string, unknown>;
 }
 
 // BinaryWindow Context

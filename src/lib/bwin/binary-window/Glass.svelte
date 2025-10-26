@@ -6,46 +6,43 @@
 	import closeAction from './actions.close.js';
 	import minimizeAction from './actions.minimize.js';
 	import maximizeAction from './actions.maximize.js';
-	import DOMPurify from 'isomorphic-dompurify';
+	//import DOMPurify from 'isomorphic-dompurify';
 
 	/**
 	 * Props for the Glass component
 	 *
 	 * Glass represents the content container within a pane, providing a header
-	 * with title/tabs and action buttons, plus a content area for arbitrary DOM.
+	 * with title/tabs and action buttons, plus a content area for Svelte components.
 	 *
 	 * @property {string | HTMLElement | Snippet | null} [title] - Title text, element, or snippet for the header
-	 * @property {string | HTMLElement | Snippet | null} [content] - Content to render (HTML string, DOM element, or snippet). Ignored if component is provided.
 	 * @property {Array<string | {label: string}>} [tabs] - Tab labels for tabbed interface
 	 * @property {GlassAction[] | boolean} [actions] - Action buttons or false to hide defaults
 	 * @property {boolean} [draggable=true] - Whether the glass can be dragged to reposition
 	 * @property {Sash} [sash] - The sash this glass is attached to
 	 * @property {BwinContext} binaryWindow - Reference to the parent BinaryWindow context
-	 * @property {Component} [component] - Svelte component to mount in the content area
+	 * @property {Component} component - Svelte component to mount in the content area (required)
 	 * @property {Record<string, unknown>} [componentProps] - Props to pass to the component
 	 */
 	interface GlassProps {
 		title?: string | HTMLElement | Snippet | null;
-		content?: string | HTMLElement | Snippet | null;
 		tabs?: (string | { label: string })[];
 		actions?: GlassAction[] | boolean;
 		draggable?: boolean;
 		sash?: Sash;
 		binaryWindow: BwinContext;
-		component?: Component;
+		component: Component;
 		componentProps?: Record<string, unknown>;
 	}
 
 	let {
 		title = null,
-		content = null,
 		tabs = [],
 		actions = undefined,
 		draggable = true,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		sash: _sash,
 		binaryWindow,
-		component = undefined,
+		component,
 		componentProps = {}
 	}: GlassProps = $props();
 
@@ -60,15 +57,11 @@
 	let mountedComponent: Record<string, unknown> | null = null;
 	let componentContainer: HTMLElement | null = null;
 
-	// Determine if content is a snippet (needs to be rendered in template)
-	// vs DOM content (needs to be mounted via $effect)
-	const isContentSnippet = $derived(isSnippet(content));
-
-	// Mount user component when provided
+	// Mount user component - always required
 	// This effect runs when component/componentProps change or contentElement is ready
 	$effect(() => {
-		// Skip if no component or no content element
-		if (!component || !contentElement) return;
+		// Skip if no content element
+		if (!contentElement) return;
 
 		// Create container for user component
 		const container = document.createElement('div');
@@ -105,62 +98,6 @@
 				componentContainer = null;
 			}
 		};
-	});
-
-	// REFACTORED: Use $effect for DOM side effect (content mounting) - only for non-snippet, non-component content
-	// This is a legitimate use of $effect because:
-	// 1. It performs DOM manipulation (appendChild, innerHTML)
-	// 2. It doesn't update reactive state
-	// 3. It reacts to content prop changes
-	// Security: This approach eliminates XSS vulnerabilities by:
-	// 1. Directly appending DOM nodes without parsing (most common case via BwinHost)
-	// 2. Sanitizing HTML strings with DOMPurify to remove malicious scripts
-	// 3. Using strict sanitization config to prevent all script execution vectors
-	// Note: Snippets are rendered declaratively in the template, so they skip this effect
-	// Note: User components are handled by the component mounting effect above
-	$effect(() => {
-		// Skip if no content element, content is a snippet, or a component is being mounted
-		if (!contentElement || isContentSnippet || component) return;
-
-		// Clear previous content (only for DOM-based content)
-		contentElement.innerHTML = '';
-
-		if (!content) return;
-
-		// If content is already a DOM element, append it directly (safe)
-		if (content instanceof HTMLElement) {
-			contentElement.appendChild(content);
-		}
-		// If content is an HTML string, sanitize it before rendering
-		else if (typeof content === 'string') {
-			// DOMPurify removes all dangerous HTML/JS while preserving safe markup
-			const sanitized = DOMPurify.sanitize(content, {
-				ALLOWED_TAGS: [
-					'p',
-					'div',
-					'span',
-					'h1',
-					'h2',
-					'h3',
-					'h4',
-					'h5',
-					'h6',
-					'strong',
-					'em',
-					'u',
-					'br',
-					'ul',
-					'ol',
-					'li'
-				],
-				ALLOWED_ATTR: ['style', 'class'],
-				ALLOW_DATA_ATTR: false,
-				// Prevent javascript: URLs in CSS
-				FORBID_ATTR: ['onerror', 'onload', 'onclick'],
-				SAFE_FOR_TEMPLATES: true
-			});
-			contentElement.innerHTML = sanitized;
-		}
 	});
 
 	// Default built-in actions
@@ -263,12 +200,8 @@
 		</div>
 	</header>
 
-	<!-- Content rendering: snippets use {@render}, DOM/string content uses $effect mounting -->
-	<div class="glass-content" bind:this={contentElement} role="tabpanel" tabindex="0">
-		{#if isContentSnippet && content}
-			{@render content()}
-		{/if}
-	</div>
+	<!-- Content rendering: component is mounted via $effect -->
+	<div class="glass-content" bind:this={contentElement} role="tabpanel" tabindex="0"></div>
 </div>
 
 <style>
