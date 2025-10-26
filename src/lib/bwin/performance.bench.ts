@@ -13,7 +13,7 @@ import { bench, describe } from 'vitest';
 import { ConfigRoot } from './config/config-root.js';
 import { ConfigNode } from './config/config-node.js';
 import { Position } from './position.js';
-import { SashConfig } from './config/sash-config.js';
+import { Sash } from './sash.js';
 
 /**
  * Helper to create a complex multi-pane configuration
@@ -27,46 +27,34 @@ function createComplexConfig(paneCount: number): ConfigRoot {
 		});
 	}
 
-	// Create a balanced binary tree structure
-	const root = new ConfigRoot({
-		width: 800,
-		height: 600,
-		id: 'root'
-	});
+	// For larger configs, create a nested children structure
+	// Build a balanced tree by recursively creating splits
+	function createNestedConfig(depth: number, baseId: string): unknown[] {
+		if (depth <= 0) {
+			return [];
+		}
 
-	// Build tree by adding panes in a balanced way
-	const panes: ConfigNode[] = [root];
-	let targetId = 'root';
-	let position: string = Position.Right;
-
-	for (let i = 1; i < paneCount; i++) {
-		const newPane = new SashConfig({
-			id: `pane-${i}`,
-			position,
-			size: '50%'
-		});
-
-		// Find the target pane and add to it
-		const targetPane = panes.find((p) => p.id === targetId);
-		if (targetPane) {
-			if (!targetPane.children) {
-				targetPane.children = [];
+		return [
+			{
+				id: `${baseId}-left`,
+				children: depth > 1 ? createNestedConfig(depth - 1, `${baseId}-left`) : []
+			},
+			{
+				id: `${baseId}-right`,
+				children: depth > 1 ? createNestedConfig(depth - 1, `${baseId}-right`) : []
 			}
-			targetPane.children.push(newPane);
-			panes.push(newPane);
-		}
-
-		// Alternate between right and bottom positions
-		// and cycle through existing panes for balanced tree
-		if (i % 2 === 0) {
-			position = Position.Bottom;
-		} else {
-			position = Position.Right;
-			targetId = `pane-${Math.floor(i / 2)}`;
-		}
+		];
 	}
 
-	return root;
+	// Calculate depth needed for pane count (log2)
+	const depth = Math.ceil(Math.log2(paneCount));
+
+	return new ConfigRoot({
+		width: 800,
+		height: 600,
+		id: 'root',
+		children: createNestedConfig(depth, 'pane')
+	});
 }
 
 /**
@@ -120,27 +108,22 @@ describe('BinaryWindow Performance Benchmarks', () => {
 					id: 'root'
 				});
 
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
-				// Add 20 panes sequentially
+				// Add 20 panes sequentially by splitting
 				let currentId = 'root';
 				for (let i = 0; i < 20; i++) {
-					const newConfig = new SashConfig({
-						id: `pane-${i}`,
-						position: i % 2 === 0 ? Position.Right : Position.Bottom,
-						size: '50%'
-					});
-
-					// Simulate addPane operation
 					const targetSash = sash.getById(currentId);
-					if (targetSash) {
-						const newSash = SashConfig.fromConfig(newConfig);
-						newSash.parent = targetSash;
-						targetSash.addChild(newSash);
+					if (targetSash && targetSash.isLeaf()) {
+						// Split the target pane
+						targetSash.split({
+							position: i % 2 === 0 ? Position.Right : Position.Bottom,
+							percent: 0.5
+						});
 
 						// Cycle through panes for next addition
-						if (i % 3 === 0) {
-							currentId = `pane-${i}`;
+						if (i % 3 === 0 && targetSash.children.length > 0) {
+							currentId = targetSash.children[0].id;
 						}
 					}
 				}
@@ -155,20 +138,16 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'adding single pane to 10-pane window',
 			() => {
 				const config = createComplexConfig(10);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
-				// Add one pane
-				const newConfig = new SashConfig({
-					id: 'new-pane',
-					position: Position.Right,
-					size: '50%'
-				});
-
-				const targetSash = sash.getById('pane-5');
-				if (targetSash) {
-					const newSash = SashConfig.fromConfig(newConfig);
-					newSash.parent = targetSash;
-					targetSash.addChild(newSash);
+				// Find a leaf pane to split
+				const leaves = sash.getAllLeafDescendants();
+				if (leaves.length > 0) {
+					const targetSash = leaves[Math.floor(leaves.length / 2)];
+					targetSash.split({
+						position: Position.Right,
+						percent: 0.5
+					});
 				}
 			},
 			{
@@ -187,7 +166,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'resize 10-pane window maintains 60fps',
 			() => {
 				const config = createComplexConfig(10);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				// Simulate resize operation - this is what happens during muntin drag
 				// Resize from 800x600 to 1200x800
@@ -220,7 +199,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'resize 5-pane window',
 			() => {
 				const config = createComplexConfig(5);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				sash.width = 1000;
 				sash.height = 700;
@@ -245,7 +224,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'initial render with 10 panes',
 			() => {
 				const config = createComplexConfig(10);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				// Walk the tree to simulate rendering
 				sash.walk((node) => {
@@ -267,7 +246,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'initial render with 5 panes',
 			() => {
 				const config = createComplexConfig(5);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				sash.walk((node) => {
 					const _ = node.left + node.top + node.width + node.height;
@@ -286,7 +265,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'initial render with 20 panes',
 			() => {
 				const config = createComplexConfig(20);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				sash.walk((node) => {
 					const _ = node.left + node.top + node.width + node.height;
@@ -323,20 +302,17 @@ describe('BinaryWindow Performance Benchmarks', () => {
 						id: 'root'
 					});
 
-					const sash = SashConfig.fromConfig(config);
+					const sash = config.buildSashTree();
 
-					// Add a pane
-					const newConfig = new SashConfig({
-						id: `pane-${cycle}`,
-						position: Position.Right,
-						size: '50%'
-					});
+					// Split to add a pane
+					if (sash.isLeaf()) {
+						sash.split({
+							position: Position.Right,
+							percent: 0.5
+						});
+					}
 
-					const newSash = SashConfig.fromConfig(newConfig);
-					newSash.parent = sash;
-					sash.addChild(newSash);
-
-					// Remove it by replacing children
+					// Remove children by clearing array
 					sash.children = [];
 				}
 
@@ -373,7 +349,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 
 				for (let i = 0; i < 50; i++) {
 					const config = createComplexConfig(5);
-					const sash = SashConfig.fromConfig(config);
+					const sash = config.buildSashTree();
 
 					// Walk tree to ensure full initialization
 					sash.walk(() => {});
@@ -406,7 +382,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'walk 20-pane tree',
 			() => {
 				const config = createComplexConfig(20);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				let count = 0;
 				sash.walk(() => {
@@ -423,12 +399,16 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'find pane by ID in 20-pane tree',
 			() => {
 				const config = createComplexConfig(20);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
-				// Search for middle pane
-				const found = sash.getById('pane-10');
-				if (!found) {
-					throw new Error('Pane not found');
+				// Search for any leaf pane (since IDs are auto-generated in the tree)
+				const leaves = sash.getAllLeafDescendants();
+				if (leaves.length > 0) {
+					const targetId = leaves[Math.floor(leaves.length / 2)].id;
+					const found = sash.getById(targetId);
+					if (!found) {
+						throw new Error('Pane not found');
+					}
 				}
 			},
 			{
@@ -441,7 +421,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'get all leaf descendants from 20-pane tree',
 			() => {
 				const config = createComplexConfig(20);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				const leaves = sash.getAllLeafDescendants();
 				if (leaves.length === 0) {
@@ -464,7 +444,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'calculate min dimensions for 10-pane tree',
 			() => {
 				const config = createComplexConfig(10);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				const minWidth = sash.calcMinWidth();
 				const minHeight = sash.calcMinHeight();
@@ -483,7 +463,7 @@ describe('BinaryWindow Performance Benchmarks', () => {
 			'calculate min dimensions for 20-pane tree',
 			() => {
 				const config = createComplexConfig(20);
-				const sash = SashConfig.fromConfig(config);
+				const sash = config.buildSashTree();
 
 				const minWidth = sash.calcMinWidth();
 				const minHeight = sash.calcMinHeight();

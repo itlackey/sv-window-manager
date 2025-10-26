@@ -44,8 +44,8 @@ describe('getOppositePosition', () => {
 	});
 
 	it('throws BwinError for invalid position', () => {
-		expect(() => getOppositePosition('invalid')).toThrow();
-		expect(() => getOppositePosition('invalid')).toThrow(
+		expect(() => getOppositePosition('invalid' as any)).toThrow();
+		expect(() => getOppositePosition('invalid' as any)).toThrow(
 			BwinErrors.invalidPosition('invalid').message
 		);
 	});
@@ -101,7 +101,7 @@ describe('isTopRightBottomLeftOrCenter', () => {
 	});
 
 	it('returns false for invalid position', () => {
-		expect(isTopRightBottomLeftOrCenter('invalid')).toBe(false);
+		expect(isTopRightBottomLeftOrCenter('invalid' as any)).toBe(false);
 	});
 });
 

@@ -52,11 +52,17 @@ test.describe('Glass Action Buttons', () => {
 		expect(paneCount).toBe(2);
 
 		// Verify the pane is no longer visible
-		await expect(page.locator(CSS_SELECTORS.glassTitle, { hasText: 'Closeable Pane' })).not.toBeVisible();
+		await expect(
+			page.locator(CSS_SELECTORS.glassTitle, { hasText: 'Closeable Pane' })
+		).not.toBeVisible();
 
 		// Verify original panes remain
-		await expect(page.locator(CSS_SELECTORS.glassTitle, { hasText: TEXT_CONTENT.leftPaneTitle })).toBeVisible();
-		await expect(page.locator(CSS_SELECTORS.glassTitle, { hasText: TEXT_CONTENT.rightPaneTitle })).toBeVisible();
+		await expect(
+			page.locator(CSS_SELECTORS.glassTitle, { hasText: TEXT_CONTENT.leftPaneTitle })
+		).toBeVisible();
+		await expect(
+			page.locator(CSS_SELECTORS.glassTitle, { hasText: TEXT_CONTENT.rightPaneTitle })
+		).toBeVisible();
 
 		// Verify no console errors
 		expect(errors.filter((e) => !e.includes('Warning'))).toEqual([]);
@@ -181,8 +187,12 @@ test.describe('Glass Action Buttons', () => {
 		expect(newHeight).toBeGreaterThanOrEqual(initialHeight);
 
 		// Verify pane approximately covers container
-		const containerWidth = await page.locator(CSS_SELECTORS.frameContainer).evaluate((el) => el.clientWidth);
-		const containerHeight = await page.locator(CSS_SELECTORS.frameContainer).evaluate((el) => el.clientHeight);
+		const containerWidth = await page
+			.locator(CSS_SELECTORS.frameContainer)
+			.evaluate((el) => el.clientWidth);
+		const containerHeight = await page
+			.locator(CSS_SELECTORS.frameContainer)
+			.evaluate((el) => el.clientHeight);
 
 		// Allow 10px tolerance for borders/padding
 		expect(newWidth).toBeGreaterThan(containerWidth - 10);

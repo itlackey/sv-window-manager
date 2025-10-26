@@ -4,12 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Svelte 5 component library** that provides a wrapper over the **bwin.js** JavaScript window manager. It enables tiling window management in web applications using modern Svelte 5 patterns. The project is in early POC stage, inspired by Wave Terminal.
+This is a **native Svelte 5 component library** that provides tiling window management for web applications. Built from the ground up using modern Svelte 5 patterns, it offers a fully reactive, type-safe approach to building tiling window layouts. The project is inspired by Wave Terminal and the concepts from bwin.js, but is a complete native Svelte 5 implementation rather than a wrapper.
 
 **Key Resources:**
 
-- bwin.js documentation: https://bhjsdev.github.io/bwin-docs/
 - Built with Svelte 5 and SvelteKit as a reusable library package
+- bwin.js documentation (conceptual reference): https://bhjsdev.github.io/bwin-docs/
 
 ## Development Commands
 
@@ -54,7 +54,7 @@ npm publish              # Publish to npm (after pack)
 The project follows a **dual-purpose structure**:
 
 - **`src/lib/`** - Exportable library code (published to npm)
-  - `components/bwin/` - Core window manager components
+  - `components/bwin/` - Core window manager components (native Svelte 5 implementation)
   - `index.ts` - Main library exports (ALL library components MUST be re-exported here)
   - `types.ts` - TypeScript type definitions
 
@@ -118,9 +118,16 @@ bwin.addPane('root', {
 });
 ```
 
-### bwin.js Integration
+### Architecture Philosophy
 
-The `src/lib/components/bwin/bwin.js` file is the **bundled bwin.js library** (minified vanilla JS). This is imported directly by `BwinHost.svelte` along with `bwin.css` for styling.
+This library is a **native Svelte 5 implementation** of tiling window management concepts. While inspired by bwin.js, all core functionality is built directly in Svelte 5 using runes, snippets, and reactive state management.
+
+**Key Architectural Decisions:**
+
+1. **Binary Space Partitioning (BSP) Tree**: Panes are organized in a tree structure where each split creates two children
+2. **Reactive State**: All pane state is managed using Svelte 5's `$state` rune for automatic reactivity
+3. **Component-based**: Every pane renders a Svelte component, ensuring type safety and reactivity
+4. **Declarative + Imperative APIs**: Support both declarative configuration and imperative pane manipulation
 
 **CSS Customization:**
 The library exposes CSS custom properties for theming:
@@ -184,6 +191,7 @@ The library uses Svelte 5 snippets for declarative content rendering:
 ```
 
 **Snippet Pattern**:
+
 - Parent component declares snippet props: `paneContent?: Snippet<[Sash]>`
 - Parent passes snippet as children with parameters
 - Child component renders snippet: `{@render paneContent(data)}`
@@ -266,12 +274,14 @@ bwin.addPane('pane-1', {
 src/
 ├── lib/                          # Published library code
 │   ├── components/
-│   │   └── bwin/                 # Window manager components
-│   │       ├── BwinHost.svelte   # Main wrapper component
-│   │       ├── bwin.js           # Bundled bwin.js library
-│   │       ├── bwin.css          # bwin.js styles
-│   │       ├── SessionComponentFactory.svelte.ts
-│   │       └── *Session.svelte   # Session type components
+│   │   └── bwin/                 # Window manager components (native Svelte 5)
+│   │       ├── BinaryWindow.svelte   # Main window manager component
+│   │       ├── Glass.svelte          # Individual pane wrapper
+│   │       ├── Frame.svelte          # BSP tree renderer
+│   │       ├── Sill.svelte           # Horizontal/vertical containers
+│   │       ├── GlassState.svelte.ts  # Reactive pane state
+│   │       ├── SillState.svelte.ts   # Reactive container state
+│   │       └── *Session.svelte       # Session type components
 │   ├── index.ts                  # Main exports (REQUIRED)
 │   └── types.ts                  # Type definitions
 ├── routes/                       # Demo app (NOT published)
@@ -301,14 +311,40 @@ dist/                             # Build output (generated)
 - **Peer dependency:** Svelte 5+ is required (`"svelte": "^5.0.0"`)
 - **CSS side effects:** CSS files are marked as side effects in `package.json` to prevent tree-shaking
 - **Package exports:** Library exports both types (`dist/index.d.ts`) and components (`dist/index.js`)
-- **bwin.js is vendored:** The library includes a bundled copy of bwin.js in `src/lib/components/bwin/`
+- **Native implementation:** All window management logic is implemented natively in Svelte 5
 - **Declarative rendering:** Glass components can be rendered declaratively via snippets (see `DECLARATIVE_GLASS_RENDERING.md`)
+
+## Known Warnings
+
+### adapter-auto Warning (Expected)
+
+When running `npm run dev` or `npm run build`, you may see:
+
+```
+@sveltejs/adapter-auto: No production environment detected. This warning can be ignored.
+```
+
+**This warning is expected and can be safely ignored.** It appears because:
+
+1. The project includes a demo/showcase SvelteKit app in `src/routes/` for development and demonstration purposes
+2. This demo app has no production deployment target (no Vercel, Netlify, etc. configuration)
+3. The demo app is excluded from the published npm package via `.npmignore`
+4. Only the library code from `src/lib/` is packaged and published to npm (via `dist/`)
+
+The warning does not affect:
+- The library package build (`npm pack`)
+- The published npm package functionality
+- Library consumers who install the package
+
+The demo app is purely for local development, Storybook integration, and showcasing library features. It is never deployed or included in the distributed package.
 
 ## Current POC Status
 
 This is an **early proof of concept**:
 
-- Basic window manager integration is functional
+- Native Svelte 5 window manager implementation is functional
+- Binary space partitioning (BSP) tree structure for pane organization
+- Reactive state management using Svelte 5 runes
 - Session component factory demonstrates dynamic loading
 - Demo app shows adding multiple session types
-- Further work needed for full bwin.js feature coverage
+- Further refinement needed for production-ready features (drag-and-drop reordering, persistence, etc.)

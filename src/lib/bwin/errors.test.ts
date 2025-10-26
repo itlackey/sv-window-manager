@@ -335,8 +335,60 @@ describe('BwinErrors factory functions', () => {
 
 	describe('all error codes are unique', () => {
 		it('ensures no duplicate error codes', () => {
-			const codes = Object.values(BwinErrors).map((fn) => {
-				const error = typeof fn === 'function' ? fn('test') : fn();
+			const codes = Object.entries(BwinErrors).map(([name]) => {
+				let error: BwinError;
+
+				// Handle functions with different signatures
+				if (name === 'invalidDimensions') {
+					error = BwinErrors.invalidDimensions(100, 200);
+				} else if (name === 'paneNotFound') {
+					error = BwinErrors.paneNotFound('test');
+				} else if (name === 'invalidPosition') {
+					error = BwinErrors.invalidPosition('test');
+				} else if (name === 'componentNotReady') {
+					error = BwinErrors.componentNotReady('test');
+				} else if (name === 'invalidConfiguration') {
+					error = BwinErrors.invalidConfiguration('test');
+				} else if (name === 'keyAlreadyExists') {
+					error = BwinErrors.keyAlreadyExists('test');
+				} else if (name === 'invalidSize') {
+					error = BwinErrors.invalidSize('test');
+				} else if (name === 'invalidConfigValue') {
+					error = BwinErrors.invalidConfigValue('test');
+				} else if (name === 'missingSashId') {
+					error = BwinErrors.missingSashId();
+				} else if (name === 'frameNotInitialized') {
+					error = BwinErrors.frameNotInitialized();
+				} else if (name === 'paneElementNotFound') {
+					error = BwinErrors.paneElementNotFound();
+				} else if (name === 'paneElementMissingSashId') {
+					error = BwinErrors.paneElementMissingSashId();
+				} else if (name === 'sillElementNotFound') {
+					error = BwinErrors.sillElementNotFound();
+				} else if (name === 'minimizedGlassCreationFailed') {
+					error = BwinErrors.minimizedGlassCreationFailed();
+				} else if (name === 'siblingsNotOpposite') {
+					error = BwinErrors.siblingsNotOpposite();
+				} else if (name === 'siblingSizesSumNot1') {
+					error = BwinErrors.siblingSizesSumNot1();
+				} else if (name === 'siblingSizesSumNotWidth') {
+					error = BwinErrors.siblingSizesSumNotWidth();
+				} else if (name === 'siblingSizesSumNotHeight') {
+					error = BwinErrors.siblingSizesSumNotHeight();
+				} else if (name === 'sashPositionRequired') {
+					error = BwinErrors.sashPositionRequired();
+				} else if (name === 'sashNotFoundWhenSwapping') {
+					error = BwinErrors.sashNotFoundWhenSwapping();
+				} else if (name === 'maxChildrenExceeded') {
+					error = BwinErrors.maxChildrenExceeded();
+				} else if (name === 'parameterMustBePositiveInteger') {
+					error = BwinErrors.parameterMustBePositiveInteger();
+				} else if (name === 'parametersMustBeNonNegative') {
+					error = BwinErrors.parametersMustBeNonNegative();
+				} else {
+					throw new Error(`Unhandled error factory: ${name}`);
+				}
+
 				return error.code;
 			});
 
@@ -347,8 +399,60 @@ describe('BwinErrors factory functions', () => {
 
 	describe('all errors have [bwin] prefix', () => {
 		it('ensures all errors are prefixed correctly', () => {
-			Object.values(BwinErrors).forEach((fn) => {
-				const error = typeof fn === 'function' ? fn('test') : fn();
+			Object.entries(BwinErrors).forEach(([name]) => {
+				let error: BwinError;
+
+				// Handle functions with different signatures
+				if (name === 'invalidDimensions') {
+					error = BwinErrors.invalidDimensions(100, 200);
+				} else if (name === 'paneNotFound') {
+					error = BwinErrors.paneNotFound('test');
+				} else if (name === 'invalidPosition') {
+					error = BwinErrors.invalidPosition('test');
+				} else if (name === 'componentNotReady') {
+					error = BwinErrors.componentNotReady('test');
+				} else if (name === 'invalidConfiguration') {
+					error = BwinErrors.invalidConfiguration('test');
+				} else if (name === 'keyAlreadyExists') {
+					error = BwinErrors.keyAlreadyExists('test');
+				} else if (name === 'invalidSize') {
+					error = BwinErrors.invalidSize('test');
+				} else if (name === 'invalidConfigValue') {
+					error = BwinErrors.invalidConfigValue('test');
+				} else if (name === 'missingSashId') {
+					error = BwinErrors.missingSashId();
+				} else if (name === 'frameNotInitialized') {
+					error = BwinErrors.frameNotInitialized();
+				} else if (name === 'paneElementNotFound') {
+					error = BwinErrors.paneElementNotFound();
+				} else if (name === 'paneElementMissingSashId') {
+					error = BwinErrors.paneElementMissingSashId();
+				} else if (name === 'sillElementNotFound') {
+					error = BwinErrors.sillElementNotFound();
+				} else if (name === 'minimizedGlassCreationFailed') {
+					error = BwinErrors.minimizedGlassCreationFailed();
+				} else if (name === 'siblingsNotOpposite') {
+					error = BwinErrors.siblingsNotOpposite();
+				} else if (name === 'siblingSizesSumNot1') {
+					error = BwinErrors.siblingSizesSumNot1();
+				} else if (name === 'siblingSizesSumNotWidth') {
+					error = BwinErrors.siblingSizesSumNotWidth();
+				} else if (name === 'siblingSizesSumNotHeight') {
+					error = BwinErrors.siblingSizesSumNotHeight();
+				} else if (name === 'sashPositionRequired') {
+					error = BwinErrors.sashPositionRequired();
+				} else if (name === 'sashNotFoundWhenSwapping') {
+					error = BwinErrors.sashNotFoundWhenSwapping();
+				} else if (name === 'maxChildrenExceeded') {
+					error = BwinErrors.maxChildrenExceeded();
+				} else if (name === 'parameterMustBePositiveInteger') {
+					error = BwinErrors.parameterMustBePositiveInteger();
+				} else if (name === 'parametersMustBeNonNegative') {
+					error = BwinErrors.parametersMustBeNonNegative();
+				} else {
+					throw new Error(`Unhandled error factory: ${name}`);
+				}
+
 				expect(error.message).toMatch(/^\[bwin\]/);
 			});
 		});
@@ -356,8 +460,60 @@ describe('BwinErrors factory functions', () => {
 
 	describe('error factory returns BwinError instances', () => {
 		it('ensures all factories return BwinError instances', () => {
-			Object.values(BwinErrors).forEach((fn) => {
-				const error = typeof fn === 'function' ? fn('test') : fn();
+			Object.entries(BwinErrors).forEach(([name]) => {
+				let error: BwinError;
+
+				// Handle functions with different signatures
+				if (name === 'invalidDimensions') {
+					error = BwinErrors.invalidDimensions(100, 200);
+				} else if (name === 'paneNotFound') {
+					error = BwinErrors.paneNotFound('test');
+				} else if (name === 'invalidPosition') {
+					error = BwinErrors.invalidPosition('test');
+				} else if (name === 'componentNotReady') {
+					error = BwinErrors.componentNotReady('test');
+				} else if (name === 'invalidConfiguration') {
+					error = BwinErrors.invalidConfiguration('test');
+				} else if (name === 'keyAlreadyExists') {
+					error = BwinErrors.keyAlreadyExists('test');
+				} else if (name === 'invalidSize') {
+					error = BwinErrors.invalidSize('test');
+				} else if (name === 'invalidConfigValue') {
+					error = BwinErrors.invalidConfigValue('test');
+				} else if (name === 'missingSashId') {
+					error = BwinErrors.missingSashId();
+				} else if (name === 'frameNotInitialized') {
+					error = BwinErrors.frameNotInitialized();
+				} else if (name === 'paneElementNotFound') {
+					error = BwinErrors.paneElementNotFound();
+				} else if (name === 'paneElementMissingSashId') {
+					error = BwinErrors.paneElementMissingSashId();
+				} else if (name === 'sillElementNotFound') {
+					error = BwinErrors.sillElementNotFound();
+				} else if (name === 'minimizedGlassCreationFailed') {
+					error = BwinErrors.minimizedGlassCreationFailed();
+				} else if (name === 'siblingsNotOpposite') {
+					error = BwinErrors.siblingsNotOpposite();
+				} else if (name === 'siblingSizesSumNot1') {
+					error = BwinErrors.siblingSizesSumNot1();
+				} else if (name === 'siblingSizesSumNotWidth') {
+					error = BwinErrors.siblingSizesSumNotWidth();
+				} else if (name === 'siblingSizesSumNotHeight') {
+					error = BwinErrors.siblingSizesSumNotHeight();
+				} else if (name === 'sashPositionRequired') {
+					error = BwinErrors.sashPositionRequired();
+				} else if (name === 'sashNotFoundWhenSwapping') {
+					error = BwinErrors.sashNotFoundWhenSwapping();
+				} else if (name === 'maxChildrenExceeded') {
+					error = BwinErrors.maxChildrenExceeded();
+				} else if (name === 'parameterMustBePositiveInteger') {
+					error = BwinErrors.parameterMustBePositiveInteger();
+				} else if (name === 'parametersMustBeNonNegative') {
+					error = BwinErrors.parametersMustBeNonNegative();
+				} else {
+					throw new Error(`Unhandled error factory: ${name}`);
+				}
+
 				expect(error).toBeInstanceOf(BwinError);
 				expect(error).toBeInstanceOf(Error);
 			});

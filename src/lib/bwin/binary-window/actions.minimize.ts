@@ -57,7 +57,7 @@ export default {
 
 		// Preserve the store (title, content, etc.) before removing the pane
 		const rootSash = binaryWindow.rootSash;
-		const sash = rootSash?.getById(paneSashId);
+		const sash = paneSashId ? rootSash?.getById(paneSashId) : null;
 		const store = { ...(sash?.store || {}) };
 
 		// Extract title and content from the actual Glass DOM element to ensure we capture them

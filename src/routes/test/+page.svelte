@@ -508,11 +508,4 @@
 	.test-info strong {
 		color: #0461ad;
 	}
-
-	.test-info code {
-		background: #e8e8e8;
-		padding: 0.2rem 0.4rem;
-		border-radius: 3px;
-		font-family: 'Monaco', monospace;
-	}
 </style>

@@ -64,7 +64,6 @@ describe('GlassManager - Reactive State', () => {
 		});
 	});
 
-
 	describe('removeGlass', () => {
 		it('should not throw if glass does not exist (no-op in declarative mode)', () => {
 			expect(() => {

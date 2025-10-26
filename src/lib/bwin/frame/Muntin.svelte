@@ -65,6 +65,12 @@
 	);
 </script>
 
+<!--
+	Per ARIA spec, a separator with aria-valuemin/max/now becomes an interactive widget
+	that MUST be focusable. Svelte's a11y checker doesn't recognize this pattern.
+	See: https://www.w3.org/TR/wai-aria-1.2/#separator
+-->
+<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
 	bind:this={muntinElement}
 	class="muntin"
@@ -75,7 +81,13 @@
 	role="separator"
 	aria-label={isVertical ? 'Vertical divider' : 'Horizontal divider'}
 	aria-orientation={isVertical ? 'vertical' : 'horizontal'}
-	aria-valuenow={isVertical ? sash.leftChild?.width : sash.topChild?.height}
+	aria-valuenow={isResizable
+		? isVertical
+			? sash.leftChild?.width
+			: sash.topChild?.height
+		: undefined}
+	aria-valuemin={isResizable ? 0 : undefined}
+	aria-valuemax={isResizable ? (isVertical ? sash.width : sash.height) : undefined}
 	tabindex={isResizable ? 0 : -1}
 	style:width
 	style:height

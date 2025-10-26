@@ -57,7 +57,8 @@
 		{@render children()}
 	{/if}
 	{#if debug}
-		<pre style="font-size: 10px; position: absolute; top: 0; left: 0; z-index: 9999; background: rgba(255,255,0,0.8); padding: 2px; margin: 0;">{sash.id}
+		<pre
+			style="font-size: 10px; position: absolute; top: 0; left: 0; z-index: 9999; background: rgba(255,255,0,0.8); padding: 2px; margin: 0;">{sash.id}
 {sash.position}
 top: {sash.top}px
 left: {sash.left}px

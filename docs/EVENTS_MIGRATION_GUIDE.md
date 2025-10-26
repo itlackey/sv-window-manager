@@ -26,46 +26,38 @@ The `Frame` component now supports both event handlers (new) and callback props 
 
 ```svelte
 <script>
-  import { Frame } from 'sv-window-manager';
+	import { Frame } from 'sv-window-manager';
 
-  function handlePaneRender(paneEl, sash) {
-    console.log('Pane rendered:', sash.id);
-  }
+	function handlePaneRender(paneEl, sash) {
+		console.log('Pane rendered:', sash.id);
+	}
 
-  function handleMuntinRender(muntinEl, sash) {
-    console.log('Muntin rendered:', sash.id);
-  }
+	function handleMuntinRender(muntinEl, sash) {
+		console.log('Muntin rendered:', sash.id);
+	}
 </script>
 
-<Frame
-  {settings}
-  onPaneRender={handlePaneRender}
-  onMuntinRender={handleMuntinRender}
-/>
+<Frame {settings} onPaneRender={handlePaneRender} onMuntinRender={handleMuntinRender} />
 ```
 
 #### After (Recommended)
 
 ```svelte
 <script>
-  import { Frame } from 'sv-window-manager';
+	import { Frame } from 'sv-window-manager';
 
-  function handlePaneRender(event) {
-    const { paneElement, sash } = event.detail;
-    console.log('Pane rendered:', sash.id);
-  }
+	function handlePaneRender(event) {
+		const { paneElement, sash } = event.detail;
+		console.log('Pane rendered:', sash.id);
+	}
 
-  function handleMuntinRender(event) {
-    const { muntinElement, sash } = event.detail;
-    console.log('Muntin rendered:', sash.id);
-  }
+	function handleMuntinRender(event) {
+		const { muntinElement, sash } = event.detail;
+		console.log('Muntin rendered:', sash.id);
+	}
 </script>
 
-<Frame
-  {settings}
-  on:panerender={handlePaneRender}
-  on:muntinrender={handleMuntinRender}
-/>
+<Frame {settings} on:panerender={handlePaneRender} on:muntinrender={handleMuntinRender} />
 ```
 
 ### Pane Component
@@ -108,8 +100,8 @@ Dispatched when a pane is mounted and rendered.
 
 ```typescript
 interface PaneRenderEvent {
-  paneElement: HTMLElement;
-  sash: Sash;
+	paneElement: HTMLElement;
+	sash: Sash;
 }
 ```
 
@@ -117,11 +109,11 @@ interface PaneRenderEvent {
 
 ```svelte
 <Frame
-  {settings}
-  on:panerender={(e) => {
-    const { paneElement, sash } = e.detail;
-    // Your logic here
-  }}
+	{settings}
+	on:panerender={(e) => {
+		const { paneElement, sash } = e.detail;
+		// Your logic here
+	}}
 />
 ```
 
@@ -133,8 +125,8 @@ Dispatched when a muntin (divider) is mounted and rendered.
 
 ```typescript
 interface MuntinRenderEvent {
-  muntinElement: HTMLElement;
-  sash: Sash;
+	muntinElement: HTMLElement;
+	sash: Sash;
 }
 ```
 
@@ -142,11 +134,11 @@ interface MuntinRenderEvent {
 
 ```svelte
 <Frame
-  {settings}
-  on:muntinrender={(e) => {
-    const { muntinElement, sash } = e.detail;
-    // Your logic here
-  }}
+	{settings}
+	on:muntinrender={(e) => {
+		const { muntinElement, sash } = e.detail;
+		// Your logic here
+	}}
 />
 ```
 
@@ -172,8 +164,8 @@ All events are fully typed. Import the event types if needed:
 import type { PaneRenderEvent, MuntinRenderEvent } from 'sv-window-manager';
 
 function handlePaneRender(event: CustomEvent<PaneRenderEvent>) {
-  const { paneElement, sash } = event.detail;
-  // TypeScript knows the exact shape of event.detail
+	const { paneElement, sash } = event.detail;
+	// TypeScript knows the exact shape of event.detail
 }
 ```
 

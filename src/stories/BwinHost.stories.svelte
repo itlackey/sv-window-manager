@@ -12,7 +12,7 @@
   });
   
   const defaultArgs = {
-    config: {
+    settings: {
       sashSize: 6,
       minPaneSize: 80
     }

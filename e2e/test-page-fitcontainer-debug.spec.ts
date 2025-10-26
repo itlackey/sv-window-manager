@@ -2,10 +2,16 @@
 // Diagnostic test to investigate fitContainer issue on initial page load
 import { test, expect } from '@playwright/test';
 
+interface ConsoleLog {
+	type: string;
+	text: string;
+	timestamp?: string;
+}
+
 test.describe('FitContainer Debug - Initial Load Investigation', () => {
 	test('DEBUG: Capture Initial Page Load State', async ({ page }) => {
 		// Enable console logging
-		const consoleLogs: any[] = [];
+		const consoleLogs: ConsoleLog[] = [];
 		page.on('console', (msg) => {
 			const text = msg.text();
 			consoleLogs.push({
@@ -108,7 +114,6 @@ test.describe('FitContainer Debug - Initial Load Investigation', () => {
 
 		// Get rootSash dimensions from component
 		const rootSashInfo = await page.evaluate(() => {
-			const bwEl = document.querySelector('.bw-container');
 			// Access the Svelte component internals (this is a hack for debugging)
 			return {
 				message: 'Root sash dimensions would need to be exposed via debug mode or API'
@@ -154,7 +159,7 @@ test.describe('FitContainer Debug - Initial Load Investigation', () => {
 
 	test('DEBUG: Compare State After Add Pane', async ({ page }) => {
 		// Enable console logging
-		const consoleLogs: any[] = [];
+		const consoleLogs: ConsoleLog[] = [];
 		page.on('console', (msg) => {
 			consoleLogs.push({
 				type: msg.type(),
@@ -279,7 +284,7 @@ test.describe('FitContainer Debug - Initial Load Investigation', () => {
 	});
 
 	test('DEBUG: Test Container Resize Behavior', async ({ page }) => {
-		const consoleLogs: any[] = [];
+		const consoleLogs: ConsoleLog[] = [];
 		page.on('console', (msg) => {
 			const text = msg.text();
 			if (text.includes('fitContainer') || text.includes('ResizeObserver')) {

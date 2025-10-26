@@ -1,6 +1,17 @@
 {
 	"name": "sv-window-manager",
 	"version": "0.0.4",
+	"description": "A modern Svelte 5 component library for tiling window management in web applications",
+	"author": "itlackey",
+	"license": "CC-BY",
+	"homepage": "https://github.com/itlackey/sv-window-manager#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/itlackey/sv-window-manager.git"
+	},
+	"bugs": {
+		"url": "https://github.com/itlackey/sv-window-manager/issues"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",

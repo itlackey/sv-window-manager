@@ -6,5 +6,5 @@
  * fine-grained reactive system while maintaining full API compatibility.
  */
 
-export { ReactiveSash as Sash, DEFAULTS } from './sash.svelte.ts';
-export type { SashConstructorParams } from './sash.svelte.ts';
+export { ReactiveSash as Sash, DEFAULTS } from './sash.svelte';
+export type { SashConstructorParams } from './sash.svelte';

@@ -31,6 +31,7 @@ export interface ConfigNodeParams {
 
 export interface SashCreationOptions {
 	resizeStrategy?: string;
+	parent?: Sash | null;
 }
 
 /**
@@ -201,7 +202,7 @@ export class ConfigNode implements ParentRect {
 	 * @param options - Options for sash creation
 	 * @returns The created sash
 	 */
-	createSash({ resizeStrategy }: SashCreationOptions = {}): Sash {
+	createSash({ resizeStrategy, parent }: SashCreationOptions = {}): Sash {
 		return new Sash({
 			left: this.left,
 			top: this.top,
@@ -212,6 +213,7 @@ export class ConfigNode implements ParentRect {
 			minWidth: this.minWidth,
 			minHeight: this.minHeight,
 			resizeStrategy: resizeStrategy || this.resizeStrategy,
+			parent: parent ?? null,
 			store: this.nonCoreData
 		} as SashConstructorParams);
 	}
@@ -302,16 +304,13 @@ export class ConfigNode implements ParentRect {
 	 * @param options - Options for tree building
 	 * @returns The root sash of the built tree
 	 */
-	buildSashTree({ resizeStrategy }: SashCreationOptions = {}): Sash {
-		const sash = this.createSash({ resizeStrategy });
+	buildSashTree({ resizeStrategy, parent }: SashCreationOptions = {}): Sash {
+		const sash = this.createSash({ resizeStrategy, parent });
 
 		if (!Array.isArray(this.children) || this.children.length === 0) {
 			// If no children and this is the root position, add placeholder content
 			// The placeholder provides helpful content and will be auto-removed when first pane is added
-			if (
-				this.position === Position.Root &&
-				Object.keys(sash.store || {}).length === 0
-			) {
+			if (this.position === Position.Root && Object.keys(sash.store || {}).length === 0) {
 				sash.store = { ...PLACEHOLDER_CONTENT, isPlaceholder: true };
 			}
 			return sash;
@@ -343,11 +342,14 @@ export class ConfigNode implements ParentRect {
 		}
 
 		if (primaryChildConfigNode && secondaryChildConfigNode) {
-			const primaryChildSash = primaryChildConfigNode.buildSashTree({ resizeStrategy });
-			const secondaryChildSash = secondaryChildConfigNode.buildSashTree({ resizeStrategy });
-
-			primaryChildSash.parent = sash;
-			secondaryChildSash.parent = sash;
+			const primaryChildSash = primaryChildConfigNode.buildSashTree({
+				resizeStrategy,
+				parent: sash
+			});
+			const secondaryChildSash = secondaryChildConfigNode.buildSashTree({
+				resizeStrategy,
+				parent: sash
+			});
 
 			sash.children.push(primaryChildSash);
 			sash.children.push(secondaryChildSash);

@@ -33,7 +33,12 @@
 	});
 </script>
 
-<div bind:this={sillElement} class={CSS_CLASSES.SILL} role="complementary" aria-label="Minimized windows">
+<div
+	bind:this={sillElement}
+	class={CSS_CLASSES.SILL}
+	role="complementary"
+	aria-label="Minimized windows"
+>
 	<!-- Minimized glass buttons will be dynamically added here -->
 </div>
 

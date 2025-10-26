@@ -1,3 +1,4 @@
+import type { Component } from 'svelte';
 import PlaceholderPane from './binary-window/PlaceholderPane.svelte';
 
 /**
@@ -192,5 +193,5 @@ export const PLACEHOLDER_PANE_ID = '__bwin_placeholder__';
  */
 export const PLACEHOLDER_CONTENT = {
 	title: 'Empty Window',
-	component: PlaceholderPane
+	component: PlaceholderPane as Component<any>
 } as const;

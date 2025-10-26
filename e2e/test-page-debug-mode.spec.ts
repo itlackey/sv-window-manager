@@ -24,10 +24,9 @@ test.describe('Debug Mode', () => {
 		const errors = collectConsoleErrors(page);
 
 		// Debug mode should be off initially
-		const debugCheckbox = page.getByRole(
-			ACCESSIBLE_SELECTORS.debugModeCheckbox.role,
-			{ name: ACCESSIBLE_SELECTORS.debugModeCheckbox.name }
-		);
+		const debugCheckbox = page.getByRole(ACCESSIBLE_SELECTORS.debugModeCheckbox.role, {
+			name: ACCESSIBLE_SELECTORS.debugModeCheckbox.name
+		});
 		await expect(debugCheckbox).not.toBeChecked();
 
 		// Enable debug mode
@@ -70,10 +69,9 @@ test.describe('Debug Mode', () => {
 		const errors = collectConsoleErrors(page);
 
 		// Enable debug mode first
-		const debugCheckbox = page.getByRole(
-			ACCESSIBLE_SELECTORS.debugModeCheckbox.role,
-			{ name: ACCESSIBLE_SELECTORS.debugModeCheckbox.name }
-		);
+		const debugCheckbox = page.getByRole(ACCESSIBLE_SELECTORS.debugModeCheckbox.role, {
+			name: ACCESSIBLE_SELECTORS.debugModeCheckbox.name
+		});
 		await debugCheckbox.check();
 		await page.waitForTimeout(500);
 
@@ -121,10 +119,9 @@ test.describe('Debug Mode', () => {
 	test('3.3 Toggle Debug Mode Multiple Times', async ({ page }) => {
 		const errors = collectConsoleErrors(page);
 
-		const debugCheckbox = page.getByRole(
-			ACCESSIBLE_SELECTORS.debugModeCheckbox.role,
-			{ name: ACCESSIBLE_SELECTORS.debugModeCheckbox.name }
-		);
+		const debugCheckbox = page.getByRole(ACCESSIBLE_SELECTORS.debugModeCheckbox.role, {
+			name: ACCESSIBLE_SELECTORS.debugModeCheckbox.name
+		});
 
 		// Toggle debug mode 5 times
 		for (let i = 0; i < 5; i++) {
@@ -157,10 +154,9 @@ test.describe('Debug Mode', () => {
 		const errors = collectConsoleErrors(page);
 
 		// Enable debug mode
-		const debugCheckbox = page.getByRole(
-			ACCESSIBLE_SELECTORS.debugModeCheckbox.role,
-			{ name: ACCESSIBLE_SELECTORS.debugModeCheckbox.name }
-		);
+		const debugCheckbox = page.getByRole(ACCESSIBLE_SELECTORS.debugModeCheckbox.role, {
+			name: ACCESSIBLE_SELECTORS.debugModeCheckbox.name
+		});
 		await debugCheckbox.check();
 		await page.waitForTimeout(500);
 

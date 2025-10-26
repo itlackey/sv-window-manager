@@ -96,7 +96,10 @@ export function updatePaneElement(sash: ReactiveSash): HTMLElement | null {
  *
  * @internal This is called by addPaneSash() based on position
  */
-function addPaneSashToLeft(targetPaneSash: ReactiveSash, { size, id }: AddPaneOptions): ReactiveSash {
+function addPaneSashToLeft(
+	targetPaneSash: ReactiveSash,
+	{ size, id }: AddPaneOptions
+): ReactiveSash {
 	const sizeParsed = size !== undefined ? parseSize(size) : null;
 	let newLeftSashWidth = targetPaneSash.width / 2;
 
@@ -148,7 +151,10 @@ function addPaneSashToLeft(targetPaneSash: ReactiveSash, { size, id }: AddPaneOp
  *
  * @internal This is called by addPaneSash() based on position
  */
-function addPaneSashToRight(targetPaneSash: ReactiveSash, { size, id }: AddPaneOptions): ReactiveSash {
+function addPaneSashToRight(
+	targetPaneSash: ReactiveSash,
+	{ size, id }: AddPaneOptions
+): ReactiveSash {
 	const sizeParsed = size !== undefined ? parseSize(size) : null;
 	let newRightSashWidth = targetPaneSash.width / 2;
 
@@ -199,7 +205,10 @@ function addPaneSashToRight(targetPaneSash: ReactiveSash, { size, id }: AddPaneO
  *
  * @internal This is called by addPaneSash() based on position
  */
-function addPaneSashToTop(targetPaneSash: ReactiveSash, { size, id }: AddPaneOptions): ReactiveSash {
+function addPaneSashToTop(
+	targetPaneSash: ReactiveSash,
+	{ size, id }: AddPaneOptions
+): ReactiveSash {
 	const sizeParsed = size !== undefined ? parseSize(size) : null;
 	let newTopSashHeight = targetPaneSash.height / 2;
 
@@ -250,7 +259,10 @@ function addPaneSashToTop(targetPaneSash: ReactiveSash, { size, id }: AddPaneOpt
  *
  * @internal This is called by addPaneSash() based on position
  */
-function addPaneSashToBottom(targetPaneSash: ReactiveSash, { size, id }: AddPaneOptions): ReactiveSash {
+function addPaneSashToBottom(
+	targetPaneSash: ReactiveSash,
+	{ size, id }: AddPaneOptions
+): ReactiveSash {
 	const sizeParsed = size !== undefined ? parseSize(size) : null;
 	let newBottomSashHeight = targetPaneSash.height / 2;
 
@@ -322,7 +334,10 @@ function addPaneSashToBottom(targetPaneSash: ReactiveSash, { size, id }: AddPane
  * });
  * ```
  */
-export function addPaneSash(targetPaneSash: ReactiveSash, { position, size, id }: AddPaneSashOptions): ReactiveSash | undefined {
+export function addPaneSash(
+	targetPaneSash: ReactiveSash,
+	{ position, size, id }: AddPaneSashOptions
+): ReactiveSash | undefined {
 	if (position === Position.Left) {
 		return addPaneSashToLeft(targetPaneSash, { size, id });
 	} else if (position === Position.Right) {

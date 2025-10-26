@@ -16,8 +16,25 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { render } from 'vitest-browser-svelte';
 import Frame from '../frame/Frame.svelte';
 import { Sash } from '../sash.js';
-import { Position } from '../position';
+import { Position } from '../position.js';
 import { page } from '@vitest/browser/context';
+import type { ReactiveSash } from '../sash.svelte.js';
+
+// Type for Frame component instance with exported functions
+interface FrameInstance {
+	addPane: (targetId: string, options: Record<string, unknown>) => Sash | null;
+	removePane: (id: string) => void;
+	swapPanes: (
+		sourcePaneEl: HTMLElement | Element | null,
+		targetPaneEl: HTMLElement | Element | null
+	) => void;
+	mount: (containerEl: HTMLElement) => void;
+	fit: () => void;
+	rootSash?: Sash;
+	windowElement?: HTMLElement;
+	containerElement?: HTMLElement;
+	panes: Sash[];
+}
 
 describe('Frame with Reactive Sash', () => {
 	let container: HTMLElement;
@@ -98,6 +115,8 @@ describe('Frame with Reactive Sash', () => {
 			props: { settings: sash }
 		});
 
+		const frameInstance = component as unknown as FrameInstance;
+
 		// Get initial dimensions
 		const initialLeftWidth = sash.leftChild?.width;
 		const initialRightWidth = sash.rightChild?.width;
@@ -116,7 +135,7 @@ describe('Frame with Reactive Sash', () => {
 		expect(sash.rightChild?.width).toBe(400);
 
 		// Verify the Frame component's panes list is updated
-		const panes = component.panes;
+		const panes = frameInstance.panes;
 		expect(panes.length).toBe(2);
 	});
 
@@ -133,12 +152,14 @@ describe('Frame with Reactive Sash', () => {
 			props: { settings: sash }
 		});
 
+		const frameInstance = component as unknown as FrameInstance;
+
 		// Initial state: 1 pane
 		let panes = frameContainer.querySelectorAll('[data-sash-id]');
 		expect(panes.length).toBe(1);
 
 		// Add a pane
-		const newPane = component.addPane('root', {
+		const newPane = frameInstance.addPane('root', {
 			position: Position.Right,
 			id: 'new-pane'
 		});
@@ -166,13 +187,15 @@ describe('Frame with Reactive Sash', () => {
 			props: { settings: sash }
 		});
 
+		const frameInstance = component as unknown as FrameInstance;
+
 		// Add two panes
-		const pane1 = component.addPane('root', {
+		const pane1 = frameInstance.addPane('root', {
 			position: Position.Right,
 			id: 'pane-1'
 		});
 
-		const pane2 = component.addPane('pane-1', {
+		const pane2 = frameInstance.addPane('pane-1', {
 			position: Position.Bottom,
 			id: 'pane-2'
 		});
@@ -184,7 +207,7 @@ describe('Frame with Reactive Sash', () => {
 		expect(panes.length).toBe(3);
 
 		// Remove pane-2
-		component.removePane('pane-2');
+		frameInstance.removePane('pane-2');
 
 		await new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -282,15 +305,17 @@ describe('Frame with Reactive Sash', () => {
 			props: { settings: sash }
 		});
 
+		const frameInstance = component as unknown as FrameInstance;
+
 		// Mount to container
-		component.mount(mountContainer);
+		frameInstance.mount(mountContainer);
 
 		// Initial dimensions
 		expect(sash.width).toBe(1000);
 		expect(sash.height).toBe(600);
 
 		// Call fit() to update to container dimensions
-		component.fit();
+		frameInstance.fit();
 
 		// Dimensions should update
 		expect(sash.width).toBe(800);
@@ -317,8 +342,10 @@ describe('Frame with Reactive Sash', () => {
 			props: { settings: sash }
 		});
 
+		const frameInstance = component as unknown as FrameInstance;
+
 		// Add a pane
-		component.addPane('root', {
+		frameInstance.addPane('root', {
 			position: Position.Right,
 			id: 'right-pane'
 		});
@@ -338,7 +365,7 @@ describe('Frame with Reactive Sash', () => {
 
 		// Frame should re-render with new pane structure
 		// Note: Frame uses updateCounter pattern, so we need to trigger update
-		component.addPane(sash.leftChild!.id, { position: Position.Bottom });
+		frameInstance.addPane(sash.leftChild!.id, { position: Position.Bottom });
 
 		await new Promise((resolve) => setTimeout(resolve, 50));
 

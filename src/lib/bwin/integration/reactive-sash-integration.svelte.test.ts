@@ -16,10 +16,33 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { render, cleanup } from 'vitest-browser-svelte';
 import BinaryWindow from '../binary-window/BinaryWindow.svelte';
 import { Sash } from '../sash.js';
-import { Position } from '../position';
+import { Position } from '../position.js';
+
+// Type for BinaryWindow component instance with exported functions
+interface BinaryWindowInstance {
+	addPane: (targetPaneSashId: string, props: Record<string, unknown>) => Sash;
+	removePane: (sashId: string) => void;
+	fit: () => void;
+	getRootSash: () => Sash | undefined;
+	getWindowElement: () => HTMLElement | undefined;
+	getSashById: (sashId: string) => Sash | null;
+	getTreeVersion: () => number;
+}
 
 describe('Reactive Sash Integration with BinaryWindow', () => {
 	let container: HTMLElement;
+
+	// Helper to render BinaryWindow and return typed instance
+	function renderBinaryWindow(props: any) {
+		const result = render(BinaryWindow, {
+			target: container,
+			props
+		});
+		return {
+			...result,
+			bwin: result.component as unknown as BinaryWindowInstance
+		};
+	}
 
 	beforeEach(() => {
 		// Create a container element for the BinaryWindow
@@ -47,19 +70,16 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 	});
 
 	test('BinaryWindow initializes with reactive sash', async () => {
-		const { component } = render(BinaryWindow, {
-			target: container,
-			props: {
-				settings: {
-					position: Position.Root,
-					width: 1000,
-					height: 600
-				}
+		const { bwin } = renderBinaryWindow({
+			settings: {
+				position: Position.Root,
+				width: 1000,
+				height: 600
 			}
 		});
 
 		// Get the root sash
-		const rootSash = component.getRootSash();
+		const rootSash = bwin.getRootSash();
 
 		expect(rootSash).toBeInstanceOf(Sash);
 		expect(rootSash?.width).toBe(1000);
@@ -68,22 +88,19 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 	});
 
 	test('addPane creates reactive sash tree', async () => {
-		const { component } = render(BinaryWindow, {
-			target: container,
-			props: {
-				settings: {
-					position: Position.Root,
-					width: 1000,
-					height: 600
-				}
+		const { bwin } = renderBinaryWindow({
+			settings: {
+				position: Position.Root,
+				width: 1000,
+				height: 600
 			}
 		});
 
-		const rootSash = component.getRootSash();
+		const rootSash = bwin.getRootSash();
 		expect(rootSash).toBeDefined();
 
 		// Add a pane to the right
-		const newPane = component.addPane(rootSash!.id, {
+		const newPane = bwin.addPane(rootSash!.id, {
 			position: Position.Right,
 			title: 'New Pane'
 		});
@@ -104,27 +121,24 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 	});
 
 	test('removePane updates reactive tree correctly', async () => {
-		const { component } = render(BinaryWindow, {
-			target: container,
-			props: {
-				settings: {
-					position: Position.Root,
-					width: 1000,
-					height: 600
-				}
+		const { bwin } = renderBinaryWindow({
+			settings: {
+				position: Position.Root,
+				width: 1000,
+				height: 600
 			}
 		});
 
-		const rootSash = component.getRootSash();
+		const rootSash = bwin.getRootSash();
 		expect(rootSash).toBeDefined();
 
 		// Add two panes
-		const pane1 = component.addPane(rootSash!.id, {
+		const pane1 = bwin.addPane(rootSash!.id, {
 			position: Position.Right,
 			title: 'Pane 1',
 			id: 'pane-1'
 		});
-		const pane2 = component.addPane(pane1!.id, {
+		const pane2 = bwin.addPane(pane1!.id, {
 			position: Position.Bottom,
 			title: 'Pane 2',
 			id: 'pane-2'
@@ -138,7 +152,7 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 		const pane1Id = pane1!.id;
 
 		// Remove pane2
-		component.removePane(pane2!.id);
+		bwin.removePane(pane2!.id);
 
 		// Verify tree structure after removal
 		expect(rootSash?.children.length).toBe(2);
@@ -151,18 +165,15 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 	});
 
 	test('reactive sash dimension updates propagate to children', async () => {
-		const { component } = render(BinaryWindow, {
-			target: container,
-			props: {
-				settings: {
-					position: Position.Root,
-					width: 1000,
-					height: 600
-				}
+		const { bwin } = renderBinaryWindow({
+			settings: {
+				position: Position.Root,
+				width: 1000,
+				height: 600
 			}
 		});
 
-		const rootSash = component.getRootSash();
+		const rootSash = bwin.getRootSash();
 		expect(rootSash).toBeDefined();
 
 		// Split the root
@@ -184,25 +195,22 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 	});
 
 	test('nested splits create correct reactive tree', async () => {
-		const { component } = render(BinaryWindow, {
-			target: container,
-			props: {
-				settings: {
-					position: Position.Root,
-					width: 1000,
-					height: 600
-				}
+		const { bwin } = renderBinaryWindow({
+			settings: {
+				position: Position.Root,
+				width: 1000,
+				height: 600
 			}
 		});
 
-		const rootSash = component.getRootSash();
+		const rootSash = bwin.getRootSash();
 		expect(rootSash).toBeDefined();
 
 		// Create nested splits:
 		// Root -> Left/Right
 		// Left -> Top/Bottom
 		// Right -> Top/Bottom
-		component.addPane(rootSash!.id, {
+		bwin.addPane(rootSash!.id, {
 			position: Position.Right,
 			title: 'Right Pane'
 		});
@@ -210,12 +218,12 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 		const leftChild = rootSash!.leftChild;
 		const rightChild = rootSash!.rightChild;
 
-		component.addPane(leftChild!.id, {
+		bwin.addPane(leftChild!.id, {
 			position: Position.Bottom,
 			title: 'Left Bottom'
 		});
 
-		component.addPane(rightChild!.id, {
+		bwin.addPane(rightChild!.id, {
 			position: Position.Bottom,
 			title: 'Right Bottom'
 		});
@@ -242,64 +250,58 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 	});
 
 	test('tree version increments on pane add/remove', async () => {
-		const { component } = render(BinaryWindow, {
-			target: container,
-			props: {
-				settings: {
-					position: Position.Root,
-					width: 1000,
-					height: 600
-				}
+		const { bwin } = renderBinaryWindow({
+			settings: {
+				position: Position.Root,
+				width: 1000,
+				height: 600
 			}
 		});
 
-		const rootSash = component.getRootSash();
-		const initialVersion = component.getTreeVersion();
+		const rootSash = bwin.getRootSash();
+		const initialVersion = bwin.getTreeVersion();
 
 		// Add a pane - should increment tree version
-		const pane1 = component.addPane(rootSash!.id, {
+		const pane1 = bwin.addPane(rootSash!.id, {
 			position: Position.Right,
 			title: 'Pane 1'
 		});
 
-		const versionAfterFirstAdd = component.getTreeVersion();
+		const versionAfterFirstAdd = bwin.getTreeVersion();
 		expect(versionAfterFirstAdd).toBeGreaterThan(initialVersion);
 
 		// Add another pane
-		component.addPane(pane1!.id, {
+		bwin.addPane(pane1!.id, {
 			position: Position.Bottom,
 			title: 'Pane 2'
 		});
 
-		const versionAfterSecondAdd = component.getTreeVersion();
+		const versionAfterSecondAdd = bwin.getTreeVersion();
 		expect(versionAfterSecondAdd).toBeGreaterThan(versionAfterFirstAdd);
 
 		// Remove a pane
-		component.removePane(pane1!.id);
+		bwin.removePane(pane1!.id);
 
-		const versionAfterRemove = component.getTreeVersion();
+		const versionAfterRemove = bwin.getTreeVersion();
 		// Version should either increment or stay the same depending on implementation
 		expect(versionAfterRemove).toBeGreaterThanOrEqual(versionAfterSecondAdd);
 	});
 
 	test('reactive sash works with custom IDs', async () => {
-		const { component } = render(BinaryWindow, {
-			target: container,
-			props: {
-				settings: {
-					position: Position.Root,
-					width: 1000,
-					height: 600,
-					id: 'custom-root'
-				}
+		const { bwin } = renderBinaryWindow({
+			settings: {
+				position: Position.Root,
+				width: 1000,
+				height: 600,
+				id: 'custom-root'
 			}
 		});
 
-		const rootSash = component.getRootSash();
+		const rootSash = bwin.getRootSash();
 		expect(rootSash?.id).toBe('custom-root');
 
 		// Add pane with custom ID
-		const pane = component.addPane('custom-root', {
+		const pane = bwin.addPane('custom-root', {
 			position: Position.Right,
 			id: 'custom-pane',
 			title: 'Custom Pane'
@@ -313,21 +315,18 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 	});
 
 	test('reactive sash preserves store on tree operations', async () => {
-		const { component } = render(BinaryWindow, {
-			target: container,
-			props: {
-				settings: {
-					position: Position.Root,
-					width: 1000,
-					height: 600
-				}
+		const { bwin } = renderBinaryWindow({
+			settings: {
+				position: Position.Root,
+				width: 1000,
+				height: 600
 			}
 		});
 
-		const rootSash = component.getRootSash();
+		const rootSash = bwin.getRootSash();
 
 		// Add pane with store data
-		const pane1 = component.addPane(rootSash!.id, {
+		const pane1 = bwin.addPane(rootSash!.id, {
 			position: Position.Right,
 			title: 'Pane with Store',
 			content: 'Test content',
@@ -340,7 +339,7 @@ describe('Reactive Sash Integration with BinaryWindow', () => {
 		expect(pane1?.store.tabs).toEqual(['Tab 1', 'Tab 2']);
 
 		// Add another pane and verify original store is still intact
-		component.addPane(pane1!.id, {
+		bwin.addPane(pane1!.id, {
 			position: Position.Bottom,
 			title: 'Another Pane'
 		});

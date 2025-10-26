@@ -28,7 +28,12 @@ test.describe('Performance', () => {
 
 		// Add 10 panes
 		for (let i = 0; i < 10; i++) {
-			const positions: Array<'top' | 'right' | 'bottom' | 'left'> = ['top', 'right', 'bottom', 'left'];
+			const positions: Array<'top' | 'right' | 'bottom' | 'left'> = [
+				'top',
+				'right',
+				'bottom',
+				'left'
+			];
 			const position = positions[i % 4];
 
 			// Get available panes
@@ -53,9 +58,11 @@ test.describe('Performance', () => {
 			// Measure time for pane addition
 			const startTime = Date.now();
 
-			await page.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
-				name: ACCESSIBLE_SELECTORS.addPaneButton.name
-			}).click();
+			await page
+				.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
+					name: ACCESSIBLE_SELECTORS.addPaneButton.name
+				})
+				.click();
 
 			await page.waitForTimeout(200);
 
@@ -71,16 +78,18 @@ test.describe('Performance', () => {
 		expect(finalCount).toBe(12);
 
 		// Verify no console errors
-		const criticalErrors = errors.filter((e) =>
-			!e.includes('Warning') && !e.includes('deprecated')
+		const criticalErrors = errors.filter(
+			(e) => !e.includes('Warning') && !e.includes('deprecated')
 		);
 		expect(criticalErrors).toEqual([]);
 
 		// Verify page is still responsive
 		await expect(page.locator(CSS_SELECTORS.frameContainer)).toBeVisible();
-		await expect(page.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
-			name: ACCESSIBLE_SELECTORS.addPaneButton.name
-		})).toBeEnabled();
+		await expect(
+			page.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
+				name: ACCESSIBLE_SELECTORS.addPaneButton.name
+			})
+		).toBeEnabled();
 
 		// Verify performance didn't degrade significantly
 		// Later additions shouldn't be significantly slower than early ones
@@ -119,8 +128,8 @@ test.describe('Performance', () => {
 		expect(paneCount).toBeLessThanOrEqual(12); // Not more than expected
 
 		// Verify no JavaScript errors
-		const criticalErrors = errors.filter((e) =>
-			!e.includes('Warning') && !e.includes('deprecated')
+		const criticalErrors = errors.filter(
+			(e) => !e.includes('Warning') && !e.includes('deprecated')
 		);
 		expect(criticalErrors).toEqual([]);
 
@@ -157,9 +166,11 @@ test.describe('Performance', () => {
 			}, i);
 
 			await page.getByLabel('Position:').selectOption('right');
-			await page.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
-				name: ACCESSIBLE_SELECTORS.addPaneButton.name
-			}).click();
+			await page
+				.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
+					name: ACCESSIBLE_SELECTORS.addPaneButton.name
+				})
+				.click();
 			await page.waitForTimeout(200);
 		}
 
@@ -171,9 +182,11 @@ test.describe('Performance', () => {
 		const startTime = Date.now();
 
 		// Switch to Complex Layout
-		await page.getByRole(ACCESSIBLE_SELECTORS.complexLayoutRadio.role, {
-			name: ACCESSIBLE_SELECTORS.complexLayoutRadio.name
-		}).click();
+		await page
+			.getByRole(ACCESSIBLE_SELECTORS.complexLayoutRadio.role, {
+				name: ACCESSIBLE_SELECTORS.complexLayoutRadio.name
+			})
+			.click();
 
 		// Wait for layout to render
 		await page.waitForTimeout(500);
@@ -189,9 +202,11 @@ test.describe('Performance', () => {
 		// Switch back to Simple Layout
 		const startTime2 = Date.now();
 
-		await page.getByRole(ACCESSIBLE_SELECTORS.simpleLayoutRadio.role, {
-			name: ACCESSIBLE_SELECTORS.simpleLayoutRadio.name
-		}).click();
+		await page
+			.getByRole(ACCESSIBLE_SELECTORS.simpleLayoutRadio.role, {
+				name: ACCESSIBLE_SELECTORS.simpleLayoutRadio.name
+			})
+			.click();
 
 		await page.waitForTimeout(500);
 
@@ -229,9 +244,11 @@ test.describe('Performance', () => {
 				});
 
 				await page.getByLabel('Position:').selectOption('right');
-				await page.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
-					name: ACCESSIBLE_SELECTORS.addPaneButton.name
-				}).click();
+				await page
+					.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
+						name: ACCESSIBLE_SELECTORS.addPaneButton.name
+					})
+					.click();
 				await page.waitForTimeout(100);
 			}
 
@@ -252,8 +269,8 @@ test.describe('Performance', () => {
 		expect(finalCount).toBe(2);
 
 		// Verify no accumulation of errors
-		const criticalErrors = errors.filter((e) =>
-			!e.includes('Warning') && !e.includes('deprecated')
+		const criticalErrors = errors.filter(
+			(e) => !e.includes('Warning') && !e.includes('deprecated')
 		);
 		expect(criticalErrors).toEqual([]);
 

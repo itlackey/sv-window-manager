@@ -9,6 +9,18 @@ describe('SillState - Reactive State Module', () => {
 	let windowElement: HTMLElement;
 	let mockRootSash: Sash;
 
+	/**
+	 * Helper function that simulates what Sill.svelte does when mounting
+	 * Creates a sill element and registers it with SillState
+	 */
+	function createAndRegisterSill(): HTMLElement {
+		const sillEl = document.createElement('div');
+		sillEl.className = CSS_CLASSES.SILL;
+		windowElement.appendChild(sillEl);
+		SillState.registerSillElement(sillEl);
+		return sillEl;
+	}
+
 	beforeEach(() => {
 		// Reset module state before each test
 		SillState.reset();
@@ -83,16 +95,16 @@ describe('SillState - Reactive State Module', () => {
 		it('should reactively update hasSillElement when sill is mounted', () => {
 			expect(SillState.hasSillElement()).toBe(false);
 
-			SillState.mount();
+			createAndRegisterSill();
 
 			expect(SillState.hasSillElement()).toBe(true);
 		});
 
 		it('should reactively clear hasSillElement on destroy', () => {
-			SillState.mount();
+			createAndRegisterSill();
 			expect(SillState.hasSillElement()).toBe(true);
 
-			SillState.destroy();
+			SillState.unregisterSillElement();
 
 			expect(SillState.hasSillElement()).toBe(false);
 		});
@@ -100,99 +112,70 @@ describe('SillState - Reactive State Module', () => {
 		it('should maintain reactive sillElement reference', () => {
 			expect(SillState.getSillElement()).toBeUndefined();
 
-			const sill = SillState.mount();
+			const sill = createAndRegisterSill();
 
 			expect(SillState.getSillElement()).toBe(sill);
 			expect(SillState.getSillElement()).toBeDefined();
 		});
 	});
 
-	describe('mount', () => {
-		it('should create and mount sill element', () => {
-			const sill = SillState.mount();
+	describe('registerSillElement', () => {
+		it('should register and store sill element', () => {
+			const sill = createAndRegisterSill();
 
 			expect(sill).toBeDefined();
 			expect(sill?.className).toContain(CSS_CLASSES.SILL);
 			expect(windowElement.contains(sill!)).toBe(true);
+			expect(SillState.getSillElement()).toBe(sill);
 		});
 
-		it('should return undefined if module not initialized', () => {
+		it('should handle registration when module not initialized', () => {
 			SillState.reset();
-			const result = SillState.mount();
+			const sillEl = document.createElement('div');
+			sillEl.className = CSS_CLASSES.SILL;
 
-			expect(result).toBeUndefined();
+			// Should not throw, just log warning
+			expect(() => {
+				SillState.registerSillElement(sillEl);
+			}).not.toThrow();
+
+			// Element should not be registered
+			expect(SillState.getSillElement()).toBeUndefined();
 		});
 
-		it('should return undefined if no window element', () => {
-			// Create context with no window element
-			const emptyContext = {
-				windowElement: undefined,
-				sillElement: undefined,
-				rootSash: undefined,
-				removePane: vi.fn(),
-				addPane: vi.fn(),
-				getMinimizedGlassElementBySashId: vi.fn(),
-				getSillElement: vi.fn(),
-				ensureSillElement: vi.fn()
-			} as unknown as BwinContext;
+		it('should allow re-registering sill element', () => {
+			const firstSill = createAndRegisterSill();
+			const secondSill = createAndRegisterSill();
 
-			SillState.reset();
-			SillState.initialize(emptyContext, false);
-			const result = SillState.mount();
-
-			expect(result).toBeUndefined();
+			// Second registration should replace first
+			expect(SillState.getSillElement()).toBe(secondSill);
 		});
 
-		it('should reuse existing sill element', () => {
-			const firstSill = SillState.mount();
-			const secondSill = SillState.mount();
+		it('should setup click handler on register', () => {
+			const sillEl = document.createElement('div');
+			sillEl.className = CSS_CLASSES.SILL;
+			windowElement.appendChild(sillEl);
 
-			expect(secondSill).toBe(firstSill);
-		});
+			const addEventListenerSpy = vi.spyOn(sillEl, 'addEventListener');
 
-		it('should preserve minimized glasses when recreating sill', () => {
-			// Create first sill with minimized glass
-			const firstSill = SillState.mount();
-			const minimizedGlass = document.createElement('div');
-			minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
-			minimizedGlass.textContent = 'Minimized 1';
-			firstSill?.append(minimizedGlass);
-
-			expect(firstSill?.children.length).toBe(1);
-
-			// Remove sill from DOM to simulate window element change
-			firstSill?.remove();
-
-			// Create new sill - should preserve minimized glass
-			const newSill = SillState.mount();
-
-			expect(newSill?.children.length).toBe(1);
-			expect(newSill?.children[0].textContent).toBe('Minimized 1');
-		});
-
-		it('should setup click handler on mount', () => {
-			const sill = SillState.mount();
-			const addEventListenerSpy = vi.spyOn(sill!, 'addEventListener');
-
-			// Remount to trigger handler setup
-			SillState.mount();
+			SillState.registerSillElement(sillEl);
 
 			expect(addEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
 		});
 	});
 
 	describe('ensureSillElement', () => {
-		it('should create sill if not exists', () => {
+		it('should return undefined if sill not yet registered', () => {
 			expect(SillState.getSillElement()).toBeUndefined();
 
 			const sill = SillState.ensureSillElement();
 
-			expect(sill).toBeDefined();
-			expect(SillState.getSillElement()).toBe(sill);
+			// In new API, ensureSillElement returns undefined if Sill.svelte hasn't mounted yet
+			expect(sill).toBeUndefined();
 		});
 
-		it('should return existing sill if already mounted', () => {
-			const firstSill = SillState.mount();
+		it('should return existing sill if already registered', () => {
+			const firstSill = createAndRegisterSill();
 			const secondSill = SillState.ensureSillElement();
 
 			expect(secondSill).toBe(firstSill);
@@ -204,48 +187,35 @@ describe('SillState - Reactive State Module', () => {
 			expect(SillState.getSillElement()).toBeUndefined();
 		});
 
-		it('should return sill after mount', () => {
-			const sill = SillState.mount();
+		it('should return sill after registration', () => {
+			const sill = createAndRegisterSill();
 			expect(SillState.getSillElement()).toBe(sill);
 		});
 	});
 
 	describe('getMinimizedGlassElement', () => {
 		it('should find minimized glass by sash ID', () => {
-			SillState.mount();
+			const sill = createAndRegisterSill();
 
 			// Create minimized glass element
 			const minimizedGlass = document.createElement('div');
 			minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
 			(minimizedGlass as any).bwOriginalSashId = 'pane-1';
-			windowElement.append(minimizedGlass);
+			sill.append(minimizedGlass);
 
 			const result = SillState.getMinimizedGlassElement('pane-1');
 
 			expect(result).toBe(minimizedGlass);
 		});
 
-		it('should return null if window element not available', () => {
-			const emptyContext = {
-				windowElement: undefined,
-				sillElement: undefined,
-				rootSash: undefined,
-				removePane: vi.fn(),
-				addPane: vi.fn(),
-				getMinimizedGlassElementBySashId: vi.fn(),
-				getSillElement: vi.fn(),
-				ensureSillElement: vi.fn()
-			} as unknown as BwinContext;
-
-			SillState.reset();
-			SillState.initialize(emptyContext, false);
+		it('should return null if sill not registered', () => {
 			const result = SillState.getMinimizedGlassElement('pane-1');
 
 			expect(result).toBeNull();
 		});
 
 		it('should return undefined if minimized glass not found', () => {
-			SillState.mount();
+			createAndRegisterSill();
 
 			const result = SillState.getMinimizedGlassElement('non-existent');
 
@@ -253,7 +223,7 @@ describe('SillState - Reactive State Module', () => {
 		});
 
 		it('should find correct glass among multiple minimized glasses', () => {
-			SillState.mount();
+			const sill = createAndRegisterSill();
 
 			// Create multiple minimized glasses
 			const glass1 = document.createElement('div');
@@ -264,7 +234,7 @@ describe('SillState - Reactive State Module', () => {
 			glass2.className = CSS_CLASSES.MINIMIZED_GLASS;
 			(glass2 as any).bwOriginalSashId = 'pane-2';
 
-			windowElement.append(glass1, glass2);
+			sill.append(glass1, glass2);
 
 			const result = SillState.getMinimizedGlassElement('pane-2');
 
@@ -283,7 +253,7 @@ describe('SillState - Reactive State Module', () => {
 		let targetPane: HTMLElement;
 
 		beforeEach(() => {
-			SillState.mount();
+			createAndRegisterSill();
 
 			// Create target pane
 			targetPane = document.createElement('div');
@@ -357,7 +327,7 @@ describe('SillState - Reactive State Module', () => {
 
 			SillState.reset();
 			SillState.initialize(noRootContext, false);
-			SillState.mount();
+			createAndRegisterSill();
 			SillState.restoreGlass(minimizedGlassEl);
 
 			expect(mockBwinContext.addPane).not.toHaveBeenCalled();
@@ -434,44 +404,44 @@ describe('SillState - Reactive State Module', () => {
 		});
 	});
 
-	describe('destroy', () => {
+	describe('unregisterSillElement (destroy)', () => {
 		it('should clear sill element reference', () => {
-			SillState.mount();
+			createAndRegisterSill();
 			expect(SillState.getSillElement()).toBeDefined();
 
-			SillState.destroy();
+			SillState.unregisterSillElement();
 
 			expect(SillState.getSillElement()).toBeUndefined();
 		});
 
 		it('should remove click handler', () => {
-			const sill = SillState.mount();
+			const sill = createAndRegisterSill();
 			const removeEventListenerSpy = vi.spyOn(sill!, 'removeEventListener');
 
-			SillState.destroy();
+			SillState.unregisterSillElement();
 
 			expect(removeEventListenerSpy).toHaveBeenCalledWith('click', expect.any(Function));
 		});
 
 		it('should not throw if called multiple times', () => {
-			SillState.mount();
+			createAndRegisterSill();
 
 			expect(() => {
-				SillState.destroy();
-				SillState.destroy();
+				SillState.unregisterSillElement();
+				SillState.unregisterSillElement();
 			}).not.toThrow();
 		});
 
-		it('should not throw if called before mount', () => {
+		it('should not throw if called before registration', () => {
 			expect(() => {
-				SillState.destroy();
+				SillState.unregisterSillElement();
 			}).not.toThrow();
 		});
 	});
 
 	describe('reset', () => {
 		it('should reset all state', () => {
-			SillState.mount();
+			createAndRegisterSill();
 			expect(SillState.hasSillElement()).toBe(true);
 
 			SillState.reset();
@@ -490,7 +460,7 @@ describe('SillState - Reactive State Module', () => {
 
 	describe('Click Handler Integration', () => {
 		it('should restore glass when minimized glass is clicked', () => {
-			const sill = SillState.mount();
+			const sill = createAndRegisterSill();
 
 			// Create minimized glass element
 			const minimizedGlass = document.createElement('div') as any;
@@ -525,11 +495,11 @@ describe('SillState - Reactive State Module', () => {
 		});
 
 		it('should setup click listener on sill element', () => {
-			const sill = SillState.mount();
+			const sill = createAndRegisterSill();
 
 			// Verify click listener was added (implementation detail: private clickHandler should be defined)
 			// We can verify by checking the sill element has listeners, but this is an implementation detail
-			// So we just verify the sill exists and was mounted correctly
+			// So we just verify the sill exists and was registered correctly
 			expect(sill).toBeDefined();
 			expect(SillState.hasSillElement()).toBe(true);
 		});
@@ -541,7 +511,7 @@ describe('SillState - Reactive State Module', () => {
 			SillState.reset();
 			SillState.initialize(mockBwinContext, true);
 
-			SillState.mount();
+			createAndRegisterSill();
 
 			expect(logSpy).toHaveBeenCalled();
 			logSpy.mockRestore();
@@ -550,7 +520,7 @@ describe('SillState - Reactive State Module', () => {
 		it('should not log debug messages when disabled', () => {
 			const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
-			SillState.mount();
+			createAndRegisterSill();
 
 			expect(logSpy).not.toHaveBeenCalled();
 			logSpy.mockRestore();
@@ -572,10 +542,10 @@ describe('SillState - Reactive State Module', () => {
 	});
 
 	describe('Edge Cases', () => {
-		it('should handle rapid mount/unmount cycles', () => {
+		it('should handle rapid register/unregister cycles', () => {
 			for (let i = 0; i < 10; i++) {
-				SillState.mount();
-				SillState.destroy();
+				createAndRegisterSill();
+				SillState.unregisterSillElement();
 			}
 
 			expect(SillState.getSillElement()).toBeUndefined();
@@ -583,7 +553,7 @@ describe('SillState - Reactive State Module', () => {
 		});
 
 		it('should handle missing target pane sash ID attribute', () => {
-			SillState.mount();
+			createAndRegisterSill();
 
 			const targetPane = document.createElement('div');
 			targetPane.className = CSS_CLASSES.PANE;
@@ -602,7 +572,7 @@ describe('SillState - Reactive State Module', () => {
 		});
 
 		it('should handle missing target pane sash in tree', () => {
-			SillState.mount();
+			createAndRegisterSill();
 
 			// Mock getById to return null
 			mockRootSash.getById = vi.fn().mockReturnValue(null);

@@ -901,7 +901,7 @@ describe('ReactiveSash - Natural Resize Strategy', () => {
 
 		// Should enforce minimum
 		expect(parent.rightChild?.width).toBeGreaterThanOrEqual(150);
-		expect(parent.leftChild?.width + (parent.rightChild?.width ?? 0)).toBe(200);
+		expect((parent.leftChild?.width ?? 0) + (parent.rightChild?.width ?? 0)).toBe(200);
 	});
 
 	it.skip('should handle natural resize with top/bottom split', () => {
@@ -984,7 +984,7 @@ describe('ReactiveSash - Classic Resize Strategy', () => {
 
 		// Should enforce minimum and adjust right child accordingly
 		expect(parent.leftChild?.width).toBeGreaterThanOrEqual(180);
-		expect(parent.leftChild?.width + (parent.rightChild?.width ?? 0)).toBe(200);
+		expect((parent.leftChild?.width ?? 0) + (parent.rightChild?.width ?? 0)).toBe(200);
 	});
 
 	it('should maintain proportions with vertical split', () => {
@@ -1027,7 +1027,7 @@ describe('ReactiveSash - Classic Resize Strategy', () => {
 		// Should respect minimums
 		expect(parent.leftChild?.width).toBeGreaterThanOrEqual(90);
 		expect(parent.rightChild?.width).toBeGreaterThanOrEqual(90);
-		expect(parent.leftChild?.width + (parent.rightChild?.width ?? 0)).toBe(150);
+		expect((parent.leftChild?.width ?? 0) + (parent.rightChild?.width ?? 0)).toBe(150);
 	});
 });
 
@@ -1113,7 +1113,7 @@ describe('ReactiveSash - Edge Cases', () => {
 		parent.width = 500;
 
 		// At least one child should be at minimum, total should match parent
-		expect(parent.leftChild?.width + (parent.rightChild?.width ?? 0)).toBe(500);
+		expect((parent.leftChild?.width ?? 0) + (parent.rightChild?.width ?? 0)).toBe(500);
 	});
 
 	it('should handle position changes correctly', () => {
@@ -1152,7 +1152,7 @@ describe('ReactiveSash - Edge Cases', () => {
 		}
 
 		// Should maintain valid state
-		expect(sash.leftChild?.width + (sash.rightChild?.width ?? 0)).toBe(380);
+		expect((sash.leftChild?.width ?? 0) + (sash.rightChild?.width ?? 0)).toBe(380);
 		expect(sash.leftChild?.left).toBe(0);
 	});
 });

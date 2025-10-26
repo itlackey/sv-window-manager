@@ -119,13 +119,24 @@ export function unregisterSillElement(): void {
 /**
  * Ensures the sill element exists and returns it
  *
- * If the sill doesn't exist yet, this method triggers its creation.
+ * In the new architecture, the Sill.svelte component registers itself when mounted.
+ * This function returns the registered sill element, or undefined if not yet registered.
  *
- * @returns The sill element, or undefined if window element not available
+ * @returns The sill element, or undefined if not yet registered by Sill.svelte
+ *
+ * @example
+ * ```typescript
+ * const sill = ensureSillElement();
+ * if (!sill) {
+ *   console.warn('Sill not yet mounted - ensure Sill.svelte is in the component tree');
+ * }
+ * ```
  */
 export function ensureSillElement(): HTMLElement | undefined {
 	if (!sillElement) {
-		return mount();
+		debugWarn(
+			'[ensureSillElement] Sill element not registered yet. Ensure Sill.svelte is mounted in the component tree.'
+		);
 	}
 	return sillElement;
 }

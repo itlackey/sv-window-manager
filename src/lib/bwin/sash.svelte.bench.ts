@@ -180,7 +180,9 @@ describe('ReactiveSash POC - Performance Benchmarks', () => {
 				if (depth >= maxDepth) return;
 
 				const splitPosition = depth % 2 === 0 ? Position.Right : Position.Bottom;
-				const isHorizontal = splitPosition === Position.Right || splitPosition === Position.Left;
+				// Check if split is horizontal (since splitPosition can only be Right or Bottom,
+				// we only need to check for Right)
+				const isHorizontal = splitPosition === Position.Right;
 
 				const child1Pos = isHorizontal ? Position.Left : Position.Top;
 				const child2Pos = isHorizontal ? Position.Right : Position.Bottom;

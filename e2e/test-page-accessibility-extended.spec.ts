@@ -1,10 +1,6 @@
 // e2e/test-page-accessibility-extended.spec.ts
 import { test, expect } from '@playwright/test';
-import {
-	navigateToTestPage,
-	addPane,
-	collectConsoleErrors
-} from './helpers/pane-helpers';
+import { navigateToTestPage, addPane, collectConsoleErrors } from './helpers/pane-helpers';
 import { CSS_SELECTORS, TEXT_CONTENT } from './helpers/selectors';
 
 /**
@@ -115,7 +111,8 @@ test.describe('Extended Accessibility', () => {
 			const textContent = await button.textContent();
 
 			// Button should have accessible name via aria-label, title, or text content
-			const hasAccessibleName = ariaLabel || title || (textContent && textContent.trim().length > 0);
+			const hasAccessibleName =
+				ariaLabel || title || (textContent && textContent.trim().length > 0);
 			expect(hasAccessibleName).toBeTruthy();
 		}
 

@@ -61,7 +61,7 @@ describe('strictAssign', () => {
 		}
 		const source = { a: 2 };
 		const target = new Target();
-		expect(() => strictAssign(target, source)).toThrow();
+		expect(() => strictAssign(target as unknown as Record<string, unknown>, source)).toThrow();
 	});
 
 	it('works for objects with prototype', () => {
@@ -70,7 +70,7 @@ describe('strictAssign', () => {
 		}
 		const source = { b: 2 };
 
-		strictAssign(Target.prototype, source);
+		strictAssign(Target.prototype as unknown as Record<string, unknown>, source);
 		const target = new Target();
 		expect(target.a).toBe(1);
 		// @ts-expect-error - Property b is added dynamically via strictAssign
@@ -83,7 +83,7 @@ describe('strictAssign', () => {
 		}
 		const source = { a: 2 };
 
-		strictAssign(Target.prototype, source);
+		strictAssign(Target.prototype as unknown as Record<string, unknown>, source);
 		const target = new Target();
 		expect(target.a).toBe(1);
 		expect(Object.getPrototypeOf(target).a).toBe(2);
@@ -95,11 +95,15 @@ describe('strictAssign', () => {
 		}
 		const source = { a: 2 };
 
-		strictAssign(Target.prototype, source);
-		expect(() => strictAssign(Target.prototype, source)).toThrow();
+		strictAssign(Target.prototype as unknown as Record<string, unknown>, source);
+		expect(() =>
+			strictAssign(Target.prototype as unknown as Record<string, unknown>, source)
+		).toThrow();
 
 		const source2 = { a: 3 };
-		expect(() => strictAssign(Target.prototype, source2)).toThrow();
+		expect(() =>
+			strictAssign(Target.prototype as unknown as Record<string, unknown>, source2)
+		).toThrow();
 	});
 });
 

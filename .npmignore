@@ -4,6 +4,7 @@
 .vscode/
 e2e/
 specs/
+src/examples/
 src/stories/
 playwright-report/
 test-results/

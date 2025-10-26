@@ -1,6 +1,6 @@
 # SV Window Manager
 
-A modern Svelte 5 component library that provides tiling window management for web applications. Built on top of [bwin.js](https://bhjsdev.github.io/bwin-docs/), it enables dynamic, resizable layouts with a simple, type-safe API.
+A native Svelte 5 component library that provides tiling window management for web applications. Built from the ground up with modern Svelte 5 patterns, it enables dynamic, resizable layouts with a simple, type-safe API. Inspired by the concepts from bwin.js but fully reimplemented in Svelte 5.
 
 ## Features
 
@@ -60,29 +60,29 @@ npm install sv-window-manager
 
 **Props:**
 
-| Prop          | Type                            | Description                                |
-| ------------- | ------------------------------- | ------------------------------------------ |
-| `settings`    | `SashConfig \| ConfigRoot`      | Initial window configuration and root pane |
-| `debug`       | `boolean`                       | Enable debug logging (default: false)      |
-| `fitContainer`| `boolean`                       | Auto-resize to fit parent (default: true)  |
+| Prop           | Type                       | Description                                |
+| -------------- | -------------------------- | ------------------------------------------ |
+| `settings`     | `SashConfig \| ConfigRoot` | Initial window configuration and root pane |
+| `debug`        | `boolean`                  | Enable debug logging (default: false)      |
+| `fitContainer` | `boolean`                  | Auto-resize to fit parent (default: true)  |
 
 **Methods:**
 
-| Method    | Signature                                                                    | Description                            |
-| --------- | ---------------------------------------------------------------------------- | -------------------------------------- |
-| `addPane` | `addPane(targetSashId: string, props: PaneProps): Sash \| null`              | Add a new pane with a Svelte component |
-| `removePane` | `removePane(sashId: string): void`                                        | Remove a pane by its sash ID           |
+| Method       | Signature                                                       | Description                            |
+| ------------ | --------------------------------------------------------------- | -------------------------------------- |
+| `addPane`    | `addPane(targetSashId: string, props: PaneProps): Sash \| null` | Add a new pane with a Svelte component |
+| `removePane` | `removePane(sashId: string): void`                              | Remove a pane by its sash ID           |
 
 **PaneProps Interface:**
 
 ```typescript
 interface PaneProps {
 	position: 'top' | 'right' | 'bottom' | 'left';
-	component: Component;          // Required: Svelte component to render
-	componentProps?: Record<string, unknown>;  // Optional: Props for the component
-	title?: string;                // Optional: Pane title
-	size?: string;                 // Optional: Size (e.g., '50%', '300px')
-	id?: string;                   // Optional: Custom sash ID
+	component: Component; // Required: Svelte component to render
+	componentProps?: Record<string, unknown>; // Optional: Props for the component
+	title?: string; // Optional: Pane title
+	size?: string; // Optional: Size (e.g., '50%', '300px')
+	id?: string; // Optional: Custom sash ID
 }
 ```
 
@@ -106,7 +106,7 @@ Customize the appearance using CSS custom properties:
 }
 ```
 
-[View all CSS variables →](https://bhjsdev.github.io/bwin-docs/)
+See the [demo app](./src/routes/+page.svelte) for a complete list of customizable CSS variables.
 
 ## Development
 
@@ -126,9 +126,9 @@ npm test
 
 ## Resources
 
-- [bwin.js Documentation](https://bhjsdev.github.io/bwin-docs/)
 - [Svelte 5 Documentation](https://svelte.dev/docs/svelte/overview)
 - [Example Implementation](./src/routes/+page.svelte)
+- [bwin.js Documentation](https://bhjsdev.github.io/bwin-docs/) (conceptual reference only)
 
 ## License
 

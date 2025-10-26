@@ -1,12 +1,12 @@
 // Type definitions for SV Window Manager library
 
 /**
- * Configuration options for BinaryWindow (bwin.js)
+ * Configuration options for BinaryWindow
  */
 export interface BwinConfig {
 	/** Whether the window manager should fit its container */
 	fitContainer?: boolean;
-	/** Additional bwin.js configuration options */
+	/** Additional BinaryWindow configuration options */
 	[key: string]: any;
 }
 

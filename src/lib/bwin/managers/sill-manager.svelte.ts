@@ -146,9 +146,7 @@ export class SillManager {
 	 */
 	getMinimizedGlassElement(sashId: string): Element | null | undefined {
 		if (!this.bwinContext.windowElement) return null;
-		const els = this.bwinContext.windowElement.querySelectorAll(
-			`.${CSS_CLASSES.MINIMIZED_GLASS}`
-		);
+		const els = this.bwinContext.windowElement.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`);
 		return Array.from(els).find(
 			(el) => (el as HTMLElement & { bwOriginalSashId?: string }).bwOriginalSashId === sashId
 		);
@@ -265,12 +263,15 @@ export class SillManager {
 			const originalStore = minimizedGlassEl.bwOriginalStore || {};
 
 			// addPane will create a new Glass component with the preserved store
-			this.bwinContext.addPane((targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID)!, {
-				id: originalSashId,
-				position: newPosition,
-				size: newSize,
-				...originalStore // Preserve title, content, and other Glass props
-			});
+			this.bwinContext.addPane(
+				(targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID)!,
+				{
+					id: originalSashId,
+					position: newPosition,
+					size: newSize,
+					...originalStore // Preserve title, content, and other Glass props
+				}
+			);
 		}
 	}
 

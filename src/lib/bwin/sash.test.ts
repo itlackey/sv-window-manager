@@ -64,11 +64,11 @@ describe('Sash class', () => {
 		});
 
 		it('throws error when position is not provided', () => {
-			expect(() => new Sash({})).toThrow();
+			expect(() => new Sash({} as any)).toThrow();
 		});
 
 		it('throws BwinError when position is missing', () => {
-			expect(() => new Sash({})).toThrow(BwinErrors.sashPositionRequired().message);
+			expect(() => new Sash({} as any)).toThrow(BwinErrors.sashPositionRequired().message);
 		});
 	});
 
@@ -166,8 +166,8 @@ describe('Sash class', () => {
 		});
 
 		describe('child getters', () => {
-			let parent;
-			let leftChild, rightChild, topChild, bottomChild;
+			let parent: Sash;
+			let leftChild: Sash, rightChild: Sash, topChild: Sash, bottomChild: Sash;
 
 			beforeEach(() => {
 				parent = new Sash({ position: Position.Root, width: 800, height: 600 });
@@ -279,7 +279,7 @@ describe('Sash class', () => {
 		describe('walk', () => {
 			it('calls callback for a single node', () => {
 				const root = new Sash({ position: Position.Root });
-				const visited = [];
+				const visited: string[] = [];
 
 				root.walk((sash) => visited.push(sash.id));
 
@@ -295,7 +295,7 @@ describe('Sash class', () => {
 				root.addChild(left);
 				root.addChild(right);
 
-				const visited = [];
+				const visited: string[] = [];
 				root.walk((sash) => visited.push(sash.id));
 
 				// Post-order: children first, then parent
@@ -314,7 +314,7 @@ describe('Sash class', () => {
 				left.addChild(leftLeft);
 				left.addChild(leftRight);
 
-				const visited = [];
+				const visited: string[] = [];
 				root.walk((sash) => visited.push(sash.id));
 
 				// Post-order traversal
@@ -902,7 +902,6 @@ describe('Sash class', () => {
 					width: 400,
 					height: 600,
 					left: 0,
-					position: Position.Left,
 					resizeStrategy: 'natural'
 				});
 				const right = new Sash({
@@ -910,7 +909,8 @@ describe('Sash class', () => {
 					parent: root,
 					width: 400,
 					height: 600,
-					left: 400
+					left: 400,
+					resizeStrategy: 'natural'
 				});
 
 				root.addChild(left);
@@ -965,7 +965,6 @@ describe('Sash class', () => {
 					width: 400,
 					height: 600,
 					left: 400,
-					position: Position.Right,
 					resizeStrategy: 'natural'
 				});
 

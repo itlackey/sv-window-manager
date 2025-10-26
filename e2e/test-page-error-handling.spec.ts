@@ -43,18 +43,18 @@ test.describe('Error Handling', () => {
 		await page.getByLabel('Position:').selectOption('right');
 
 		// Try to add pane
-		await page.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
-			name: ACCESSIBLE_SELECTORS.addPaneButton.name
-		}).click();
+		await page
+			.getByRole(ACCESSIBLE_SELECTORS.addPaneButton.role, {
+				name: ACCESSIBLE_SELECTORS.addPaneButton.name
+			})
+			.click();
 		await page.waitForTimeout(500);
 
 		// Verify page remains functional regardless of whether pane was added
 		await expect(page.locator(CSS_SELECTORS.frameContainer)).toBeVisible();
 
 		// The key requirement is no JavaScript errors
-		const criticalErrors = errors.filter((e) =>
-			e.includes('Error') && !e.includes('Warning')
-		);
+		const criticalErrors = errors.filter((e) => e.includes('Error') && !e.includes('Warning'));
 		expect(criticalErrors).toEqual([]);
 
 		// Verify pane count is reasonable (either unchanged or increased)
@@ -138,8 +138,8 @@ test.describe('Error Handling', () => {
 		expect(paneCount).toBe(finalCount);
 
 		// Verify no critical errors - this is the key requirement
-		const criticalErrors = errors.filter((e) =>
-			!e.includes('Warning') && !e.includes('deprecated')
+		const criticalErrors = errors.filter(
+			(e) => !e.includes('Warning') && !e.includes('deprecated')
 		);
 		expect(criticalErrors).toEqual([]);
 	});

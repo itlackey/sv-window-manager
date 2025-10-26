@@ -78,7 +78,6 @@ export class GlassManager {
 	// PUBLIC METHODS
 	// ============================================================================
 
-
 	/**
 	 * Removes a Glass component
 	 *

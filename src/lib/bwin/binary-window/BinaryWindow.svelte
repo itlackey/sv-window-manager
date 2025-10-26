@@ -10,10 +10,7 @@
 	import Sill from './Sill.svelte';
 	import { drag } from '../actions/drag.svelte';
 	import type { Sash } from '../sash.js';
-	import {
-		type BwinContext,
-		setWindowContext
-	} from '../context.js';
+	import { type BwinContext, setWindowContext } from '../context.js';
 	import type { FrameComponent } from '../types.js';
 	import type { SashConfig } from '../config/sash-config.js';
 	import type { ConfigRoot } from '../config/config-root.js';
@@ -55,7 +52,7 @@
 		if (debug) console.warn('[BinaryWindow]', ...args);
 	}
 
-	// Support fitContainer from settings object (like bwin.js) or from prop
+	// Support fitContainer from settings object or from prop
 	const shouldFitContainer = $derived(
 		'fitContainer' in settings ? settings.fitContainer : fitContainer
 	);
@@ -259,7 +256,12 @@
 		}
 
 		// Validate position is one of the valid directional values
-		const validPositions: Position[] = [Position.Top, Position.Right, Position.Bottom, Position.Left];
+		const validPositions: Position[] = [
+			Position.Top,
+			Position.Right,
+			Position.Bottom,
+			Position.Left
+		];
 		if (!validPositions.includes(position as Position)) {
 			throw BwinErrors.invalidPosition(position as string);
 		}

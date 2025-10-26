@@ -254,10 +254,7 @@ export async function dragMuntin(
  * @example
  * await switchLayout(page, 'complex');
  */
-export async function switchLayout(
-	page: Page,
-	layout: 'simple' | 'complex'
-): Promise<void> {
+export async function switchLayout(page: Page, layout: 'simple' | 'complex'): Promise<void> {
 	if (layout === 'simple') {
 		await page.getByRole('radio', { name: 'Simple Layout (2 panes)' }).click();
 	} else {
@@ -316,11 +313,7 @@ export async function getPaneTitles(page: Page): Promise<string[]> {
  * await expect(pane).toBeVisible();
  */
 export async function findPaneByTitle(page: Page, title: string) {
-	return page
-		.locator('.glass-title', { hasText: title })
-		.locator('..')
-		.locator('..')
-		.locator('..');
+	return page.locator('.glass-title', { hasText: title }).locator('..').locator('..').locator('..');
 }
 
 /**

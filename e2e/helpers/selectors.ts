@@ -183,10 +183,7 @@ export const DEFAULTS = {
  * const selector = buildDataSelector('sashId', 'sash-1');
  * // Returns: '[data-sash-id="sash-1"]'
  */
-export function buildDataSelector(
-	attribute: keyof typeof DATA_ATTRIBUTES,
-	value: string
-): string {
+export function buildDataSelector(attribute: keyof typeof DATA_ATTRIBUTES, value: string): string {
 	return `[${DATA_ATTRIBUTES[attribute]}="${value}"]`;
 }
 

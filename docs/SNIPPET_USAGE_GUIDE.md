@@ -21,25 +21,25 @@ All pane content must be Svelte components:
 ```svelte
 <!-- MyPaneComponent.svelte -->
 <script lang="ts">
-  let { message = 'Hello' }: { message?: string } = $props();
+	let { message = 'Hello' }: { message?: string } = $props();
 
-  let count = $state(0);
+	let count = $state(0);
 
-  function increment() {
-    count++;
-  }
+	function increment() {
+		count++;
+	}
 </script>
 
 <div class="pane-content">
-  <h2>{message}</h2>
-  <p>Count: {count}</p>
-  <button onclick={increment}>Increment</button>
+	<h2>{message}</h2>
+	<p>Count: {count}</p>
+	<button onclick={increment}>Increment</button>
 </div>
 
 <style>
-  .pane-content {
-    padding: 20px;
-  }
+	.pane-content {
+		padding: 20px;
+	}
 </style>
 ```
 
@@ -47,26 +47,26 @@ All pane content must be Svelte components:
 
 ```svelte
 <script lang="ts">
-  import { BinaryWindow } from 'sv-window-manager';
-  import MyPaneComponent from './MyPaneComponent.svelte';
+	import { BinaryWindow } from 'sv-window-manager';
+	import MyPaneComponent from './MyPaneComponent.svelte';
 
-  const settings = {
-    id: 'root',
-    title: 'Main Pane',
-    component: MyPaneComponent,
-    componentProps: { message: 'Welcome!' }
-  };
+	const settings = {
+		id: 'root',
+		title: 'Main Pane',
+		component: MyPaneComponent,
+		componentProps: { message: 'Welcome!' }
+	};
 
-  let bwin = $state<BinaryWindow>();
+	let bwin = $state<BinaryWindow>();
 
-  function addPane() {
-    bwin?.addPane('root', {
-      position: 'right',
-      title: 'New Pane',
-      component: MyPaneComponent,
-      componentProps: { message: 'Split view!' }
-    });
-  }
+	function addPane() {
+		bwin?.addPane('root', {
+			position: 'right',
+			title: 'New Pane',
+			component: MyPaneComponent,
+			componentProps: { message: 'Split view!' }
+		});
+	}
 </script>
 
 <BinaryWindow bind:this={bwin} {settings} />
@@ -82,20 +82,20 @@ You can use snippets inside your pane components for composable layouts:
 ```svelte
 <!-- StatsPane.svelte -->
 <script lang="ts">
-  let { stats }: { stats: Array<{title: string, value: number}> } = $props();
+	let { stats }: { stats: Array<{ title: string; value: number }> } = $props();
 </script>
 
 {#snippet statsCard(title: string, value: number)}
-  <div class="card">
-    <h3>{title}</h3>
-    <div class="value">{value}</div>
-  </div>
+	<div class="card">
+		<h3>{title}</h3>
+		<div class="value">{value}</div>
+	</div>
 {/snippet}
 
 <div class="stats-grid">
-  {#each stats as stat}
-    {@render statsCard(stat.title, stat.value)}
-  {/each}
+	{#each stats as stat}
+		{@render statsCard(stat.title, stat.value)}
+	{/each}
 </div>
 ```
 
@@ -103,18 +103,18 @@ Then use it as a pane component:
 
 ```svelte
 <script lang="ts">
-  import StatsPane from './StatsPane.svelte';
+	import StatsPane from './StatsPane.svelte';
 
-  bwin?.addPane('root', {
-    position: 'right',
-    component: StatsPane,
-    componentProps: {
-      stats: [
-        { title: 'Users', value: 42 },
-        { title: 'Revenue', value: 1000 }
-      ]
-    }
-  });
+	bwin?.addPane('root', {
+		position: 'right',
+		component: StatsPane,
+		componentProps: {
+			stats: [
+				{ title: 'Users', value: 42 },
+				{ title: 'Revenue', value: 1000 }
+			]
+		}
+	});
 </script>
 ```
 
@@ -125,28 +125,28 @@ Build sophisticated pane components with nested snippets:
 ```svelte
 <!-- DashboardPane.svelte -->
 <script lang="ts">
-  let { data }: { data: any } = $props();
+	let { data }: { data: any } = $props();
 </script>
 
 {#snippet header()}
-  <div class="header">
-    <h1>Dashboard</h1>
-  </div>
+	<div class="header">
+		<h1>Dashboard</h1>
+	</div>
 {/snippet}
 
 {#snippet sidebar()}
-  <nav>
-    <ul>
-      <li>Home</li>
-      <li>Settings</li>
-    </ul>
-  </nav>
+	<nav>
+		<ul>
+			<li>Home</li>
+			<li>Settings</li>
+		</ul>
+	</nav>
 {/snippet}
 
 <div class="layout">
-  {@render header()}
-  {@render sidebar()}
-  <main>{data.content}</main>
+	{@render header()}
+	{@render sidebar()}
+	<main>{data.content}</main>
 </div>
 ```
 
@@ -167,30 +167,30 @@ Use Svelte's conditional logic in your pane components:
 ```svelte
 <!-- DataViewPane.svelte -->
 <script lang="ts">
-  let { initialData = [] }: { initialData?: any[] } = $props();
+	let { initialData = [] }: { initialData?: any[] } = $props();
 
-  let isLoading = $state(false);
-  let data = $state(initialData);
+	let isLoading = $state(false);
+	let data = $state(initialData);
 
-  async function loadData() {
-    isLoading = true;
-    // Fetch data...
-    isLoading = false;
-  }
+	async function loadData() {
+		isLoading = true;
+		// Fetch data...
+		isLoading = false;
+	}
 </script>
 
 <div class="data-view">
-  {#if isLoading}
-    <div class="spinner">Loading...</div>
-  {:else if data.length === 0}
-    <p>No data available</p>
-  {:else}
-    <ul>
-      {#each data as item}
-        <li>{item.name}</li>
-      {/each}
-    </ul>
-  {/if}
+	{#if isLoading}
+		<div class="spinner">Loading...</div>
+	{:else if data.length === 0}
+		<p>No data available</p>
+	{:else}
+		<ul>
+			{#each data as item}
+				<li>{item.name}</li>
+			{/each}
+		</ul>
+	{/if}
 </div>
 ```
 
@@ -223,8 +223,8 @@ Components and their props are fully typed with TypeScript:
 import type { Component } from 'svelte';
 
 interface MyComponentProps {
-  message: string;
-  count?: number;
+	message: string;
+	count?: number;
 }
 
 // Your component with typed props
@@ -232,12 +232,12 @@ const MyComponent: Component<MyComponentProps>;
 
 // Type-safe pane configuration
 bwin?.addPane('root', {
-  position: 'right',
-  component: MyComponent,
-  componentProps: {
-    message: 'Hello',  // TypeScript validates this
-    count: 42          // TypeScript validates this too
-  }
+	position: 'right',
+	component: MyComponent,
+	componentProps: {
+		message: 'Hello', // TypeScript validates this
+		count: 42 // TypeScript validates this too
+	}
 });
 ```
 
@@ -252,13 +252,13 @@ bwin?.addPane('root', {
 
 ### Best Practices
 
-| Use Case | Recommended Pattern |
-|----------|---------------------|
-| Static content | Simple component with props |
-| Interactive UI | Component with $state runes |
-| Reusable widgets | Component with typed props |
-| Complex layouts | Component with nested snippets |
-| Form inputs | Component with bindings |
+| Use Case         | Recommended Pattern            |
+| ---------------- | ------------------------------ |
+| Static content   | Simple component with props    |
+| Interactive UI   | Component with $state runes    |
+| Reusable widgets | Component with typed props     |
+| Complex layouts  | Component with nested snippets |
+| Form inputs      | Component with bindings        |
 
 ## Creating Reusable Pane Components
 
@@ -267,30 +267,30 @@ bwin?.addPane('root', {
 ```svelte
 <!-- FormPane.svelte -->
 <script lang="ts">
-  interface FormData {
-    name: string;
-    email: string;
-  }
+	interface FormData {
+		name: string;
+		email: string;
+	}
 
-  let {
-    onSubmit,
-    initialData = { name: '', email: '' }
-  }: {
-    onSubmit: (data: FormData) => void;
-    initialData?: FormData;
-  } = $props();
+	let {
+		onSubmit,
+		initialData = { name: '', email: '' }
+	}: {
+		onSubmit: (data: FormData) => void;
+		initialData?: FormData;
+	} = $props();
 
-  let formData = $state<FormData>(initialData);
+	let formData = $state<FormData>(initialData);
 
-  function handleSubmit() {
-    onSubmit(formData);
-  }
+	function handleSubmit() {
+		onSubmit(formData);
+	}
 </script>
 
 <form class="form-pane">
-  <input bind:value={formData.name} placeholder="Name" />
-  <input bind:value={formData.email} placeholder="Email" />
-  <button onclick={handleSubmit}>Submit</button>
+	<input bind:value={formData.name} placeholder="Name" />
+	<input bind:value={formData.email} placeholder="Email" />
+	<button onclick={handleSubmit}>Submit</button>
 </form>
 ```
 
@@ -314,28 +314,28 @@ bwin?.addPane('root', {
 ```svelte
 <!-- LoadingPane.svelte -->
 <script lang="ts">
-  let { loadData }: { loadData: () => Promise<any> } = $props();
+	let { loadData }: { loadData: () => Promise<any> } = $props();
 
-  let isLoading = $state(true);
-  let data = $state(null);
+	let isLoading = $state(true);
+	let data = $state(null);
 
-  async function load() {
-    isLoading = true;
-    data = await loadData();
-    isLoading = false;
-  }
+	async function load() {
+		isLoading = true;
+		data = await loadData();
+		isLoading = false;
+	}
 
-  $effect(() => {
-    load();
-  });
+	$effect(() => {
+		load();
+	});
 </script>
 
 <div class="loading-pane">
-  {#if isLoading}
-    <div class="spinner">Loading...</div>
-  {:else}
-    <div>Data: {JSON.stringify(data)}</div>
-  {/if}
+	{#if isLoading}
+		<div class="spinner">Loading...</div>
+	{:else}
+		<div>Data: {JSON.stringify(data)}</div>
+	{/if}
 </div>
 ```
 
@@ -344,27 +344,30 @@ bwin?.addPane('root', {
 ```svelte
 <!-- DashboardCard.svelte -->
 <script lang="ts">
-  let {
-    title,
-    value,
-    change
-  }: {
-    title: string;
-    value: number;
-    change: number;
-  } = $props();
+	let {
+		title,
+		value,
+		change
+	}: {
+		title: string;
+		value: number;
+		change: number;
+	} = $props();
 </script>
 
 <div class="card">
-  <h3>{title}</h3>
-  <div class="value">{value}</div>
-  <div class="change" class:positive={change > 0}>
-    {change > 0 ? '↑' : '↓'} {Math.abs(change)}%
-  </div>
+	<h3>{title}</h3>
+	<div class="value">{value}</div>
+	<div class="change" class:positive={change > 0}>
+		{change > 0 ? '↑' : '↓'}
+		{Math.abs(change)}%
+	</div>
 </div>
 
 <style>
-  .positive { color: green; }
+	.positive {
+		color: green;
+	}
 </style>
 ```
 
@@ -387,30 +390,30 @@ Pane components can access the window manager context to interact with other pan
 ```svelte
 <!-- InteractivePane.svelte -->
 <script lang="ts">
-  import { getWindowContext } from 'sv-window-manager';
-  import type { Sash } from 'sv-window-manager';
-  import AnotherComponent from './AnotherComponent.svelte';
+	import { getWindowContext } from 'sv-window-manager';
+	import type { Sash } from 'sv-window-manager';
+	import AnotherComponent from './AnotherComponent.svelte';
 
-  let { sash }: { sash: Sash } = $props();
+	let { sash }: { sash: Sash } = $props();
 
-  const bwin = getWindowContext();
+	const bwin = getWindowContext();
 
-  function splitRight() {
-    bwin.addPane(sash.id, {
-      position: 'right',
-      component: AnotherComponent,
-      componentProps: { message: 'I was split off!' }
-    });
-  }
+	function splitRight() {
+		bwin.addPane(sash.id, {
+			position: 'right',
+			component: AnotherComponent,
+			componentProps: { message: 'I was split off!' }
+		});
+	}
 
-  function closeMe() {
-    bwin.removePane(sash.id);
-  }
+	function closeMe() {
+		bwin.removePane(sash.id);
+	}
 </script>
 
 <div class="interactive-pane">
-  <button onclick={splitRight}>Split Right</button>
-  <button onclick={closeMe}>Close</button>
+	<button onclick={splitRight}>Split Right</button>
+	<button onclick={closeMe}>Close</button>
 </div>
 ```
 

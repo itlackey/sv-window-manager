@@ -2,7 +2,7 @@
 	import type { Sash } from '../sash.js';
 	import type { Snippet } from 'svelte';
 	import { SashConfig } from '../config/sash-config.js';
-	import { ConfigRoot } from '../config/config-root.js';
+	import { ConfigRoot, type ConfigRootParams } from '../config/config-root.js';
 	import { addPaneSash } from './pane-utils.js';
 	import { genId } from '../utils.js';
 	import { Position } from '../position.js';
@@ -10,10 +10,7 @@
 	import Muntin from './Muntin.svelte';
 	import { resize } from '../actions/resize.svelte';
 	import { drop } from '../actions/drop.svelte';
-	import {
-		type FrameContext,
-		setLayoutContext
-	} from '../context.js';
+	import { type FrameContext, setLayoutContext } from '../context.js';
 
 	/**
 	 * Props for the Frame component
@@ -45,14 +42,24 @@
 		treeVersion?: number;
 	}
 
-	let { settings, debug = false, onPaneRender, onMuntinRender, onpanerender, onmuntinrender, onPaneDrop, paneContent, treeVersion = 0 }: FrameProps = $props();
+	let {
+		settings,
+		debug = false,
+		onPaneRender,
+		onMuntinRender,
+		onpanerender,
+		onmuntinrender,
+		onPaneDrop,
+		paneContent,
+		treeVersion = 0
+	}: FrameProps = $props();
 
 	// Initialize sash tree from settings
 	let rootSash = $derived.by(() => {
 		if (settings instanceof SashConfig) {
 			return settings;
 		}
-		const config = new ConfigRoot(settings);
+		const config = new ConfigRoot(settings as ConfigRootParams);
 		return config.buildSashTree({ resizeStrategy: config.resizeStrategy });
 	});
 
@@ -154,11 +161,13 @@
 		if (!siblingSash) return;
 
 		if (siblingSash.children.length === 0) {
+			// @ts-expect-error - id is readonly but we need to reassign it during pane removal
 			parentSash.id = siblingSash.id;
 			parentSash.domNode = siblingSash.domNode;
 			parentSash.store = siblingSash.store;
 			parentSash.children = [];
 		} else {
+			// @ts-expect-error - id is readonly but we need to reassign it during pane removal
 			parentSash.id = genId();
 			parentSash.children = siblingSash.children;
 
@@ -271,11 +280,7 @@
 		use:drop={{ rootSash, onDrop: onPaneDrop }}
 	>
 		{#each panes as sash (sash.id)}
-			<Pane
-				{sash}
-				{onPaneRender}
-				{onpanerender}
-			>
+			<Pane {sash} {onPaneRender} {onpanerender}>
 				{#if paneContent}
 					{@render paneContent(sash)}
 				{/if}
@@ -283,11 +288,7 @@
 		{/each}
 
 		{#each muntins as sash (sash.id)}
-			<Muntin
-				{sash}
-				{onMuntinRender}
-				{onmuntinrender}
-			/>
+			<Muntin {sash} {onMuntinRender} {onmuntinrender} />
 		{/each}
 	</div>
 {/if}
