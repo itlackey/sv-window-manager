@@ -22,9 +22,7 @@ const config = {
 			// Set base path to repository name for GitHub Pages
 			// In dev mode, use empty string to avoid issues with local development
 			base: dev ? '' : process.env.BASE_PATH || '/sv-window-manager'
-		},
-		// Ensure trailing slash for proper GitHub Pages routing
-		trailingSlash: 'always'
+		}
 	}
 };
 
