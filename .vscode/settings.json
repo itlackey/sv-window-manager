@@ -1,4 +1,18 @@
 {
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/.svelte-kit": true,
+        "**/.storybook": true,
+        "**/coverage": true,
+        "**/storybook-static": true,
+        "**/test-results": true
+    },
     "chat.promptFilesRecommendations": {
         "speckit.constitution": true,
         "speckit.specify": true,

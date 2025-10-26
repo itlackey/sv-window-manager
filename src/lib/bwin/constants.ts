@@ -149,3 +149,52 @@ export const DATA_ATTRIBUTES = {
 	RESIZABLE: 'data-resizable',
 	MAXIMIZED: 'data-maximized'
 } as const;
+
+/**
+ * ID for the placeholder pane shown when window has no panes.
+ *
+ * This placeholder is automatically created when a BinaryWindow is initialized
+ * with no children, and is automatically removed when the first real pane is added.
+ *
+ * @constant {string}
+ * @default '__bwin_placeholder__'
+ *
+ * @example
+ * ```typescript
+ * // Check if current pane is the placeholder
+ * if (sash.id === PLACEHOLDER_PANE_ID) {
+ *   // This is the placeholder
+ * }
+ * ```
+ */
+export const PLACEHOLDER_PANE_ID = '__bwin_placeholder__';
+
+/**
+ * Default content for the placeholder pane.
+ *
+ * This content is shown when a BinaryWindow is initialized with no panes.
+ * It provides helpful instructions to guide users on how to add their first pane.
+ *
+ * @constant {Object}
+ * @property {string} title - The title shown in the placeholder glass header
+ * @property {string} content - HTML content shown in the placeholder glass body
+ *
+ * @example
+ * ```typescript
+ * // Use in config
+ * const placeholderStore = {
+ *   id: PLACEHOLDER_PANE_ID,
+ *   ...PLACEHOLDER_CONTENT
+ * };
+ * ```
+ */
+export const PLACEHOLDER_CONTENT = {
+	title: 'Empty Window',
+	content: `
+		<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 2rem; text-align: center; color: #6c757d;">
+			<h3 style="margin: 0 0 1rem 0; color: #495057;">No Panes Yet</h3>
+			<p style="margin: 0 0 0.5rem 0; line-height: 1.6;">This window has no panes yet.</p>
+			<p style="margin: 0; line-height: 1.6;">Use <code>addPane()</code> to add content.</p>
+		</div>
+	`
+} as const;

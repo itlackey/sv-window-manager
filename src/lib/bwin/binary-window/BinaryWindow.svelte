@@ -242,7 +242,24 @@
 		// Validate frame component is initialized
 		if (!frameComponent) throw BwinErrors.frameNotInitialized();
 
-		// Validate required position parameter
+		// Check if target is the placeholder pane - if so, replace it instead of adding alongside
+		const targetSash = frameComponent.rootSash?.getById(targetPaneSashId);
+		if (targetSash?.store?.isPlaceholder) {
+			debugLog('[addPane] Target is placeholder - replacing placeholder content');
+
+			// Store glass props (title, content, etc.) in the sash's store
+			// Remove the isPlaceholder marker
+			const fullGlassProps = { ...glassProps, component, componentProps };
+			targetSash.store = fullGlassProps;
+
+			// Increment tree version to trigger reactive updates
+			treeVersion++;
+
+			debugLog('[addPane] Placeholder replaced with pane:', targetSash.id);
+			return targetSash;
+		}
+
+		// Validate required position parameter (only required when not replacing placeholder)
 		if (!position || typeof position !== 'string') {
 			throw BwinErrors.invalidPosition(String(position || 'undefined'));
 		}
