@@ -79,66 +79,41 @@ export function initialize(context: BwinContext, debug = false): void {
 // ============================================================================
 
 /**
- * Mounts the sill element to the window element
+ * Registers the sill element from the Sill component
  *
- * Creates or reuses existing sill element, preserving any minimized glass buttons.
- * The sill is automatically recreated when the window element changes (e.g., Frame re-renders).
+ * Called by Sill.svelte when it mounts. This replaces the old mount() logic
+ * that appended the sill to the window element.
  *
- * @returns The mounted sill element, or undefined if window element not available
+ * @param element - The sill element from Sill.svelte
  *
  * @example
  * ```typescript
- * const sill = mount();
- * if (sill) {
- *   console.log('Sill mounted:', sill);
- * }
+ * // In Sill.svelte onMount:
+ * registerSillElement(sillElement);
  * ```
  */
-export function mount(): HTMLElement | undefined {
+export function registerSillElement(element: HTMLElement): void {
 	if (!bwinContext) {
-		debugWarn('[mount] Module not initialized - call initialize() first');
-		return undefined;
+		debugWarn('[registerSillElement] Module not initialized - call initialize() first');
+		return;
 	}
 
-	const winEl = bwinContext.windowElement;
-	if (!winEl) {
-		sillElement = undefined;
-		debugWarn('[mount] No window element available');
-		return undefined;
-	}
-
-	// Check if sill already exists in this windowElement
-	const existingSill = winEl.querySelector(`.${CSS_CLASSES.SILL}`);
-	if (existingSill) {
-		sillElement = existingSill as HTMLElement;
-		debugLog('[mount] Found existing sill in windowElement:', sillElement);
-		setupClickHandler();
-		return sillElement;
-	}
-
-	// Create new sill
-	const sillEl = document.createElement('div');
-	sillEl.className = CSS_CLASSES.SILL;
-
-	// Preserve minimized glass buttons from old sill if it exists
-	if (sillElement) {
-		const minimizedGlasses = Array.from(
-			sillElement.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`)
-		);
-		debugLog('[mount] Preserving minimized glasses:', minimizedGlasses.length);
-		minimizedGlasses.forEach((glassBtn) => {
-			sillEl.append(glassBtn);
-		});
-	}
-
-	winEl.append(sillEl);
-	sillElement = sillEl;
-	debugLog('[mount] Created and appended sill element');
+	sillElement = element;
+	debugLog('[registerSillElement] Sill element registered:', sillElement);
 
 	// Setup click handler
 	setupClickHandler();
+}
 
-	return sillElement;
+/**
+ * Unregisters the sill element
+ *
+ * Called by Sill.svelte when it unmounts.
+ */
+export function unregisterSillElement(): void {
+	debugLog('[unregisterSillElement] Unregistering sill element');
+	removeClickHandler();
+	sillElement = undefined;
 }
 
 /**
@@ -167,7 +142,7 @@ export function getSillElement(): HTMLElement | undefined {
 /**
  * Gets a minimized glass element by sash ID
  *
- * Searches the window element for a minimized glass button with the matching sash ID.
+ * Searches the sill element for a minimized glass button with the matching sash ID.
  *
  * @param sashId - The sash ID to search for
  * @returns The minimized glass element, or null/undefined if not found
@@ -181,8 +156,8 @@ export function getSillElement(): HTMLElement | undefined {
  * ```
  */
 export function getMinimizedGlassElement(sashId: string): Element | null | undefined {
-	if (!bwinContext?.windowElement) return null;
-	const els = bwinContext.windowElement.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`);
+	if (!sillElement) return null;
+	const els = sillElement.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`);
 	return Array.from(els).find(
 		(el) => (el as HTMLElement & { bwOriginalSashId?: string }).bwOriginalSashId === sashId
 	);

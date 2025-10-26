@@ -7,6 +7,7 @@
 	import { getIntersectRect } from '../rect.js';
 	import Frame from '../frame/Frame.svelte';
 	import Glass from './Glass.svelte';
+	import Sill from './Sill.svelte';
 	import { drag } from '../actions/drag.svelte';
 	import type { Sash } from '../sash.js';
 	import {
@@ -21,7 +22,7 @@
 	import * as GlassState from '../managers/glass-state.svelte.js';
 	import * as SillState from '../managers/sill-state.svelte.js';
 	import '../css/index.css';
-	const DEBUG = import.meta.env.VITE_DEBUG == 'true' ? true : false;
+	const DEBUG = false;
 
 	// Throttle timeout for ResizeObserver
 	let resizeTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -411,14 +412,8 @@
 		updateButton('.glass-action--maximize');
 	});
 
-	// Mount sill element when window element becomes available
-	// The sill displays minimized glass buttons at the bottom of the window
-	// This runs once when frameComponent.windowElement is first set
-	$effect(() => {
-		if (frameComponent?.windowElement) {
-			SillState.mount();
-		}
-	});
+	// Note: Sill component now handles its own mounting via the Sill.svelte component
+	// No need to call SillState.mount() - it registers itself when mounted
 
 	// Cleanup state modules when component is destroyed
 	// Ensures proper teardown of observers, event listeners, and DOM elements
@@ -670,27 +665,30 @@
 		onDragEnd: handleDragEnd
 	}}
 >
-	<Frame
-		bind:this={frameComponent}
-		{settings}
-		{debug}
-		{treeVersion}
-		onmuntinrender={handleMuntinRender}
-		onPaneDrop={handlePaneDrop}
-	>
-		{#snippet paneContent(sash)}
-			<Glass
-				title={sash.store.title}
-				tabs={sash.store.tabs}
-				actions={sash.store.actions}
-				draggable={sash.store.draggable !== false}
-				{sash}
-				binaryWindow={bwinContext}
-				component={sash.store.component}
-				componentProps={sash.store.componentProps}
-			/>
-		{/snippet}
-	</Frame>
+	<div class="bw-window-area">
+		<Frame
+			bind:this={frameComponent}
+			{settings}
+			{debug}
+			{treeVersion}
+			onmuntinrender={handleMuntinRender}
+			onPaneDrop={handlePaneDrop}
+		>
+			{#snippet paneContent(sash)}
+				<Glass
+					title={sash.store.title}
+					tabs={sash.store.tabs}
+					actions={sash.store.actions}
+					draggable={sash.store.draggable !== false}
+					{sash}
+					binaryWindow={bwinContext}
+					component={sash.store.component}
+					componentProps={sash.store.componentProps}
+				/>
+			{/snippet}
+		</Frame>
+	</div>
+	<Sill binaryWindow={bwinContext} />
 </div>
 
 <style>
@@ -698,7 +696,14 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-		/* Allow sill to overflow below the window without being clipped */
-		overflow: visible;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	.bw-window-area {
+		flex: 1;
+		min-height: 0; /* Allow flex item to shrink below content size */
+		position: relative;
 	}
 </style>

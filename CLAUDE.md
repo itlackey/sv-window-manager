@@ -22,20 +22,6 @@ npm pack                 # Build the library package for distribution
 npm run build            # Build the production showcase app
 ```
 
-### Feature Flags
-
-The project uses environment variables for gradual rollout of architectural refactorings:
-
-```bash
-# Enable declarative Glass rendering (Workstream 2.3)
-VITE_USE_DECLARATIVE_GLASS_RENDERING=true npm run dev
-
-# Run tests with feature flag
-VITE_USE_DECLARATIVE_GLASS_RENDERING=true npm run test:unit
-```
-
-See `.env.example` for all available feature flags and their documentation.
-
 ### Testing
 
 ```bash
@@ -316,7 +302,6 @@ dist/                             # Build output (generated)
 - **CSS side effects:** CSS files are marked as side effects in `package.json` to prevent tree-shaking
 - **Package exports:** Library exports both types (`dist/index.d.ts`) and components (`dist/index.js`)
 - **bwin.js is vendored:** The library includes a bundled copy of bwin.js in `src/lib/components/bwin/`
-- **Feature flags:** Architectural refactorings use environment-based feature flags for gradual rollout (see `.env.example`)
 - **Declarative rendering:** Glass components can be rendered declaratively via snippets (see `DECLARATIVE_GLASS_RENDERING.md`)
 
 ## Current POC Status

@@ -13,16 +13,30 @@ export const drag: Action<HTMLElement, DragActionParams> = (node, params = {}) =
 
 	function handleMouseDown(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (event.button !== 0 || !target.matches(`.${CSS_CLASSES.GLASS_HEADER}`)) return;
 
-		if (target.getAttribute(DATA_ATTRIBUTES.CAN_DRAG) === 'false') {
+		// Only handle left mouse button
+		if (event.button !== 0) return;
+
+		// Check if the click is within a glass header
+		const headerEl = target.closest(`.${CSS_CLASSES.GLASS_HEADER}`) as HTMLElement;
+		if (!headerEl) return;
+
+		// Don't initiate drag if clicking on action buttons or tabs
+		// This allows buttons to function normally while making the rest of the header draggable
+		if (
+			target.closest(`.${CSS_CLASSES.GLASS_ACTION}`) ||
+			target.closest(`.${CSS_CLASSES.GLASS_TAB}`)
+		) {
+			return;
+		}
+
+		if (headerEl.getAttribute(DATA_ATTRIBUTES.CAN_DRAG) === 'false') {
 			// Chrome bug: use `event.preventDefault` to trigger `dragover` event
 			// even if there's no `draggable` attribute set
 			event.preventDefault();
 			return;
 		}
 
-		const headerEl = target;
 		const glassEl = headerEl.closest(`.${CSS_CLASSES.GLASS}`) as HTMLElement;
 		if (!glassEl) return;
 

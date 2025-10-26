@@ -1,18 +1,21 @@
 .sill {
-	position: absolute;
-	top: 100%;
-	left: 0;
-	margin-top: 8px;
+	/* Normal flex layout - no absolute positioning */
 	width: 100%;
-	min-height: 24px;
+	min-height: var(--bw-sill-height, 32px);
 	display: flex;
-	gap: 8px;
+	gap: var(--bw-sill-gap, 8px);
 	box-sizing: border-box;
-	padding: 4px 8px;
-	pointer-events: auto;
-	background-color: rgba(0, 0, 0, 0.05);
-	border-top: 1px solid #ccc;
-	z-index: 1000;
+	padding: var(--bw-sill-padding, 4px 8px);
+	background-color: var(--bw-sill-bg-color, rgba(0, 0, 0, 0.05));
+	border-top: 1px solid var(--bw-sill-border-color, #ccc);
+	flex-shrink: 0; /* Don't shrink when space is tight */
+	overflow-x: auto; /* Allow horizontal scrolling if many minimized windows */
+	overflow-y: hidden;
+
+	/* Hide sill when empty */
+	&:empty {
+		display: none;
+	}
 }
 
 .bw-minimized-glass {

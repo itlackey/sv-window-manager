@@ -30,8 +30,8 @@ import { genId } from './utils.js';
 import { Position } from './position.js';
 import { BwinErrors } from './errors.js';
 
-const MIN_WIDTH = Number(import.meta.env.VITE_DEFAULT_SASH_MIN_WIDTH);
-const MIN_HEIGHT = Number(import.meta.env.VITE_DEFAULT_SASH_MIN_HEIGHT);
+const MIN_WIDTH = 50;
+const MIN_HEIGHT = 50;
 
 export const DEFAULTS = {
 	left: 0,

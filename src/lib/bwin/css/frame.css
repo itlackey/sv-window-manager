@@ -4,7 +4,7 @@
 	box-sizing: border-box;
 	width: 100%;
 	height: 100%;
-	overflow: visible; /* Allow sill to be visible below the window */
+	overflow: hidden; /* Normal overflow behavior */
 
 	/* When one pane maximized, hide all other panes and muntins */
 	&:has(> .pane[data-maximized]) > :is(.pane, .muntin):not([data-maximized]) {

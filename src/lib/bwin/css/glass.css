@@ -75,6 +75,16 @@
 	border-top-left-radius: var(--bw-glass-border-radius);
 	border-top-right-radius: var(--bw-glass-border-radius);
 	background-color: var(--bw-glass-header-bg-color);
+
+	/* Show grab cursor when header is draggable */
+	&[data-can-drag='true'] {
+		cursor: grab;
+
+		/* Show grabbing cursor while actively dragging */
+		&:active {
+			cursor: grabbing;
+		}
+	}
 }
 
 .glass-title {
@@ -82,6 +92,8 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	min-width: 0; /* Allow flex item to shrink below content size */
+	/* Inherit the grab cursor from the header */
+	cursor: inherit;
 }
 
 .glass-tabs {
@@ -96,7 +108,7 @@
 	border-bottom: none;
 	border-top-left-radius: var(--bw-glass-border-radius);
 	border-top-right-radius: var(--bw-glass-border-radius);
-	cursor: pointer;
+	cursor: pointer !important; /* Override header's grab cursor */
 	background: transparent;
 	padding: 0.25rem 0.5rem;
 
@@ -127,7 +139,7 @@
 	font-family: var(--bw-font-family);
 	border: var(--bw-glass-action-border);
 	border-radius: var(--bw-glass-border-radius);
-	cursor: pointer;
+	cursor: pointer !important; /* Override header's grab cursor */
 	background: var(--bw-glass-action-bg-color);
 	padding: 0.25rem 0.5rem;
 	min-width: 24px;
