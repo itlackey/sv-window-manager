@@ -18,15 +18,10 @@
 	import type { ConfigRoot } from '../config/config-root.js';
 	import { TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 	import { BwinErrors } from '../errors.js';
-	import { GlassManager } from '../managers/glass-manager.svelte.js';
-	import { SillManager } from '../managers/sill-manager.svelte.js';
+	import * as GlassState from '../managers/glass-state.svelte.js';
+	import * as SillState from '../managers/sill-state.svelte.js';
 	import '../css/index.css';
 	const DEBUG = import.meta.env.VITE_DEBUG == 'true' ? true : false;
-
-	// Feature flag: Workstream 2.3 - Declarative Glass Rendering
-	// When true, renders Glass components declaratively using {#each panes}
-	// When false, uses imperative GlassManager.createGlass() (legacy behavior)
-	const USE_DECLARATIVE_GLASS_RENDERING = import.meta.env.VITE_USE_DECLARATIVE_GLASS_RENDERING === 'true';
 
 	// Throttle timeout for ResizeObserver
 	let resizeTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -78,10 +73,6 @@
 	// Drag state
 	let activeDragGlassEl = $state<HTMLElement | null>(null);
 
-	// Forward declarations for managers (needed for bwinContext)
-	let glassManager: GlassManager;
-	let sillManager: SillManager;
-
 	// Provide context for child components via Frame
 	// Use getters to ensure reactive values are always fresh
 	const bwinContext: BwinContext = {
@@ -89,7 +80,7 @@
 			return frameComponent?.windowElement;
 		},
 		get sillElement() {
-			return sillManager?.sillElement;
+			return SillState.getSillElement();
 		},
 		get rootSash() {
 			return frameComponent?.rootSash;
@@ -97,26 +88,22 @@
 		removePane,
 		addPane,
 		getMinimizedGlassElementBySashId: (sashId: string) =>
-			sillManager?.getMinimizedGlassElement(sashId),
-		getSillElement: () => sillManager?.sillElement,
-		ensureSillElement: () => sillManager?.ensureSillElement()
+			SillState.getMinimizedGlassElement(sashId),
+		getSillElement: () => SillState.getSillElement(),
+		ensureSillElement: () => SillState.ensureSillElement()
 	};
 
 	// Set context using type-safe context API
 	setWindowContext(bwinContext);
 
-	// Initialize managers - must happen after bwinContext is created
-	glassManager = new GlassManager(bwinContext, debug);
-	sillManager = new SillManager(bwinContext, debug);
+	// Initialize state modules - must happen after bwinContext is created
+	GlassState.initialize(bwinContext, debug);
+	SillState.initialize(bwinContext, debug);
 
-	// Share managers via context for child components
-	setContext('glassManager', glassManager);
-	setContext('sillManager', sillManager);
-
-	// Pane render callback - delegate to GlassManager
-	function handlePaneRender(paneEl: HTMLElement, sash: Sash) {
-		glassManager.createGlass(paneEl, sash, sash.store);
-	}
+	// Share state modules via context for child components (for backward compatibility)
+	// Components can now import state modules directly or use context
+	setContext('glassManager', GlassState);
+	setContext('sillManager', SillState);
 
 	// Muntin render callback - apply trim
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -324,8 +311,8 @@
 		);
 
 		if (paneEl) {
-			// Cleanup glass and user component via GlassManager
-			glassManager.removeGlass(sashId);
+			// Cleanup glass and user component via GlassState
+			GlassState.removeGlass(sashId);
 
 			frameComponent.removePane(sashId);
 
@@ -335,7 +322,7 @@
 		}
 
 		// Remove minimized glass element if pane is minimized
-		const minimizedGlassEl = sillManager.getMinimizedGlassElement(sashId);
+		const minimizedGlassEl = SillState.getMinimizedGlassElement(sashId);
 		if (minimizedGlassEl) {
 			(minimizedGlassEl as HTMLElement).remove();
 			// Increment tree version to trigger reactive updates
@@ -419,15 +406,15 @@
 	// This runs once when frameComponent.windowElement is first set
 	$effect(() => {
 		if (frameComponent?.windowElement) {
-			sillManager.mount();
+			SillState.mount();
 		}
 	});
 
-	// Cleanup managers when component is destroyed
+	// Cleanup state modules when component is destroyed
 	// Ensures proper teardown of observers, event listeners, and DOM elements
 	onDestroy(() => {
-		glassManager.destroy();
-		sillManager.destroy();
+		GlassState.destroy();
+		SillState.destroy();
 	});
 
 	/**
@@ -598,7 +585,7 @@
 	 * ```
 	 */
 	export function getSillElement() {
-		return sillManager.sillElement;
+		return SillState.getSillElement();
 	}
 
 	/**
@@ -620,7 +607,7 @@
 	 * ```
 	 */
 	export function ensureSillElement() {
-		return sillManager.ensureSillElement();
+		return SillState.ensureSillElement();
 	}
 
 	/**
@@ -678,24 +665,21 @@
 		{settings}
 		{debug}
 		{treeVersion}
-		onpanerender={USE_DECLARATIVE_GLASS_RENDERING ? undefined : handlePaneRender}
 		onmuntinrender={handleMuntinRender}
 		onPaneDrop={handlePaneDrop}
 	>
 		{#snippet paneContent(sash)}
-			{#if USE_DECLARATIVE_GLASS_RENDERING}
-				<Glass
-					title={sash.store.title}
-					content={sash.store.content}
-					tabs={sash.store.tabs}
-					actions={sash.store.actions}
-					draggable={sash.store.draggable !== false}
-					{sash}
-					binaryWindow={bwinContext}
-					component={sash.store.component}
-					componentProps={sash.store.componentProps}
-				/>
-			{/if}
+			<Glass
+				title={sash.store.title}
+				content={sash.store.content}
+				tabs={sash.store.tabs}
+				actions={sash.store.actions}
+				draggable={sash.store.draggable !== false}
+				{sash}
+				binaryWindow={bwinContext}
+				component={sash.store.component}
+				componentProps={sash.store.componentProps}
+			/>
 		{/snippet}
 	</Frame>
 </div>

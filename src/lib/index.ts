@@ -71,9 +71,31 @@ export { ConfigRoot } from './bwin/config/config-root.js';
 
 /**
  * Manager classes for handling glass and sill lifecycle with Svelte 5 reactive state.
+ *
+ * **LEGACY API (deprecated)**: The class-based GlassManager and SillManager are kept
+ * for backward compatibility but are deprecated. Use the modern state modules instead.
+ *
+ * **MODERN API (recommended)**: GlassState and SillState are module-level reactive state
+ * modules using Svelte 5 runes. They provide the same functionality with a simpler,
+ * more functional API.
+ *
+ * @example
+ * ```typescript
+ * // Legacy (deprecated):
+ * import { GlassManager, SillManager } from 'sv-window-manager';
+ * const glassManager = new GlassManager(bwinContext, debug);
+ * glassManager.removeGlass(sashId);
+ *
+ * // Modern (recommended):
+ * import { GlassState, SillState } from 'sv-window-manager';
+ * GlassState.initialize(bwinContext, debug);
+ * GlassState.removeGlass(sashId);
+ * ```
  */
 export { GlassManager } from './bwin/managers/glass-manager.svelte.js';
 export { SillManager } from './bwin/managers/sill-manager.svelte.js';
+export * as GlassState from './bwin/managers/glass-state.svelte.js';
+export * as SillState from './bwin/managers/sill-state.svelte.js';
 
 // ============================================================================
 // CONSTANTS
