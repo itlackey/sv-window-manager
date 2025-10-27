@@ -3,6 +3,8 @@
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
 	import { getLayoutContext } from '../context.js';
+  import { emitPaneEvent } from '../../events/dispatcher.js';
+  import { buildPanePayload } from '../../events/payload.js';
 
 	interface PaneProps {
 		sash: Sash;
@@ -20,6 +22,22 @@
 	const canDrop = $derived(sash.store.droppable !== false);
 
 	let paneElement = $state<HTMLElement>();
+
+	function handleFocusIn() {
+		try {
+			const payload = buildPanePayload(sash, paneElement);
+			emitPaneEvent('onpanefocused', payload);
+		} catch {}
+	}
+
+	function handleFocusOut() {
+		// Suppress blur if element has been removed
+		if (!paneElement?.isConnected) return;
+		try {
+			const payload = buildPanePayload(sash, paneElement);
+			emitPaneEvent('onpaneblurred', payload);
+		} catch {}
+	}
 
 	// REFACTORED: Use onMount lifecycle hook instead of $effect
 	// This runs ONCE when the pane mounts, preventing infinite loops
@@ -52,6 +70,8 @@
 	style:left="{sash.left}px"
 	style:width="{sash.width}px"
 	style:height="{sash.height}px"
+	onfocusin={handleFocusIn}
+	onfocusout={handleFocusOut}
 >
 	{#if children}
 		{@render children()}

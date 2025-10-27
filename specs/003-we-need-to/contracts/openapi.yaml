@@ -1,0 +1,172 @@
+openapi: 3.1.0
+info:
+  title: SV Window Manager - Pane Event Contracts
+  version: 1.0.0
+  description: |
+    Webhook-style contracts describing pane lifecycle and interaction events emitted by the window manager.
+    Each webhook name matches the on-prefixed event name.
+
+webhooks:
+  onpaneadded:
+    post:
+      summary: Pane added
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpaneremoved:
+    post:
+      summary: Pane removed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpaneminimized:
+    post:
+      summary: Pane minimized
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpanemaximized:
+    post:
+      summary: Pane maximized
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpanerestored:
+    post:
+      summary: Pane restored from minimized or maximized
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpaneresized:
+    post:
+      summary: Pane resized (debounced trailing 100 ms)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpanefocused:
+    post:
+      summary: Pane gained focus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpaneblurred:
+    post:
+      summary: Pane lost focus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpaneorderchanged:
+    post:
+      summary: Pane order changed within group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+  onpanetitlechanged:
+    post:
+      summary: Pane title changed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaneEvent'
+
+components:
+  schemas:
+    Pane:
+      type: object
+      required: [id, size, position, state]
+      properties:
+        id:
+          type: string
+        title:
+          type: [string, 'null']
+        size:
+          $ref: '#/components/schemas/Size'
+        position:
+          $ref: '#/components/schemas/Position'
+        state:
+          type: string
+          enum: [normal, minimized, maximized]
+        groupId:
+          type: [string, 'null']
+        index:
+          type: [integer, 'null']
+          minimum: 0
+        config:
+          type: object
+          description: Snapshot of user-specified properties
+        dynamic:
+          type: object
+          description: Snapshot of internal runtime state exposed for consumers
+    PaneEvent:
+      type: object
+      required: [type, timestamp, pane]
+      properties:
+        type:
+          type: string
+          enum: [
+            onpaneadded, onpaneremoved, onpaneminimized, onpanemaximized,
+            onpanerestored, onpaneresized, onpanefocused, onpaneblurred,
+            onpaneorderchanged, onpanetitlechanged
+          ]
+        timestamp:
+          type: string
+          format: date-time
+        pane:
+          $ref: '#/components/schemas/Pane'
+        context:
+          type: object
+          properties:
+            previousTitle:
+              type: string
+            previousIndex:
+              type: integer
+              minimum: 0
+            groupId:
+              type: string
+    Size:
+      type: object
+      required: [width, height]
+      properties:
+        width:
+          type: integer
+          minimum: 0
+        height:
+          type: integer
+          minimum: 0
+    Position:
+      type: object
+      required: [x, y]
+      properties:
+        x:
+          type: integer
+        y:
+          type: integer

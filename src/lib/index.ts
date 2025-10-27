@@ -216,3 +216,37 @@ export type {
 	CreateGlassProps,
 	MinimizedGlassData
 } from './bwin/managers/types.js';
+
+// ============================================================================
+// EVENTS (Types + Dispatcher)
+// ============================================================================
+
+/**
+ * Typed pane lifecycle events and dispatcher utilities.
+ * Consumers can subscribe to specific events or use the generic API.
+ */
+export type {
+	PanePayload,
+	PaneEventType,
+	PaneEvent,
+	PaneContext
+} from './events/types.js';
+
+export {
+	onPaneEvent,
+	offPaneEvent,
+	emitPaneEvent,
+	// Convenience helpers for specific events
+	onpaneadded,
+	onpaneremoved,
+	onpaneminimized,
+	onpanemaximized,
+	onpanerestored,
+	onpaneresized,
+	onpanefocused,
+	onpaneblurred,
+	onpaneorderchanged,
+	onpanetitlechanged
+} from './events/dispatcher.js';
+
+export { buildPanePayload } from './events/payload.js';

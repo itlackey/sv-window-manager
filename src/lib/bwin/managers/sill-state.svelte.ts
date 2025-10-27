@@ -6,6 +6,8 @@ import { getIntersectRect } from '../rect.js';
 import { Position } from '../position.js';
 import { BwinErrors } from '../errors.js';
 import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
+import { emitPaneEvent } from '../../events/dispatcher.js';
+import { buildPanePayload } from '../../events/payload.js';
 
 /**
  * Sill Reactive State Module (Svelte 5)
@@ -289,13 +291,23 @@ export function restoreGlass(
 		const originalSashId = minimizedGlassEl.bwOriginalSashId;
 		const originalStore = minimizedGlassEl.bwOriginalStore || {};
 
-		// addPane will create a new Glass component with the preserved store
-		bwinContext.addPane((targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID)!, {
+				// addPane will create a new Glass component with the preserved store
+				const newSash = bwinContext.addPane((targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID)!, {
 			id: originalSashId,
 			position: newPosition,
 			size: newSize,
 			...originalStore // Preserve title, content, and other Glass props
-		});
+				});
+
+				// Post-action: emit restored event
+				try {
+					if (newSash) {
+						const payload = buildPanePayload(newSash, undefined);
+						emitPaneEvent('onpanerestored', payload);
+					}
+				} catch (err) {
+					debugWarn('[restoreGlass] failed to emit onpanerestored', err as unknown);
+				}
 	}
 }
 

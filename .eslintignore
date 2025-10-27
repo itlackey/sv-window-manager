@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+coverage/
+.svelte-kit/
+storybook-static/
+playwright-report/
+test-results/
+static/
+*.min.js

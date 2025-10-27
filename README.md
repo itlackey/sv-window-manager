@@ -86,6 +86,68 @@ interface PaneProps {
 }
 ```
 
+## Pane Lifecycle Events
+
+SV Window Manager emits typed lifecycle events as panes are added, removed, focused, resized, reordered, and more. You can subscribe with either a generic handler or convenience helpers.
+
+Supported events:
+
+- onpaneadded, onpaneremoved
+- onpaneminimized, onpanemaximized, onpanerestored
+- onpaneresized (debounced ~100ms, trailing)
+- onpanefocused, onpaneblurred
+- onpaneorderchanged (when panes swap/move; includes groupId and previousIndex)
+- onpanetitlechanged (includes previousTitle)
+
+### Quick example
+
+```svelte
+<script lang="ts">
+	import { BinaryWindow, onPaneEvent, onpaneresized, offPaneEvent } from 'sv-window-manager';
+
+	let bwin = $state<BinaryWindow | undefined>();
+	let unsubs: Array<() => void> = [];
+
+	function startLogging() {
+		// Subscribe to a specific event type using the generic API
+		const handler = (evt) => {
+			console.log('[pane-event]', evt.type, evt.pane, evt.context);
+		};
+		onPaneEvent('onpaneadded', handler);
+		unsubs.push(() => offPaneEvent('onpaneadded', handler));
+
+		// Or use convenience helpers for common events
+		const onResize = (evt) => {
+			console.log('[resized]', evt.pane.id, evt.pane.size, evt.pane.position);
+		};
+		onpaneresized(onResize);
+		unsubs.push(() => offPaneEvent('onpaneresized', onResize));
+	}
+
+	function stopLogging() { unsubs.forEach((u) => u()); unsubs = []; }
+</script>
+
+<BinaryWindow bind:this={bwin} settings={{ fitContainer: true }} />
+<button onclick={startLogging}>Start Event Log</button>
+<button onclick={stopLogging}>Stop</button>
+```
+
+Event callback signature:
+
+```ts
+type PaneEvent = {
+	type:
+		| 'onpaneadded' | 'onpaneremoved'
+		| 'onpaneminimized' | 'onpanemaximized' | 'onpanerestored'
+		| 'onpaneresized' | 'onpanefocused' | 'onpaneblurred'
+		| 'onpaneorderchanged' | 'onpanetitlechanged';
+		pane: PanePayload; // id, title, size, position, state, group, index, bounds, etc.
+	context?: { previousTitle?: string; previousIndex?: number; groupId?: string };
+}
+```
+
+For detailed examples, open the demo app’s “Events” tab at `src/routes/+page.svelte`.
+
 ## Customization
 
 Customize the appearance using CSS custom properties:

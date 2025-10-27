@@ -18,6 +18,8 @@
 	import { BwinErrors } from '../errors.js';
 	import * as GlassState from '../managers/glass-state.svelte.js';
 	import * as SillState from '../managers/sill-state.svelte.js';
+    import { emitPaneEvent } from '../../events/dispatcher.js';
+    import { buildPanePayload } from '../../events/payload.js';
 	import '../css/index.css';
 	const DEBUG = false;
 
@@ -90,8 +92,14 @@
 	setWindowContext(bwinContext);
 
 	// Initialize state modules - must happen after bwinContext is created
-	GlassState.initialize(bwinContext, debug);
-	SillState.initialize(bwinContext, debug);
+	let __initialized = false;
+	$effect(() => {
+		if (!__initialized) {
+			GlassState.initialize(bwinContext, debug);
+			SillState.initialize(bwinContext, debug);
+			__initialized = true;
+		}
+	});
 
 	// Share state modules via context for child components (for backward compatibility)
 	// Components can now import state modules directly or use context
@@ -284,6 +292,17 @@
 		// Increment tree version to trigger reactive updates
 		treeVersion++;
 
+		// Emit pane added event (post-action)
+		try {
+			const paneEl = frameComponent?.windowElement?.querySelector(
+				`[${DATA_ATTRIBUTES.SASH_ID}="${newPaneSash.id}"]`
+			) as HTMLElement | null;
+			const payload = buildPanePayload(newPaneSash, paneEl);
+			emitPaneEvent('onpaneadded', payload);
+		} catch (err) {
+			debugWarn('[addPane] failed to emit onpaneadded', err);
+		}
+
 		return newPaneSash;
 	}
 
@@ -312,6 +331,9 @@
 	export function removePane(sashId: string) {
 		if (!frameComponent) return;
 
+		// Capture sash and element before removal for payload
+		const preSash = frameComponent.rootSash?.getById(sashId);
+
 		const paneEl = frameComponent.windowElement?.querySelector(
 			`[${DATA_ATTRIBUTES.SASH_ID}="${sashId}"]`
 		);
@@ -324,6 +346,16 @@
 
 			// Increment tree version to trigger reactive updates
 			treeVersion++;
+
+			// Emit pane removed (post-action)
+			try {
+				if (preSash) {
+					const payload = buildPanePayload(preSash, paneEl as HTMLElement | null);
+					emitPaneEvent('onpaneremoved', payload);
+				}
+			} catch (err) {
+				debugWarn('[removePane] failed to emit onpaneremoved', err);
+			}
 			return;
 		}
 

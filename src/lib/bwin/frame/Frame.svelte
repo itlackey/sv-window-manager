@@ -11,6 +11,8 @@
 	import { resize } from '../actions/resize.svelte';
 	import { drop } from '../actions/drop.svelte';
 	import { type FrameContext, setLayoutContext } from '../context.js';
+	import { emitPaneEvent } from '../../events/dispatcher.js';
+	import { buildPanePayload } from '../../events/payload.js';
 
 	/**
 	 * Props for the Frame component
@@ -219,10 +221,39 @@
 			const targetSash = rootSash.getById(targetSashId);
 
 			if (sourceSash && targetSash) {
+				// Capture indices before swap (relative to common parent where possible)
+				const parent = sourceSash.parent === targetSash.parent ? sourceSash.parent : null;
+				const prevSourceIndex = parent ? getLeafIndexWithin(parent, sourceSash.id) : null;
+				const prevTargetIndex = parent ? getLeafIndexWithin(parent, targetSash.id) : null;
+
 				// Swap stores - reactive Sash will automatically trigger re-render
 				const tempStore = sourceSash.store;
 				sourceSash.store = targetSash.store;
 				targetSash.store = tempStore;
+
+				// Emit order-changed for both panes if a common parent exists
+				if (parent) {
+					const sourceIndex = getLeafIndexWithin(parent, sourceSash.id);
+					const targetIndex = getLeafIndexWithin(parent, targetSash.id);
+
+					try {
+						const srcEl = sourcePaneEl as HTMLElement;
+						const srcPayload = buildPanePayload(sourceSash, srcEl);
+						emitPaneEvent('onpaneorderchanged', srcPayload, {
+							groupId: parent.id,
+							previousIndex: prevSourceIndex ?? undefined
+						});
+					} catch {}
+
+					try {
+						const tgtEl = targetPaneEl as HTMLElement;
+						const tgtPayload = buildPanePayload(targetSash, tgtEl);
+						emitPaneEvent('onpaneorderchanged', tgtPayload, {
+							groupId: parent.id,
+							previousIndex: prevTargetIndex ?? undefined
+						});
+					} catch {}
+				}
 			}
 		}
 	}
@@ -264,6 +295,13 @@
 		if (!containerElement || !rootSash) return;
 		rootSash.width = containerElement.clientWidth;
 		rootSash.height = containerElement.clientHeight;
+	}
+
+	function getLeafIndexWithin(parent: Sash, leafId: string): number {
+		const leaves = parent.getAllLeafDescendants();
+		// Sort by visual order: top->bottom, then left->right
+		leaves.sort((a, b) => (a.top - b.top) || (a.left - b.left));
+		return leaves.findIndex((l) => l.id === leafId);
 	}
 
 	export { rootSash, windowElement, containerElement, panes };

@@ -5,6 +5,21 @@
 	import FileEditorSession from './components/FileEditorSession.svelte';
 	import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
 	import type { Component } from 'svelte';
+	// Events demo imports
+	import {
+		onpaneadded,
+		onpaneremoved,
+		onpaneminimized,
+		onpanemaximized,
+		onpanerestored,
+		onpaneresized,
+		onpanefocused,
+		onpaneblurred,
+		onpaneorderchanged,
+		onpanetitlechanged,
+		offPaneEvent
+	} from '$lib/events/dispatcher.js';
+	import type { PaneEvent } from '$lib/events/types.js';
 
 	let bwinRef = $state<BinaryWindow | undefined>();
 	let activeSection = $state('demo');
@@ -140,6 +155,47 @@
 		// Reload the page to reset
 		window.location.reload();
 	}
+
+	// --- Events demo state ---
+	let loggingEnabled = $state(false);
+	let eventLog = $state<Array<{ ts: string; type: string; id: string; title?: string }>>([]);
+	let maxLog = $state(50);
+	let eventOffs = $state<Array<() => void>>([]);
+
+	function startEventLogging() {
+		if (loggingEnabled) return;
+		loggingEnabled = true;
+		const offs: Array<() => void> = [];
+		const push = (evt: PaneEvent) => {
+			const ts = new Date().toLocaleTimeString();
+			const id = evt.pane?.id ?? '';
+			const title = evt.pane?.title as string | undefined;
+			eventLog = [{ ts, type: evt.type, id, title }, ...eventLog].slice(0, maxLog);
+		};
+		// Register event listeners and collect explicit unsubs
+		onpaneadded(push); offs.push(() => offPaneEvent('onpaneadded', push));
+		onpaneremoved(push); offs.push(() => offPaneEvent('onpaneremoved', push));
+		onpaneminimized(push); offs.push(() => offPaneEvent('onpaneminimized', push));
+		onpanemaximized(push); offs.push(() => offPaneEvent('onpanemaximized', push));
+		onpanerestored(push); offs.push(() => offPaneEvent('onpanerestored', push));
+		onpaneresized(push); offs.push(() => offPaneEvent('onpaneresized', push));
+		onpanefocused(push); offs.push(() => offPaneEvent('onpanefocused', push));
+		onpaneblurred(push); offs.push(() => offPaneEvent('onpaneblurred', push));
+		onpaneorderchanged(push); offs.push(() => offPaneEvent('onpaneorderchanged', push));
+		onpanetitlechanged(push); offs.push(() => offPaneEvent('onpanetitlechanged', push));
+		eventOffs = offs;
+	}
+
+	function clearEventLog() {
+		eventLog = [];
+	}
+
+	function stopEventLogging() {
+		if (!loggingEnabled) return;
+		for (const off of eventOffs) off();
+		eventOffs = [];
+		loggingEnabled = false;
+	}
 </script>
 
 <svelte:head>
@@ -183,6 +239,9 @@
 			onclick={() => (activeSection = 'styling')}
 		>
 			Styling
+		</button>
+		<button class={{ active: activeSection === 'events' }} onclick={() => (activeSection = 'events')}>
+			Events
 		</button>
 	</nav>
 
@@ -745,6 +804,74 @@ interface AddPaneProps {'{'}
   --bw-glass-action-hover-color: #7c3aed;
 {'}'}</code
 					></pre>
+			</section>
+		{/if}
+
+		{#if activeSection === 'events'}
+			<section class="section">
+				<h2>Events</h2>
+				<p>
+					The window manager emits typed lifecycle events as you add, remove, resize, and focus panes.
+					Toggle logging to see events in real time, and copy the snippet to wire up your own
+					listeners.
+				</p>
+
+				<div class="demo-controls">
+					{#if !loggingEnabled}
+						<button class="btn-primary" onclick={startEventLogging}>Enable Event Logging</button>
+					{:else}
+						<button class="btn-secondary" onclick={stopEventLogging}>Disable Logging</button>
+					{/if}
+					<button onclick={clearEventLog}>Clear Log</button>
+				</div>
+
+				<div class="demo-container">
+					<BinaryWindow
+						bind:this={bwinRef}
+						settings={{ width: 900, height: 500, fitContainer: true, debug: false }}
+					/>
+				</div>
+
+				<h3>Live Event Log</h3>
+				<div class="event-log">
+					<table>
+						<thead>
+							<tr>
+								<th>Time</th>
+								<th>Event</th>
+								<th>Pane ID</th>
+								<th>Title</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#if eventLog.length === 0}
+								<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">No events captured yet</td></tr>
+							{:else}
+								{#each eventLog as e}
+									<tr>
+										<td>{e.ts}</td>
+										<td><code>{e.type}</code></td>
+										<td>{e.id}</td>
+										<td>{e.title}</td>
+									</tr>
+								{/each}
+							{/if}
+						</tbody>
+					</table>
+				</div>
+
+				<h3>Subscribe in your app</h3>
+				<pre><code>import {'{'} onPaneEvent, onpaneresized {'}'} from 'sv-window-manager';
+
+// All pane events
+const offAll = onPaneEvent((evt) => console.log(evt.type, evt.payload));
+
+// Specific event
+const offResize = onpaneresized((evt) => console.log('resized', evt.payload));
+
+// Later to cleanup
+offAll();
+offResize();</code></pre>
 			</section>
 		{/if}
 	</main>

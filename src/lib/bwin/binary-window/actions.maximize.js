@@ -1,5 +1,7 @@
 import { getMetricsFromElement } from '../utils.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
+import { emitPaneEvent } from '../../events/dispatcher.js';
+import { buildPanePayload } from '../../events/payload.js';
 
 /**
  * @typedef {Object} BoundingRect
@@ -19,7 +21,7 @@ import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 export default {
 	label: '',
 	className: 'glass-action glass-action--maximize',
-	onClick: (/** @type {MouseEvent} */ event) => {
+	onClick: (/** @type {MouseEvent} */ event, /** @type {import('../types.js').BwinContext} */ binaryWindow) => {
 		if (!(event.target instanceof HTMLElement)) return;
 
 		const paneElCandidate = event.target.closest(`.${CSS_CLASSES.PANE}`);
@@ -27,6 +29,10 @@ export default {
 
 		/** @type {BwinMaximizableElement} */
 		const paneEl = paneElCandidate;
+
+		const sashId = paneEl.getAttribute(DATA_ATTRIBUTES.SASH_ID);
+		const rootSash = binaryWindow?.rootSash;
+		const sash = sashId ? rootSash?.getById(sashId) : null;
 
 		if (paneEl.hasAttribute(DATA_ATTRIBUTES.MAXIMIZED)) {
 			paneEl.removeAttribute(DATA_ATTRIBUTES.MAXIMIZED);
@@ -36,6 +42,12 @@ export default {
 				paneEl.style.width = `${paneEl.bwOriginalBoundingRect.width}px`;
 				paneEl.style.height = `${paneEl.bwOriginalBoundingRect.height}px`;
 			}
+
+			// Emit restored after unmaximize
+			if (sash) {
+				const payload = buildPanePayload(sash, paneEl);
+				emitPaneEvent('onpanerestored', payload);
+			}
 		} else {
 			paneEl.setAttribute(DATA_ATTRIBUTES.MAXIMIZED, '');
 			paneEl.bwOriginalBoundingRect = getMetricsFromElement(paneEl);
@@ -43,6 +55,12 @@ export default {
 			paneEl.style.top = '0';
 			paneEl.style.width = '100%';
 			paneEl.style.height = '100%';
+
+			// Emit maximized
+			if (sash) {
+				const payload = buildPanePayload(sash, paneEl);
+				emitPaneEvent('onpanemaximized', payload);
+			}
 		}
 	}
 };

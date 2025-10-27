@@ -12,6 +12,22 @@
 	import TopPane from './components/TopPane.svelte';
 	import BottomLeftPane from './components/BottomLeftPane.svelte';
 	import BottomRightPane from './components/BottomRightPane.svelte';
+	// Events: import dispatcher helpers for live event console
+	import {
+		onPaneEvent,
+		onpaneresized,
+		onpaneremoved,
+		onpaneadded,
+		onpaneminimized,
+		onpanemaximized,
+		onpanerestored,
+		onpanefocused,
+		onpaneblurred,
+		onpaneorderchanged,
+		onpanetitlechanged,
+		offPaneEvent
+	} from '$lib/events/dispatcher.js';
+	import type { PaneEvent } from '$lib/events/types.js';
 
 	// Create a simple test configuration with 2 panes
 	const testConfig = {
@@ -175,6 +191,39 @@
 			console.error('Error adding pane:', error);
 		}
 	}
+
+	// --- Event console state ---
+	let eventLogging = $state(false);
+	let recentEvents = $state<Array<{ ts: string; type: string; id: string; title?: string }>>([]);
+	let eventOffs = $state<Array<() => void>>([]);
+	const MAX = 30;
+
+	function startEvents() {
+		if (eventLogging) return;
+		eventLogging = true;
+		const offs: Array<() => void> = [];
+		const push = (evt: PaneEvent) => {
+			const ts = new Date().toLocaleTimeString();
+			recentEvents = [
+				{ ts, type: evt.type, id: evt.pane?.id ?? '', title: evt.pane?.title as string | undefined },
+				...recentEvents
+			].slice(0, MAX);
+		};
+		onpaneadded(push); offs.push(() => offPaneEvent('onpaneadded', push));
+		onpaneremoved(push); offs.push(() => offPaneEvent('onpaneremoved', push));
+		onpaneminimized(push); offs.push(() => offPaneEvent('onpaneminimized', push));
+		onpanemaximized(push); offs.push(() => offPaneEvent('onpanemaximized', push));
+		onpanerestored(push); offs.push(() => offPaneEvent('onpanerestored', push));
+		onpaneresized(push); offs.push(() => offPaneEvent('onpaneresized', push));
+		onpanefocused(push); offs.push(() => offPaneEvent('onpanefocused', push));
+		onpaneblurred(push); offs.push(() => offPaneEvent('onpaneblurred', push));
+		onpaneorderchanged(push); offs.push(() => offPaneEvent('onpaneorderchanged', push));
+		onpanetitlechanged(push); offs.push(() => offPaneEvent('onpanetitlechanged', push));
+		eventOffs = offs;
+	}
+
+	function stopEventsNow() { for (const off of eventOffs) off(); eventOffs = []; eventLogging = false; }
+	function clearEvents() { recentEvents = []; }
 </script>
 
 <svelte:head>
@@ -274,6 +323,36 @@
 		{#key componentKey}
 			<BinaryWindow bind:this={binaryWindowComponent} settings={config} />
 		{/key}
+	</div>
+
+	<div class="event-console">
+		<div class="event-console-header">
+			<h3>Event Console</h3>
+			<div class="event-actions">
+				{#if !eventLogging}
+					<button type="button" onclick={startEvents}>Enable</button>
+				{:else}
+					<button type="button" onclick={stopEventsNow}>Disable</button>
+				{/if}
+				<button type="button" onclick={clearEvents}>Clear</button>
+			</div>
+		</div>
+		<div class="event-list">
+			{#if recentEvents.length === 0}
+				<div class="event-empty">No events yet. Interact with panes to see events.</div>
+			{:else}
+				<ul>
+					{#each recentEvents as e}
+						<li>
+							<span class="ts">{e.ts}</span>
+							<code class="type">{e.type}</code>
+							<span class="id">{e.id}</span>
+							{#if e.title}<span class="title">{e.title}</span>{/if}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</div>
 	</div>
 
 	<div class="test-info">
@@ -510,5 +589,63 @@
 
 	.test-info strong {
 		color: #0461ad;
+	}
+
+	/* Event console */
+	.event-console {
+		background: #fff;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		margin-bottom: 2rem;
+	}
+
+	.event-console-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.75rem 1rem;
+		border-bottom: 1px solid #eee;
+	}
+
+	.event-actions button {
+		margin-left: 0.5rem;
+		padding: 0.4rem 0.75rem;
+		border-radius: 4px;
+		border: 1px solid #ccc;
+		background: #f7f7f7;
+		cursor: pointer;
+	}
+
+	.event-list {
+		max-height: 240px;
+		overflow: auto;
+		padding: 0.5rem 1rem 1rem 1rem;
+	}
+
+	.event-list ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.event-list li {
+		display: grid;
+		grid-template-columns: 90px 1fr 1fr 1.2fr;
+		gap: 0.5rem;
+		padding: 0.3rem 0;
+		border-bottom: 1px dashed #eee;
+		align-items: center;
+		font-size: 0.9rem;
+	}
+
+	.event-list .ts { color: #666; }
+	.event-list .id { color: #333; }
+	.event-list .title { color: #555; font-style: italic; }
+	.event-list .type { color: #0461ad; }
+
+	.event-empty {
+		color: #666;
+		padding: 0.75rem 0;
+		text-align: center;
 	}
 </style>

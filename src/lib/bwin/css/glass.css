@@ -204,5 +204,5 @@
 	box-sizing: border-box;
 	overflow: hidden;
 	flex-grow: 1;
-	padding: 1rem;
+	padding: 0;
 }

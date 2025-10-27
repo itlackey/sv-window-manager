@@ -3,6 +3,8 @@ import { getMetricsFromElement } from '../utils.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { BwinErrors } from '../errors.js';
 import MinimizedGlass from './MinimizedGlass.svelte';
+import { emitPaneEvent } from '../../events/dispatcher.js';
+import { buildPanePayload } from '../../events/payload.js';
 import type { BwinContext } from '../types.js';
 
 /**
@@ -106,7 +108,20 @@ export default {
 		minimizedGlassEl.bwOriginalStore = store;
 
 		if (paneSashId) {
+			// Perform removal first per spec (post-action emission)
 			binaryWindow.removePane(paneSashId);
+
+			try {
+				// Emit minimized using pre-removal sash and pane element bounds
+				if (sash) {
+					const payload = buildPanePayload(sash, paneEl as HTMLElement | null);
+					payload.state = 'minimized';
+					emitPaneEvent('onpaneminimized', payload);
+				}
+			} catch (err) {
+				// eslint-disable-next-line no-console
+				console.warn('[minimize] failed to emit onpaneminimized', err);
+			}
 		}
 	}
 };
