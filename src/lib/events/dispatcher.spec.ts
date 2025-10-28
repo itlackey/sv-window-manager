@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
-  onPaneEvent,
-  offPaneEvent,
+  addEventHandler,
+  removeEventHandler,
   emitPaneEvent,
   type PaneEventType,
   type PanePayload
@@ -26,7 +26,7 @@ function isIso8601(str: string) {
 describe('pane event dispatcher', () => {
   it('subscribes and receives emitted events', () => {
     const handler = vi.fn();
-    onPaneEvent('onpaneadded', handler);
+    addEventHandler('onpaneadded', handler);
 
     emitPaneEvent('onpaneadded', samplePane());
 
@@ -36,28 +36,28 @@ describe('pane event dispatcher', () => {
     expect(isIso8601(evt.timestamp)).toBe(true);
     expect(evt.pane.id).toBe('pane-1');
 
-    offPaneEvent('onpaneadded', handler);
+    removeEventHandler('onpaneadded', handler);
   });
 
   it('does not leak across event types', () => {
     const addHandler = vi.fn();
     const removeHandler = vi.fn();
-    onPaneEvent('onpaneadded', addHandler);
-    onPaneEvent('onpaneremoved', removeHandler);
+    addEventHandler('onpaneadded', addHandler);
+    addEventHandler('onpaneremoved', removeHandler);
 
     emitPaneEvent('onpaneadded', samplePane());
 
     expect(addHandler).toHaveBeenCalledTimes(1);
     expect(removeHandler).not.toHaveBeenCalled();
 
-    offPaneEvent('onpaneadded', addHandler);
-    offPaneEvent('onpaneremoved', removeHandler);
+    removeEventHandler('onpaneadded', addHandler);
+    removeEventHandler('onpaneremoved', removeHandler);
   });
 
   it('unsubscribes correctly', () => {
     const handler = vi.fn();
-    onPaneEvent('onpanemaximized', handler);
-    offPaneEvent('onpanemaximized', handler);
+    addEventHandler('onpanemaximized', handler);
+    removeEventHandler('onpanemaximized', handler);
 
     emitPaneEvent('onpanemaximized', samplePane());
 

@@ -3,7 +3,7 @@ import { render, cleanup } from 'vitest-browser-svelte';
 import BinaryWindow from '../bwin/binary-window/BinaryWindow.svelte';
 import { Position } from '../bwin/position.js';
 import type { Sash } from '../bwin/sash.js';
-import { onpaneadded, onpaneresized, offPaneEvent } from './dispatcher.js';
+import { onpaneadded, onpaneresized, removeEventHandler } from './dispatcher.js';
 import type { PaneEvent, PanePayload } from './types.js';
 
 interface BinaryWindowInstance {
@@ -34,7 +34,7 @@ function validatePayloadShape(p: PanePayload) {
 function waitForEventOnce(register: (h: (e: PaneEvent) => void) => void, timeoutMs = 1500) {
   return new Promise<PaneEvent>((resolve, reject) => {
     const handler = (e: PaneEvent) => {
-      offPaneEvent(e.type, handler);
+      removeEventHandler(e.type, handler);
       resolve(e);
     };
     register(handler);

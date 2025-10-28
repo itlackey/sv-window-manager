@@ -17,7 +17,7 @@
 		onpaneblurred,
 		onpaneorderchanged,
 		onpanetitlechanged,
-		offPaneEvent
+		removeEventHandler
 	} from '$lib/events/dispatcher.js';
 	import type { PaneEvent } from '$lib/events/types.js';
 
@@ -173,16 +173,16 @@
 			eventLog = [{ ts, type: evt.type, id, title }, ...eventLog].slice(0, maxLog);
 		};
 		// Register event listeners and collect explicit unsubs
-		onpaneadded(push); offs.push(() => offPaneEvent('onpaneadded', push));
-		onpaneremoved(push); offs.push(() => offPaneEvent('onpaneremoved', push));
-		onpaneminimized(push); offs.push(() => offPaneEvent('onpaneminimized', push));
-		onpanemaximized(push); offs.push(() => offPaneEvent('onpanemaximized', push));
-		onpanerestored(push); offs.push(() => offPaneEvent('onpanerestored', push));
-		onpaneresized(push); offs.push(() => offPaneEvent('onpaneresized', push));
-		onpanefocused(push); offs.push(() => offPaneEvent('onpanefocused', push));
-		onpaneblurred(push); offs.push(() => offPaneEvent('onpaneblurred', push));
-		onpaneorderchanged(push); offs.push(() => offPaneEvent('onpaneorderchanged', push));
-		onpanetitlechanged(push); offs.push(() => offPaneEvent('onpanetitlechanged', push));
+		onpaneadded(push); offs.push(() => removeEventHandler('onpaneadded', push));
+		onpaneremoved(push); offs.push(() => removeEventHandler('onpaneremoved', push));
+		onpaneminimized(push); offs.push(() => removeEventHandler('onpaneminimized', push));
+		onpanemaximized(push); offs.push(() => removeEventHandler('onpanemaximized', push));
+		onpanerestored(push); offs.push(() => removeEventHandler('onpanerestored', push));
+		onpaneresized(push); offs.push(() => removeEventHandler('onpaneresized', push));
+		onpanefocused(push); offs.push(() => removeEventHandler('onpanefocused', push));
+		onpaneblurred(push); offs.push(() => removeEventHandler('onpaneblurred', push));
+		onpaneorderchanged(push); offs.push(() => removeEventHandler('onpaneorderchanged', push));
+		onpanetitlechanged(push); offs.push(() => removeEventHandler('onpanetitlechanged', push));
 		eventOffs = offs;
 	}
 
@@ -861,10 +861,10 @@ interface AddPaneProps {'{'}
 				</div>
 
 				<h3>Subscribe in your app</h3>
-				<pre><code>import {'{'} onPaneEvent, onpaneresized {'}'} from 'sv-window-manager';
+				<pre><code>import {'{'} addEventHandler, onpaneresized {'}'} from 'sv-window-manager';
 
 // All pane events
-const offAll = onPaneEvent((evt) => console.log(evt.type, evt.payload));
+const offAll = addEventHandler((evt) => console.log(evt.type, evt.payload));
 
 // Specific event
 const offResize = onpaneresized((evt) => console.log('resized', evt.payload));

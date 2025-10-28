@@ -14,7 +14,7 @@
 	import BottomRightPane from './components/BottomRightPane.svelte';
 	// Events: import dispatcher helpers for live event console
 	import {
-		onPaneEvent,
+		addEventHandler,
 		onpaneresized,
 		onpaneremoved,
 		onpaneadded,
@@ -25,7 +25,7 @@
 		onpaneblurred,
 		onpaneorderchanged,
 		onpanetitlechanged,
-		offPaneEvent
+		removeEventHandler
 	} from '$lib/events/dispatcher.js';
 	import type { PaneEvent } from '$lib/events/types.js';
 
@@ -209,16 +209,16 @@
 				...recentEvents
 			].slice(0, MAX);
 		};
-		onpaneadded(push); offs.push(() => offPaneEvent('onpaneadded', push));
-		onpaneremoved(push); offs.push(() => offPaneEvent('onpaneremoved', push));
-		onpaneminimized(push); offs.push(() => offPaneEvent('onpaneminimized', push));
-		onpanemaximized(push); offs.push(() => offPaneEvent('onpanemaximized', push));
-		onpanerestored(push); offs.push(() => offPaneEvent('onpanerestored', push));
-		onpaneresized(push); offs.push(() => offPaneEvent('onpaneresized', push));
-		onpanefocused(push); offs.push(() => offPaneEvent('onpanefocused', push));
-		onpaneblurred(push); offs.push(() => offPaneEvent('onpaneblurred', push));
-		onpaneorderchanged(push); offs.push(() => offPaneEvent('onpaneorderchanged', push));
-		onpanetitlechanged(push); offs.push(() => offPaneEvent('onpanetitlechanged', push));
+		onpaneadded(push); offs.push(() => removeEventHandler('onpaneadded', push));
+		onpaneremoved(push); offs.push(() => removeEventHandler('onpaneremoved', push));
+		onpaneminimized(push); offs.push(() => removeEventHandler('onpaneminimized', push));
+		onpanemaximized(push); offs.push(() => removeEventHandler('onpanemaximized', push));
+		onpanerestored(push); offs.push(() => removeEventHandler('onpanerestored', push));
+		onpaneresized(push); offs.push(() => removeEventHandler('onpaneresized', push));
+		onpanefocused(push); offs.push(() => removeEventHandler('onpanefocused', push));
+		onpaneblurred(push); offs.push(() => removeEventHandler('onpaneblurred', push));
+		onpaneorderchanged(push); offs.push(() => removeEventHandler('onpaneorderchanged', push));
+		onpanetitlechanged(push); offs.push(() => removeEventHandler('onpanetitlechanged', push));
 		eventOffs = offs;
 	}
 

@@ -51,7 +51,7 @@ Conventions
 - [X] T021: Public API for subscriptions [P]
   - Deps: T020
   - Files: `src/lib/index.ts`
-  - Actions: Export `onPaneEvent`, `offPaneEvent`, and specific helpers like `onpaneadded(handler)` as thin wrappers (optional convenience).
+  - Actions: Export `addEventHandler`, `removeEventHandler`, and specific helpers like `onpaneadded(handler)` as thin wrappers (optional convenience).
   - Acceptance: Consumers can subscribe; type inference works per event type.
 
 - [X] T022: Pane payload builder [P]
@@ -176,7 +176,7 @@ Conventions
 - T050: Update quickstart with subscription examples [P]
   - Deps: T021
   - Files: `specs/003-we-need-to/quickstart.md`
-  - Actions: Add `onPaneEvent` usage and snippet to filter by type/id.
+  - Actions: Add `addEventHandler` usage and snippet to filter by type/id.
   - Acceptance: Docs show working example.
 
 - T051: Storybook event logger story [P]

@@ -6,7 +6,7 @@ import type { Sash } from '../bwin/sash.js';
 import {
   onpaneorderchanged,
   onpanetitlechanged,
-  offPaneEvent
+  removeEventHandler
 } from './dispatcher.js';
 import type { PaneEvent } from './types.js';
 
@@ -26,15 +26,15 @@ function waitForEvents(
     const handler = (e: PaneEvent) => {
       events.push(e);
       if (events.length >= count) {
-        offPaneEvent(e.type, handler);
+        removeEventHandler(e.type, handler);
         resolve(events);
       }
     };
     register(handler);
     const to = setTimeout(() => {
       try {
-        offPaneEvent('onpaneorderchanged', handler as any);
-        offPaneEvent('onpanetitlechanged', handler as any);
+        removeEventHandler('onpaneorderchanged', handler as any);
+        removeEventHandler('onpanetitlechanged', handler as any);
       } catch {}
       reject(new Error(`Timed out waiting for ${count} pane events`));
     }, timeoutMs);

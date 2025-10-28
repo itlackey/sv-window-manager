@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { mount as svelteMount, unmount, onDestroy, setContext } from 'svelte';
-	import type { Component } from 'svelte';
+	import { onDestroy, setContext } from 'svelte';
 	import { Position } from '../position.js';
 	import { getMetricsFromElement } from '../utils.js';
 	import { getSashIdFromPane } from '../frame/frame-utils.js';
-	import { getIntersectRect } from '../rect.js';
 	import Frame from '../frame/Frame.svelte';
 	import Glass from './Glass.svelte';
 	import Sill from './Sill.svelte';
@@ -18,8 +16,8 @@
 	import { BwinErrors } from '../errors.js';
 	import * as GlassState from '../managers/glass-state.svelte.js';
 	import * as SillState from '../managers/sill-state.svelte.js';
-    import { emitPaneEvent } from '../../events/dispatcher.js';
-    import { buildPanePayload } from '../../events/payload.js';
+	import { emitPaneEvent } from '../../events/dispatcher.js';
+	import { buildPanePayload } from '../../events/payload.js';
 	import '../css/index.css';
 	const DEBUG = false;
 
@@ -674,7 +672,7 @@
 			{/snippet}
 		</Frame>
 	</div>
-	<Sill binaryWindow={bwinContext} />
+	<Sill />
 </div>
 
 <style>

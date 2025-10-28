@@ -1,5 +1,4 @@
 import type { BwinContext } from '../context.js';
-import type { Sash } from '../sash.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { getMetricsFromElement } from '../utils.js';
 import { getIntersectRect } from '../rect.js';
@@ -37,9 +36,6 @@ import { buildPanePayload } from '../../events/payload.js';
 /** BwinContext reference (set during initialization) */
 let bwinContext: BwinContext | undefined = $state();
 
-/** Debug mode flag */
-let debugMode = $state(false);
-
 /** Debug utility instance */
 let debugUtil: Debugger;
 
@@ -72,7 +68,6 @@ export const hasSillElement = () => _hasSillElement;
  */
 export function initialize(context: BwinContext, debug = false): void {
 	bwinContext = context;
-	debugMode = debug;
 	debugUtil = createDebugger('SillState', debug);
 }
 
@@ -331,7 +326,6 @@ export function reset(): void {
 	removeClickHandler();
 	sillElement = undefined;
 	bwinContext = undefined;
-	debugMode = false;
 }
 
 // ============================================================================

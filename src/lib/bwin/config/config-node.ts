@@ -308,10 +308,10 @@ export class ConfigNode implements ParentRect {
 		const sash = this.createSash({ resizeStrategy, parent });
 
 		if (!Array.isArray(this.children) || this.children.length === 0) {
-			// If no children and this is the root position, add placeholder content
+			// If no children and this is the root position, add placeholder content if no component is set
 			// The placeholder provides helpful content and will be auto-removed when first pane is added
-			if (this.position === Position.Root && Object.keys(sash.store || {}).length === 0) {
-				sash.store = { ...PLACEHOLDER_CONTENT, isPlaceholder: true };
+			if (this.position === Position.Root && !sash.store.component) {
+				sash.store = { ...sash.store, ...PLACEHOLDER_CONTENT, isPlaceholder: true };
 			}
 			return sash;
 		}

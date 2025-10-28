@@ -78,6 +78,11 @@
 		// Skip if no content element
 		if (!contentElement) return;
 
+		// Skip if component is not provided or not a function
+		if (!component || typeof component !== 'function') {
+			return;
+		}
+
 		// Create container for user component
 		const container = document.createElement('div');
 		container.style.height = '100%';

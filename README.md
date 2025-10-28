@@ -103,7 +103,7 @@ Supported events:
 
 ```svelte
 <script lang="ts">
-	import { BinaryWindow, onPaneEvent, onpaneresized, offPaneEvent } from 'sv-window-manager';
+	import { BinaryWindow, addEventHandler, onpaneresized, removeEventHandler } from 'sv-window-manager';
 
 	let bwin = $state<BinaryWindow | undefined>();
 	let unsubs: Array<() => void> = [];
@@ -113,15 +113,15 @@ Supported events:
 		const handler = (evt) => {
 			console.log('[pane-event]', evt.type, evt.pane, evt.context);
 		};
-		onPaneEvent('onpaneadded', handler);
-		unsubs.push(() => offPaneEvent('onpaneadded', handler));
+		addEventHandler('onpaneadded', handler);
+		unsubs.push(() => removeEventHandler('onpaneadded', handler));
 
 		// Or use convenience helpers for common events
 		const onResize = (evt) => {
 			console.log('[resized]', evt.pane.id, evt.pane.size, evt.pane.position);
 		};
 		onpaneresized(onResize);
-		unsubs.push(() => offPaneEvent('onpaneresized', onResize));
+		unsubs.push(() => removeEventHandler('onpaneresized', onResize));
 	}
 
 	function stopLogging() { unsubs.forEach((u) => u()); unsubs = []; }

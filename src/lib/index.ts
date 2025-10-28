@@ -233,8 +233,8 @@ export type {
 } from './events/types.js';
 
 export {
-	onPaneEvent,
-	offPaneEvent,
+	addEventHandler,
+	removeEventHandler,
 	emitPaneEvent,
 	// Convenience helpers for specific events
 	onpaneadded,

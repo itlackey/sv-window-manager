@@ -13,7 +13,7 @@ import {
   onpanefocused,
   onpaneblurred,
   onpaneresized,
-  offPaneEvent
+  removeEventHandler
 } from './dispatcher.js';
 import type { PaneEvent } from './types.js';
 
@@ -26,19 +26,19 @@ interface BinaryWindowInstance {
 function waitForEvent(register: (h: (e: PaneEvent) => void) => void, timeoutMs = 1000) {
   return new Promise<PaneEvent>((resolve, reject) => {
     const handler = (e: PaneEvent) => {
-      offPaneEvent(e.type, handler);
+      removeEventHandler(e.type, handler);
       resolve(e);
     };
     register(handler);
     const to = setTimeout(() => {
-      offPaneEvent('onpaneadded', handler as any);
-      offPaneEvent('onpaneremoved', handler as any);
-      offPaneEvent('onpaneminimized', handler as any);
-      offPaneEvent('onpanemaximized', handler as any);
-      offPaneEvent('onpanerestored', handler as any);
-      offPaneEvent('onpanefocused', handler as any);
-      offPaneEvent('onpaneblurred', handler as any);
-      offPaneEvent('onpaneresized', handler as any);
+      removeEventHandler('onpaneadded', handler as any);
+      removeEventHandler('onpaneremoved', handler as any);
+      removeEventHandler('onpaneminimized', handler as any);
+      removeEventHandler('onpanemaximized', handler as any);
+      removeEventHandler('onpanerestored', handler as any);
+      removeEventHandler('onpanefocused', handler as any);
+      removeEventHandler('onpaneblurred', handler as any);
+      removeEventHandler('onpaneresized', handler as any);
       reject(new Error('Timed out waiting for pane event'));
     }, timeoutMs);
     // Clear timeout on resolve
@@ -170,7 +170,7 @@ describe('Pane Lifecycle Events', () => {
     bwin.removePane(pane.id);
     // Allow a short delay to ensure no blur after removal
     await new Promise((r) => setTimeout(r, 150));
-    offPaneEvent('onpaneblurred', blurHandler);
+    removeEventHandler('onpaneblurred', blurHandler);
     expect(blurred).toBe(false);
   });
 
@@ -207,7 +207,7 @@ describe('Pane Lifecycle Events', () => {
 
     // Wait for debounce window
     await new Promise((r) => setTimeout(r, 200));
-    offPaneEvent('onpaneresized', resizeHandler);
+    removeEventHandler('onpaneresized', resizeHandler);
 
     expect(events.length).toBeGreaterThanOrEqual(1);
     // Should include pane payloads with ids
