@@ -1,6 +1,6 @@
 {
 	"name": "sv-window-manager",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "A modern Svelte 5 component library for tiling window management in web applications",
 	"author": "itlackey",
 	"license": "CC-BY",
