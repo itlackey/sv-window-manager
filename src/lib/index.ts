@@ -286,6 +286,65 @@ export type {
 } from './bwin/aria-announcer.js';
 
 // ============================================================================
+// PANE TEMPLATES & PRESETS
+// ============================================================================
+
+/**
+ * Pane templates and layout presets for creating predefined window layouts.
+ *
+ * **Features:**
+ * - Built-in templates (two-column, three-column, grid, dashboard, IDE, etc.)
+ * - Custom template registration
+ * - Template validation and import/export
+ * - JSON serialization for template storage
+ *
+ * **Usage:**
+ * ```typescript
+ * import {
+ *   BUILTIN_TEMPLATES,
+ *   getTemplate,
+ *   listTemplates,
+ *   registerTemplate
+ * } from 'sv-window-manager';
+ *
+ * // Use a built-in template
+ * const template = getTemplate('two-column');
+ *
+ * // Register a custom template
+ * registerTemplate({
+ *   id: 'my-layout',
+ *   name: 'My Custom Layout',
+ *   panes: [
+ *     { id: 'main', position: 'root', size: 0.7 },
+ *     { id: 'sidebar', position: 'right', size: 0.3 }
+ *   ]
+ * });
+ *
+ * // List all templates
+ * const all = listTemplates();
+ * const devTemplates = listTemplates(t => t.metadata?.category === 'development');
+ * ```
+ */
+export {
+	BUILTIN_TEMPLATES,
+	registerTemplate,
+	unregisterTemplate,
+	getTemplate,
+	listTemplates,
+	validateTemplate,
+	clearCustomTemplates,
+	exportTemplateToJSON,
+	importTemplateFromJSON
+} from './bwin/templates.js';
+
+export type {
+	TemplatePane,
+	LayoutTemplate,
+	ApplyTemplateOptions,
+	ApplyTemplateResult
+} from './bwin/templates.js';
+
+// ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
