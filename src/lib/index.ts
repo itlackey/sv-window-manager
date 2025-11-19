@@ -180,6 +180,171 @@ export {
 export { BwinError, BwinErrors } from './bwin/errors.js';
 
 // ============================================================================
+// STATE PERSISTENCE
+// ============================================================================
+
+/**
+ * State persistence utilities for saving and restoring window layouts.
+ *
+ * **Features:**
+ * - Serialize tree to JSON
+ * - Deserialize tree from JSON
+ * - LocalStorage integration (browser-based)
+ * - Component reference mapping
+ * - Validation and error handling
+ *
+ * **Usage:**
+ * ```typescript
+ * import { serializeTree, deserializeTree, saveToLocalStorage } from 'sv-window-manager';
+ *
+ * // Save layout
+ * const result = saveToLocalStorage('my-layout', rootSash, {
+ *   componentToKey: (component) => {
+ *     if (component === ChatSession) return 'ChatSession';
+ *     return undefined;
+ *   }
+ * });
+ *
+ * // Load layout
+ * const loaded = loadFromLocalStorage('my-layout', {
+ *   componentMap: { ChatSession }
+ * });
+ * ```
+ */
+export {
+	serializeTree,
+	deserializeTree,
+	saveToLocalStorage,
+	loadFromLocalStorage,
+	removeFromLocalStorage,
+	listSavedLayouts
+} from './bwin/persistence.js';
+
+export type {
+	SerializedSash,
+	SerializeOptions,
+	DeserializeOptions,
+	SaveResult,
+	LoadResult
+} from './bwin/persistence.js';
+
+// ============================================================================
+// ACCESSIBILITY
+// ============================================================================
+
+/**
+ * Accessibility utilities for keyboard navigation and screen reader support.
+ *
+ * **Keyboard Shortcuts:**
+ * - Provides configurable keyboard shortcuts for window management
+ * - Default shortcuts: Ctrl/Cmd+W (close), Ctrl/Cmd+Tab (next pane), etc.
+ * - Custom shortcut registration
+ *
+ * **ARIA Announcements:**
+ * - Screen reader announcements for state changes
+ * - Debounced announcements to avoid spam
+ * - Polite and assertive modes
+ * - WCAG 2.1 AA compliant
+ *
+ * **Usage:**
+ * ```typescript
+ * import { createKeyboardShortcuts, createAriaAnnouncer } from 'sv-window-manager';
+ *
+ * // Keyboard shortcuts
+ * const shortcuts = createKeyboardShortcuts(bwinContext, {
+ *   enabled: true,
+ *   shortcuts: [{
+ *     key: 'ctrl+shift+n',
+ *     description: 'New pane',
+ *     handler: () => { /* ... *\/ }
+ *   }]
+ * });
+ *
+ * // ARIA announcements
+ * const announcer = createAriaAnnouncer({ enabled: true });
+ * announcer.announcePaneAdded('My Pane');
+ * ```
+ */
+export {
+	KeyboardShortcuts,
+	createKeyboardShortcuts
+} from './bwin/keyboard-shortcuts.js';
+
+export type {
+	KeyboardShortcut,
+	KeyboardShortcutsOptions
+} from './bwin/keyboard-shortcuts.js';
+
+export {
+	AriaAnnouncer,
+	createAriaAnnouncer
+} from './bwin/aria-announcer.js';
+
+export type {
+	AriaLiveMode,
+	AnnouncerOptions
+} from './bwin/aria-announcer.js';
+
+// ============================================================================
+// PANE TEMPLATES & PRESETS
+// ============================================================================
+
+/**
+ * Pane templates and layout presets for creating predefined window layouts.
+ *
+ * **Features:**
+ * - Built-in templates (two-column, three-column, grid, dashboard, IDE, etc.)
+ * - Custom template registration
+ * - Template validation and import/export
+ * - JSON serialization for template storage
+ *
+ * **Usage:**
+ * ```typescript
+ * import {
+ *   BUILTIN_TEMPLATES,
+ *   getTemplate,
+ *   listTemplates,
+ *   registerTemplate
+ * } from 'sv-window-manager';
+ *
+ * // Use a built-in template
+ * const template = getTemplate('two-column');
+ *
+ * // Register a custom template
+ * registerTemplate({
+ *   id: 'my-layout',
+ *   name: 'My Custom Layout',
+ *   panes: [
+ *     { id: 'main', position: 'root', size: 0.7 },
+ *     { id: 'sidebar', position: 'right', size: 0.3 }
+ *   ]
+ * });
+ *
+ * // List all templates
+ * const all = listTemplates();
+ * const devTemplates = listTemplates(t => t.metadata?.category === 'development');
+ * ```
+ */
+export {
+	BUILTIN_TEMPLATES,
+	registerTemplate,
+	unregisterTemplate,
+	getTemplate,
+	listTemplates,
+	validateTemplate,
+	clearCustomTemplates,
+	exportTemplateToJSON,
+	importTemplateFromJSON
+} from './bwin/templates.js';
+
+export type {
+	TemplatePane,
+	LayoutTemplate,
+	ApplyTemplateOptions,
+	ApplyTemplateResult
+} from './bwin/templates.js';
+
+// ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
