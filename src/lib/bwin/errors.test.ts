@@ -6,7 +6,7 @@ describe('BwinError class', () => {
 		it('creates an error with message only', () => {
 			const error = new BwinError('Test error message');
 
-			expect(error.message).toBe('[bwin] Test error message');
+			expect(error.message).toContain('[bwin] Test error message');
 			expect(error.name).toBe('BwinError');
 			expect(error.code).toBeUndefined();
 			expect(error.context).toBeUndefined();
@@ -15,7 +15,7 @@ describe('BwinError class', () => {
 		it('creates an error with message and code', () => {
 			const error = new BwinError('Test error message', 'TEST_CODE');
 
-			expect(error.message).toBe('[bwin] Test error message');
+			expect(error.message).toContain('[bwin] Test error message');
 			expect(error.name).toBe('BwinError');
 			expect(error.code).toBe('TEST_CODE');
 			expect(error.context).toBeUndefined();
@@ -25,7 +25,7 @@ describe('BwinError class', () => {
 			const context = { foo: 'bar', baz: 123 };
 			const error = new BwinError('Test error message', 'TEST_CODE', context);
 
-			expect(error.message).toBe('[bwin] Test error message');
+			expect(error.message).toContain('[bwin] Test error message');
 			expect(error.name).toBe('BwinError');
 			expect(error.code).toBe('TEST_CODE');
 			expect(error.context).toEqual(context);
@@ -34,7 +34,7 @@ describe('BwinError class', () => {
 		it('prefixes message with [bwin]', () => {
 			const error = new BwinError('Something went wrong');
 			expect(error.message).toContain('[bwin]');
-			expect(error.message).toBe('[bwin] Something went wrong');
+			expect(error.message).toContain('[bwin] Something went wrong');
 		});
 
 		it('is an instance of Error', () => {
@@ -51,9 +51,12 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.frameNotInitialized();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Frame not initialized');
+			expect(error.message).toContain('[bwin] Frame not initialized');
 			expect(error.code).toBe('FRAME_NOT_INIT');
 			expect(error.context).toBeUndefined();
+			// Enhanced error includes hint and docsUrl
+			expect(error.hint).toBeDefined();
+			expect(error.docsUrl).toBeDefined();
 		});
 	});
 
@@ -62,20 +65,26 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.paneNotFound('test-123');
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Pane not found: test-123');
+			expect(error.message).toContain('[bwin] Pane not found: test-123');
 			expect(error.code).toBe('PANE_NOT_FOUND');
 			expect(error.context).toEqual({ sashId: 'test-123' });
+			// Enhanced error includes hint and docsUrl
+			expect(error.hint).toBeDefined();
+			expect(error.docsUrl).toBeDefined();
 		});
 	});
 
 	describe('invalidPosition', () => {
 		it('returns a BwinError with position in message and context', () => {
-			const error = BwinErrors.invalidPosition('diagonal');
+			const error = BwinErrors.invalidPosition('topp'); // Close to "top"
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Invalid position: diagonal');
+			expect(error.message).toContain('[bwin] Invalid position: topp');
 			expect(error.code).toBe('INVALID_POSITION');
-			expect(error.context).toEqual({ position: 'diagonal' });
+			expect(error.context).toEqual({ position: 'topp' });
+			// Enhanced error includes suggestion (Did you mean?) and docsUrl
+			expect(error.suggestion).toBeDefined(); // Should suggest "top"
+			expect(error.docsUrl).toBeDefined();
 		});
 	});
 
@@ -84,7 +93,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.missingSashId();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Sash ID not found on element');
+			expect(error.message).toContain('[bwin] Sash ID not found on element');
 			expect(error.code).toBe('MISSING_SASH_ID');
 			expect(error.context).toEqual({ element: undefined });
 		});
@@ -105,7 +114,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.invalidDimensions(100, 200);
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Invalid dimensions: 100x200');
+			expect(error.message).toContain('[bwin] Invalid dimensions: 100x200');
 			expect(error.code).toBe('INVALID_DIMENSIONS');
 			expect(error.context).toEqual({ width: 100, height: 200 });
 		});
@@ -113,14 +122,14 @@ describe('BwinErrors factory functions', () => {
 		it('handles negative dimensions', () => {
 			const error = BwinErrors.invalidDimensions(-50, -100);
 
-			expect(error.message).toBe('[bwin] Invalid dimensions: -50x-100');
+			expect(error.message).toContain('[bwin] Invalid dimensions: -50x-100');
 			expect(error.context).toEqual({ width: -50, height: -100 });
 		});
 
 		it('handles zero dimensions', () => {
 			const error = BwinErrors.invalidDimensions(0, 0);
 
-			expect(error.message).toBe('[bwin] Invalid dimensions: 0x0');
+			expect(error.message).toContain('[bwin] Invalid dimensions: 0x0');
 			expect(error.context).toEqual({ width: 0, height: 0 });
 		});
 	});
@@ -130,7 +139,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.componentNotReady('Frame');
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Frame component not ready');
+			expect(error.message).toContain('[bwin] Frame component not ready');
 			expect(error.code).toBe('COMPONENT_NOT_READY');
 			expect(error.context).toEqual({ component: 'Frame' });
 		});
@@ -141,7 +150,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.invalidConfiguration('minWidth must be positive');
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Invalid configuration: minWidth must be positive');
+			expect(error.message).toContain('[bwin] Invalid configuration: minWidth must be positive');
 			expect(error.code).toBe('INVALID_CONFIG');
 			expect(error.context).toBeUndefined();
 		});
@@ -152,7 +161,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.paneElementNotFound();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Pane element not found');
+			expect(error.message).toContain('[bwin] Pane element not found');
 			expect(error.code).toBe('PANE_ELEMENT_NOT_FOUND');
 			expect(error.context).toBeUndefined();
 		});
@@ -163,7 +172,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.paneElementMissingSashId();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Pane element missing data-sash-id attribute');
+			expect(error.message).toContain('[bwin] Pane element missing data-sash-id attribute');
 			expect(error.code).toBe('PANE_MISSING_SASH_ID');
 			expect(error.context).toBeUndefined();
 		});
@@ -174,7 +183,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.sillElementNotFound();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Sill element not found when minimizing');
+			expect(error.message).toContain('[bwin] Sill element not found when minimizing');
 			expect(error.code).toBe('SILL_NOT_FOUND');
 			expect(error.context).toBeUndefined();
 		});
@@ -185,7 +194,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.minimizedGlassCreationFailed();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Failed to create minimized glass element');
+			expect(error.message).toContain('[bwin] Failed to create minimized glass element');
 			expect(error.code).toBe('MINIMIZED_GLASS_FAILED');
 			expect(error.context).toBeUndefined();
 		});
@@ -196,7 +205,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.siblingsNotOpposite();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Sibling position and current position are not opposite');
+			expect(error.message).toContain('[bwin] Sibling position and current position are not opposite');
 			expect(error.code).toBe('SIBLINGS_NOT_OPPOSITE');
 			expect(error.context).toBeUndefined();
 		});
@@ -207,7 +216,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.siblingSizesSumNot1();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Sum of sibling sizes is not equal to 1');
+			expect(error.message).toContain('[bwin] Sum of sibling sizes is not equal to 1');
 			expect(error.code).toBe('SIBLING_SIZES_SUM');
 			expect(error.context).toBeUndefined();
 		});
@@ -218,7 +227,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.siblingSizesSumNotWidth();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Sum of sibling sizes is not equal to parent width');
+			expect(error.message).toContain('[bwin] Sum of sibling sizes is not equal to parent width');
 			expect(error.code).toBe('SIBLING_SIZES_WIDTH');
 			expect(error.context).toBeUndefined();
 		});
@@ -229,7 +238,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.siblingSizesSumNotHeight();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Sum of sibling sizes is not equal to parent height');
+			expect(error.message).toContain('[bwin] Sum of sibling sizes is not equal to parent height');
 			expect(error.code).toBe('SIBLING_SIZES_HEIGHT');
 			expect(error.context).toBeUndefined();
 		});
@@ -240,7 +249,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.invalidSize(999);
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Invalid size value: 999');
+			expect(error.message).toContain('[bwin] Invalid size value: 999');
 			expect(error.code).toBe('INVALID_SIZE');
 			expect(error.context).toEqual({ size: 999 });
 		});
@@ -249,7 +258,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.invalidSize('invalid');
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Invalid size value: invalid');
+			expect(error.message).toContain('[bwin] Invalid size value: invalid');
 			expect(error.code).toBe('INVALID_SIZE');
 			expect(error.context).toEqual({ size: 'invalid' });
 		});
@@ -272,7 +281,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.sashPositionRequired();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Sash position is required');
+			expect(error.message).toContain('[bwin] Sash position is required');
 			expect(error.code).toBe('SASH_POSITION_REQUIRED');
 			expect(error.context).toBeUndefined();
 		});
@@ -283,7 +292,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.sashNotFoundWhenSwapping();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Sash not found when swapping IDs');
+			expect(error.message).toContain('[bwin] Sash not found when swapping IDs');
 			expect(error.code).toBe('SASH_SWAP_FAILED');
 			expect(error.context).toBeUndefined();
 		});
@@ -294,7 +303,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.maxChildrenExceeded();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Maximum 2 children allowed');
+			expect(error.message).toContain('[bwin] Maximum 2 children allowed');
 			expect(error.code).toBe('MAX_CHILDREN_EXCEEDED');
 			expect(error.context).toBeUndefined();
 		});
@@ -305,7 +314,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.parameterMustBePositiveInteger();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Parameter must be a positive integer');
+			expect(error.message).toContain('[bwin] Parameter must be a positive integer');
 			expect(error.code).toBe('PARAM_NOT_POSITIVE_INT');
 			expect(error.context).toBeUndefined();
 		});
@@ -316,7 +325,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.parametersMustBeNonNegative();
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Parameters must be non-negative numbers');
+			expect(error.message).toContain('[bwin] Parameters must be non-negative numbers');
 			expect(error.code).toBe('PARAMS_NOT_NON_NEGATIVE');
 			expect(error.context).toBeUndefined();
 		});
@@ -327,7 +336,7 @@ describe('BwinErrors factory functions', () => {
 			const error = BwinErrors.keyAlreadyExists('testKey');
 
 			expect(error).toBeInstanceOf(BwinError);
-			expect(error.message).toBe('[bwin] Key "testKey" already exists in target object');
+			expect(error.message).toContain('[bwin] Key "testKey" already exists in target object');
 			expect(error.code).toBe('KEY_ALREADY_EXISTS');
 			expect(error.context).toEqual({ key: 'testKey' });
 		});
