@@ -6,7 +6,7 @@
 **Estimated Timeline:** 3-6 months
 
 📊 **Overall Project Health:** A- (4.2/5)
-📈 **Progress to 1.0:** 88% Complete
+📈 **Progress to 1.0:** 94% Complete
 
 > **Full Review:** See [PROJECT_REVIEW.md](./PROJECT_REVIEW.md) for comprehensive analysis
 
@@ -359,16 +359,67 @@
 
 ### 🟢 8. Storybook Expansion
 
-**Status:** 🟢 Basic Stories Exist
+**Status:** ✅ Complete
 **Priority:** Low
 **Estimated Effort:** 2-3 weeks
 **Review Section:** [§8.3 Low Priority](./PROJECT_REVIEW.md#83-low-priority)
+**Completed:** 2025-11-19
 
 **Tasks:**
-- [ ] Expand story coverage
-- [ ] Add interactive examples
-- [ ] Integrate Chromatic for visual regression
-- [ ] Add Controls for all props
+- [x] **Expand story coverage**
+  - Created comprehensive Glass component stories (10 variations)
+  - Expanded BinaryWindow stories (7 scenarios)
+  - Added interactive Actions stories (4 demonstrations)
+  - Created Persistence stories (2 examples)
+  - Created Accessibility stories (3 demonstrations)
+- [x] **Add interactive examples**
+  - Resize action with live dimensions display
+  - Drag action with visual feedback
+  - Drop action with drop zone highlighting
+  - Combined drag & resize demonstration
+  - Save/load layout with localStorage
+  - Keyboard shortcuts with event logging
+  - ARIA announcements with live updates
+- [x] **Add Controls for all props**
+  - Glass component: title, minimized, maximized, canClose, canMinimize, canMaximize, debug
+  - BinaryWindow: settings object with sashSize, minPaneSize
+  - All stories use argTypes for full Storybook Controls support
+- [ ] **Integrate Chromatic for visual regression** (Deferred - requires Chromatic account setup)
+
+**Deliverables:**
+- ✅ `src/stories/Glass.stories.svelte` - Glass component stories (10 variations)
+  - Basic, All Actions Enabled, Close Only, No Actions
+  - Minimized, Maximized states
+  - Long Title, Debug Mode
+  - Small Size, Large Size
+- ✅ `src/stories/BwinHost.stories.svelte` - Enhanced BinaryWindow stories (7 scenarios)
+  - Empty Window, Single Pane
+  - Large/Small Sash Size
+  - Multiple Panes, Complex Layout
+  - Full argTypes with Controls
+- ✅ `src/stories/Actions.stories.svelte` - Interactive action demonstrations (4 stories)
+  - Resize Action with live feedback
+  - Drag Action with visual states
+  - Drop Action with drop zones
+  - Combined Actions (drag + resize)
+- ✅ `src/stories/Persistence.stories.svelte` - State persistence examples (2 stories)
+  - Save and Load Layout with localStorage
+  - JSON Serialization viewer
+- ✅ `src/stories/Accessibility.stories.svelte` - A11y demonstrations (3 stories)
+  - Keyboard Shortcuts with custom handlers
+  - ARIA Announcements with event logging
+  - Focus Management with WCAG compliance
+
+**Story Count:**
+- Before: 2 basic stories
+- After: 26 comprehensive stories across 5 files
+- Coverage: All major components, actions, persistence, and accessibility features
+
+**Success Criteria:**
+- ✅ Story coverage expanded significantly (2 → 26 stories)
+- ✅ Interactive examples for all major features
+- ✅ Controls for all component props
+- ⏳ Chromatic integration (deferred - not blocking)
 
 ---
 
@@ -502,6 +553,7 @@
 | 5. Accessibility Enhancements | ✅ Complete | Claude | 2025-11-19 |
 | 6. Performance Benchmarking & Budgets | ✅ Complete | Claude | 2025-11-19 |
 | 7. Bundle Size Optimization | ✅ Complete | Claude | 2025-11-19 |
+| 8. Storybook Expansion | ✅ Complete | Claude | 2025-11-19 |
 | 9. Enhanced Error Messages | ✅ Complete | Claude | 2025-11-19 |
 
 ### Velocity Tracking
@@ -554,6 +606,12 @@
 - **2025-11-19:** Levenshtein distance algorithm for "Did you mean?" suggestions
 - **2025-11-19:** All 23 error factories enhanced with recovery hints and documentation links
 - **2025-11-19:** ERROR_HANDLING.md created with comprehensive error handling guide
+- **2025-11-19:** Storybook expansion completed (2 → 26 stories across 5 files)
+- **2025-11-19:** Comprehensive Glass component stories with 10 variations
+- **2025-11-19:** Interactive Actions stories demonstrating resize/drag/drop
+- **2025-11-19:** Persistence stories with save/load and JSON serialization
+- **2025-11-19:** Accessibility stories with keyboard shortcuts, ARIA, and focus management
+- **2025-11-19:** All stories include full argTypes for Storybook Controls support
 
 ### Resources
 
