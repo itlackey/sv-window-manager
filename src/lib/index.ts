@@ -180,6 +180,55 @@ export {
 export { BwinError, BwinErrors } from './bwin/errors.js';
 
 // ============================================================================
+// STATE PERSISTENCE
+// ============================================================================
+
+/**
+ * State persistence utilities for saving and restoring window layouts.
+ *
+ * **Features:**
+ * - Serialize tree to JSON
+ * - Deserialize tree from JSON
+ * - LocalStorage integration (browser-based)
+ * - Component reference mapping
+ * - Validation and error handling
+ *
+ * **Usage:**
+ * ```typescript
+ * import { serializeTree, deserializeTree, saveToLocalStorage } from 'sv-window-manager';
+ *
+ * // Save layout
+ * const result = saveToLocalStorage('my-layout', rootSash, {
+ *   componentToKey: (component) => {
+ *     if (component === ChatSession) return 'ChatSession';
+ *     return undefined;
+ *   }
+ * });
+ *
+ * // Load layout
+ * const loaded = loadFromLocalStorage('my-layout', {
+ *   componentMap: { ChatSession }
+ * });
+ * ```
+ */
+export {
+	serializeTree,
+	deserializeTree,
+	saveToLocalStorage,
+	loadFromLocalStorage,
+	removeFromLocalStorage,
+	listSavedLayouts
+} from './bwin/persistence.js';
+
+export type {
+	SerializedSash,
+	SerializeOptions,
+	DeserializeOptions,
+	SaveResult,
+	LoadResult
+} from './bwin/persistence.js';
+
+// ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
