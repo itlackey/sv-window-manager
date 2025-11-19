@@ -10,6 +10,31 @@ import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
 /**
  * Manages the sill element and minimized glasses using Svelte 5 reactive state
  *
+ * ⚠️ **DEPRECATED** - This class-based manager is deprecated and will be removed in v2.0.0.
+ * Please migrate to the modern module-level `SillState` API.
+ *
+ * **Migration Guide:**
+ * See MIGRATION.md or https://github.com/itlackey/sv-window-manager/blob/main/MIGRATION.md
+ *
+ * **Before (deprecated):**
+ * ```typescript
+ * import { SillManager } from 'sv-window-manager';
+ * const manager = new SillManager(bwinContext, debug);
+ * manager.mount();
+ * ```
+ *
+ * **After (recommended):**
+ * ```typescript
+ * import { SillState } from 'sv-window-manager';
+ * SillState.initialize(bwinContext, debug);
+ * SillState.getSillElement();
+ * ```
+ *
+ * **Deprecation Timeline:**
+ * - Deprecated in: v0.3.0 (planned)
+ * - Removal in: v2.0.0 (at least 6 months notice)
+ * - Current version: v0.2.2
+ *
  * Key Svelte 5 Patterns:
  * - Uses $state() for reactive properties
  * - Uses $derived() for computed values
@@ -21,6 +46,8 @@ import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
  * - Track minimized glass instances
  * - Handle restoration of minimized glasses to panes
  * - Manage click events on minimized glass buttons
+ *
+ * @deprecated Use SillState module instead. See MIGRATION.md for migration guide.
  */
 export class SillManager {
 	// ============================================================================
@@ -46,10 +73,28 @@ export class SillManager {
 
 	private bwinContext: BwinContext;
 	private debugger: Debugger;
+	private static deprecationWarned = false;
 
 	constructor(bwinContext: BwinContext, debug = false) {
 		this.bwinContext = bwinContext;
 		this.debugger = createDebugger('SillManager', debug);
+
+		// Deprecation warning (fires once per application)
+		if (!SillManager.deprecationWarned && typeof console !== 'undefined') {
+			SillManager.deprecationWarned = true;
+			console.warn(
+				'[sv-window-manager] SillManager is DEPRECATED and will be removed in v2.0.0.\n' +
+					'Please migrate to SillState module for better performance and simpler API.\n\n' +
+					'Migration example:\n' +
+					'  BEFORE: const manager = new SillManager(bwinContext, debug);\n' +
+					'          manager.mount();\n\n' +
+					'  AFTER:  import { SillState } from "sv-window-manager";\n' +
+					'          SillState.initialize(bwinContext, debug);\n' +
+					'          SillState.getSillElement();\n\n' +
+					'See MIGRATION.md for full migration guide:\n' +
+					'https://github.com/itlackey/sv-window-manager/blob/main/MIGRATION.md'
+			);
+		}
 	}
 
 	// ============================================================================

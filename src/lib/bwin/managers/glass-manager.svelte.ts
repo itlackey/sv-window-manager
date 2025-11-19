@@ -7,6 +7,31 @@ import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
 /**
  * Manages Glass component lifecycle using Svelte 5 reactive state
  *
+ * ⚠️ **DEPRECATED** - This class-based manager is deprecated and will be removed in v2.0.0.
+ * Please migrate to the modern module-level `GlassState` API.
+ *
+ * **Migration Guide:**
+ * See MIGRATION.md or https://github.com/itlackey/sv-window-manager/blob/main/MIGRATION.md
+ *
+ * **Before (deprecated):**
+ * ```typescript
+ * import { GlassManager } from 'sv-window-manager';
+ * const manager = new GlassManager(bwinContext, debug);
+ * manager.removeGlass(sashId);
+ * ```
+ *
+ * **After (recommended):**
+ * ```typescript
+ * import { GlassState } from 'sv-window-manager';
+ * GlassState.initialize(bwinContext, debug);
+ * GlassState.removeGlass(sashId);
+ * ```
+ *
+ * **Deprecation Timeline:**
+ * - Deprecated in: v0.3.0 (planned)
+ * - Removal in: v2.0.0 (at least 6 months notice)
+ * - Current version: v0.2.2
+ *
  * LEGACY MODE: This manager is kept for backward compatibility but is largely
  * a no-op in the default declarative rendering mode. Glass components are now
  * rendered declaratively via BinaryWindow's {#each} loop and Svelte 5 snippets,
@@ -22,6 +47,8 @@ import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
  * - Track Glass instances reactively (typically empty in declarative mode)
  * - Provide computed state (count, active, etc.)
  * - Clean up instances on removal (typically no-op in declarative mode)
+ *
+ * @deprecated Use GlassState module instead. See MIGRATION.md for migration guide.
  */
 export class GlassManager {
 	// ============================================================================
@@ -68,10 +95,28 @@ export class GlassManager {
 
 	private bwinContext: BwinContext;
 	private debugger: Debugger;
+	private static deprecationWarned = false;
 
 	constructor(bwinContext: BwinContext, debug = false) {
 		this.bwinContext = bwinContext;
 		this.debugger = createDebugger('GlassManager', debug);
+
+		// Deprecation warning (fires once per application)
+		if (!GlassManager.deprecationWarned && typeof console !== 'undefined') {
+			GlassManager.deprecationWarned = true;
+			console.warn(
+				'[sv-window-manager] GlassManager is DEPRECATED and will be removed in v2.0.0.\n' +
+					'Please migrate to GlassState module for better performance and simpler API.\n\n' +
+					'Migration example:\n' +
+					'  BEFORE: const manager = new GlassManager(bwinContext, debug);\n' +
+					'          manager.removeGlass(sashId);\n\n' +
+					'  AFTER:  import { GlassState } from "sv-window-manager";\n' +
+					'          GlassState.initialize(bwinContext, debug);\n' +
+					'          GlassState.removeGlass(sashId);\n\n' +
+					'See MIGRATION.md for full migration guide:\n' +
+					'https://github.com/itlackey/sv-window-manager/blob/main/MIGRATION.md'
+			);
+		}
 	}
 
 	// ============================================================================
