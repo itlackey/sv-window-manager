@@ -140,6 +140,15 @@ const VALID_POSITIONS = ['top', 'right', 'bottom', 'left', 'root'];
 const DOCS_BASE_URL = 'https://github.com/itlackey/sv-window-manager#';
 
 /**
+ * Type for error options
+ */
+type ErrorOptions = {
+	hint?: string;
+	suggestion?: string;
+	docsUrl?: string;
+};
+
+/**
  * Predefined error factory functions for common error scenarios
  *
  * This object provides convenient factory functions for creating common bwin errors.
@@ -178,7 +187,7 @@ export const BwinErrors = {
 	 * @returns {BwinError} Pane not found error with context
 	 */
 	paneNotFound: (id: string, availableIds?: string[]) => {
-		const options: Parameters<typeof BwinError>[3] = {
+		const options: ErrorOptions = {
 			hint: 'Check that the pane ID exists in your layout. Use getAllLeafDescendants() to see all available pane IDs.',
 			docsUrl: `${DOCS_BASE_URL}pane-management`
 		};
@@ -202,7 +211,7 @@ export const BwinErrors = {
 	 */
 	invalidPosition: (pos: string) => {
 		const closest = findClosestMatch(pos, VALID_POSITIONS);
-		const options: Parameters<typeof BwinError>[3] = {
+		const options: ErrorOptions = {
 			hint: `Valid positions are: ${VALID_POSITIONS.join(', ')}`,
 			docsUrl: `${DOCS_BASE_URL}positioning`
 		};
