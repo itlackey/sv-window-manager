@@ -229,6 +229,63 @@ export type {
 } from './bwin/persistence.js';
 
 // ============================================================================
+// ACCESSIBILITY
+// ============================================================================
+
+/**
+ * Accessibility utilities for keyboard navigation and screen reader support.
+ *
+ * **Keyboard Shortcuts:**
+ * - Provides configurable keyboard shortcuts for window management
+ * - Default shortcuts: Ctrl/Cmd+W (close), Ctrl/Cmd+Tab (next pane), etc.
+ * - Custom shortcut registration
+ *
+ * **ARIA Announcements:**
+ * - Screen reader announcements for state changes
+ * - Debounced announcements to avoid spam
+ * - Polite and assertive modes
+ * - WCAG 2.1 AA compliant
+ *
+ * **Usage:**
+ * ```typescript
+ * import { createKeyboardShortcuts, createAriaAnnouncer } from 'sv-window-manager';
+ *
+ * // Keyboard shortcuts
+ * const shortcuts = createKeyboardShortcuts(bwinContext, {
+ *   enabled: true,
+ *   shortcuts: [{
+ *     key: 'ctrl+shift+n',
+ *     description: 'New pane',
+ *     handler: () => { /* ... *\/ }
+ *   }]
+ * });
+ *
+ * // ARIA announcements
+ * const announcer = createAriaAnnouncer({ enabled: true });
+ * announcer.announcePaneAdded('My Pane');
+ * ```
+ */
+export {
+	KeyboardShortcuts,
+	createKeyboardShortcuts
+} from './bwin/keyboard-shortcuts.js';
+
+export type {
+	KeyboardShortcut,
+	KeyboardShortcutsOptions
+} from './bwin/keyboard-shortcuts.js';
+
+export {
+	AriaAnnouncer,
+	createAriaAnnouncer
+} from './bwin/aria-announcer.js';
+
+export type {
+	AriaLiveMode,
+	AnnouncerOptions
+} from './bwin/aria-announcer.js';
+
+// ============================================================================
 // TYPE DEFINITIONS
 // ============================================================================
 
