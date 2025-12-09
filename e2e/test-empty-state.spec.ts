@@ -58,7 +58,10 @@ test.describe('Empty State Slot Feature', () => {
 		await expect(emptyState).toBeVisible();
 
 		// Wait for the button to be ready (component bound)
-		await page.waitForSelector('#toggle-content[data-ready="true"]', { state: 'attached', timeout: 5000 });
+		await page.waitForSelector('#toggle-content[data-ready="true"]', {
+			state: 'attached',
+			timeout: 5000
+		});
 
 		// Click the "Add Content" button
 		const addButton = page.locator('#toggle-content');

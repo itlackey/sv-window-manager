@@ -1,7 +1,6 @@
 <script lang="ts">
 	import BinaryWindow from '$lib/bwin/binary-window/BinaryWindow.svelte';
 	import ExamplePane from './components/ExamplePane.svelte';
-	import { PLACEHOLDER_PANE_ID } from '$lib/bwin/constants.js';
 	import '$lib/bwin/css/vars.css';
 	import '$lib/bwin/css/frame.css';
 	import '$lib/bwin/css/glass.css';
@@ -15,6 +14,7 @@
 		fitContainer: true
 	};
 
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let windowComponent = $state<any>();
 	let showWithContent = $state(false);
 
@@ -84,8 +84,8 @@
 		height: 100vh;
 		display: flex;
 		flex-direction: column;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-			sans-serif;
+		font-family:
+			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 	}
 
 	.test-header {
