@@ -300,7 +300,7 @@
 	function getLeafIndexWithin(parent: Sash, leafId: string): number {
 		const leaves = parent.getAllLeafDescendants();
 		// Sort by visual order: top->bottom, then left->right
-		leaves.sort((a, b) => (a.top - b.top) || (a.left - b.left));
+		leaves.sort((a, b) => a.top - b.top || a.left - b.left);
 		return leaves.findIndex((l) => l.id === leafId);
 	}
 

@@ -220,17 +220,30 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
 		const leaves = node.getAllLeafDescendants();
 		if (!leaves.length) return null;
 		if (edge === 'left') {
-			return leaves.reduce((best, cur) => (cur.left < (best?.left ?? Infinity) ? cur : best),
-				leaves[0]);
+			return leaves.reduce(
+				(best, cur) => (cur.left < (best?.left ?? Infinity) ? cur : best),
+				leaves[0]
+			);
 		}
 		if (edge === 'right') {
-			return leaves.reduce((best, cur) => (cur.left + cur.width > (best ? best.left + best.width : -Infinity) ? cur : best), leaves[0]);
+			return leaves.reduce(
+				(best, cur) =>
+					cur.left + cur.width > (best ? best.left + best.width : -Infinity) ? cur : best,
+				leaves[0]
+			);
 		}
 		if (edge === 'top') {
-			return leaves.reduce((best, cur) => (cur.top < (best?.top ?? Infinity) ? cur : best), leaves[0]);
+			return leaves.reduce(
+				(best, cur) => (cur.top < (best?.top ?? Infinity) ? cur : best),
+				leaves[0]
+			);
 		}
 		// bottom
-		return leaves.reduce((best, cur) => (cur.top + cur.height > (best ? best.top + best.height : -Infinity) ? cur : best), leaves[0]);
+		return leaves.reduce(
+			(best, cur) =>
+				cur.top + cur.height > (best ? best.top + best.height : -Infinity) ? cur : best,
+			leaves[0]
+		);
 	}
 
 	// Use svelte/events for automatic cleanup

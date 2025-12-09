@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, setContext } from 'svelte';
+	import { onDestroy, setContext, type Snippet } from 'svelte';
 	import { Position } from '../position.js';
 	import { getMetricsFromElement } from '../utils.js';
 	import { getSashIdFromPane } from '../frame/frame-utils.js';
@@ -28,12 +28,15 @@
 	 * Props for the BinaryWindow component
 	 *
 	 * @property {SashConfig | ConfigRoot | Record<string, unknown>} settings - Initial window configuration
+	 * @property {Snippet} [empty] - Optional snippet to render when there are no panes open
 	 */
 	interface BinaryWindowProps {
 		settings: SashConfig | ConfigRoot | Record<string, unknown>;
+		/** Optional snippet to render when there are no panes open */
+		empty?: Snippet;
 	}
 
-	let { settings }: BinaryWindowProps = $props();
+	let { settings, empty }: BinaryWindowProps = $props();
 
 	// Get debug from settings, with fallback to DEBUG constant
 	const debug = $derived(
@@ -390,6 +393,26 @@
 		frameComponent?.windowElement?.querySelectorAll(`.${CSS_CLASSES.PANE}`).length || 0
 	);
 
+	// Check if the window is in "empty" state (no real panes, only placeholder or no panes at all)
+	// This is reactive and updates whenever treeVersion or frameComponent changes
+	const isEmpty = $derived.by(() => {
+		// Access treeVersion to make this reactive (void prevents unused var warning)
+		void treeVersion;
+		const rootSash = frameComponent?.rootSash;
+		if (!rootSash) return true;
+
+		// Get all leaf nodes (actual panes)
+		const leafNodes = rootSash.getAllLeafDescendants();
+		if (leafNodes.length === 0) return true;
+
+		// Check if the only pane is the placeholder
+		if (leafNodes.length === 1 && leafNodes[0].store?.isPlaceholder) {
+			return true;
+		}
+
+		return false;
+	});
+
 	// Update action button disabled states when pane count changes
 	// Single-pane windows disable close/minimize/maximize buttons
 	// Multi-pane windows enable all buttons
@@ -640,6 +663,26 @@
 	export function getTreeVersion() {
 		return treeVersion;
 	}
+
+	/**
+	 * Checks if the window is in an empty state (no real panes open).
+	 *
+	 * Returns true when there are no panes, or only the placeholder pane exists.
+	 * This is useful for conditionally rendering UI elements based on whether
+	 * the window has any content.
+	 *
+	 * @returns {boolean} True if the window has no real panes, false otherwise
+	 *
+	 * @example
+	 * ```typescript
+	 * if (binaryWindow.getIsEmpty()) {
+	 *   console.log('Window is empty, showing empty state');
+	 * }
+	 * ```
+	 */
+	export function getIsEmpty() {
+		return isEmpty;
+	}
 </script>
 
 <div
@@ -651,26 +694,37 @@
 	}}
 >
 	<div class="bw-window-area">
-		<Frame
-			bind:this={frameComponent}
-			{settings}
-			{debug}
-			{treeVersion}
-			onmuntinrender={handleMuntinRender}
-			onPaneDrop={handlePaneDrop}
-		>
-			{#snippet paneContent(sash)}
-				<Glass
-					title={sash.store.title}
-					actions={sash.store.actions}
-					draggable={sash.store.draggable !== false}
-					{sash}
-					binaryWindow={bwinContext}
-					component={sash.store.component}
-					componentProps={sash.store.componentProps}
-				/>
-			{/snippet}
-		</Frame>
+		{#if isEmpty && empty}
+			<!-- Empty state with custom content -->
+			<div class="bw-empty-state">
+				{@render empty()}
+			</div>
+		{/if}
+		<!-- Frame is always rendered but hidden when showing empty state -->
+		<div class="bw-frame-container" class:bw-hidden={isEmpty && empty}>
+			<Frame
+				bind:this={frameComponent}
+				{settings}
+				{debug}
+				{treeVersion}
+				onmuntinrender={handleMuntinRender}
+				onPaneDrop={handlePaneDrop}
+			>
+				{#snippet paneContent(sash)}
+					{#if !sash.store?.isPlaceholder}
+						<Glass
+							title={sash.store.title}
+							actions={sash.store.actions}
+							draggable={sash.store.draggable !== false}
+							{sash}
+							binaryWindow={bwinContext}
+							component={sash.store.component}
+							componentProps={sash.store.componentProps}
+						/>
+					{/if}
+				{/snippet}
+			</Frame>
+		</div>
 	</div>
 	<Sill />
 </div>
@@ -689,5 +743,22 @@
 		flex: 1;
 		min-height: 0; /* Allow flex item to shrink below content size */
 		position: relative;
+	}
+
+	.bw-frame-container {
+		width: 100%;
+		height: 100%;
+	}
+
+	.bw-frame-container.bw-hidden {
+		display: none;
+	}
+
+	.bw-empty-state {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>

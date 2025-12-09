@@ -6,8 +6,8 @@
 	import closeAction from './actions.close.js';
 	import minimizeAction from './actions.minimize.js';
 	import maximizeAction from './actions.maximize.js';
-  import { emitPaneEvent } from '../../events/dispatcher.js';
-  import { buildPanePayload } from '../../events/payload.js';
+	import { emitPaneEvent } from '../../events/dispatcher.js';
+	import { buildPanePayload } from '../../events/payload.js';
 	//import DOMPurify from 'isomorphic-dompurify';
 
 	/**
@@ -48,14 +48,18 @@
 	// Track title changes and emit event
 	let prevTitle: string | null | undefined = title as any;
 	$effect(() => {
-		const current = title as any as (string | null | undefined);
+		const current = title as any as string | null | undefined;
 		if (current !== prevTitle) {
 			try {
 				const payload = buildPanePayload(_sash as Sash, undefined);
-				emitPaneEvent('onpanetitlechanged', {
-					...payload,
-					title: current ?? null
-				}, { previousTitle: typeof prevTitle === 'string' ? prevTitle : undefined });
+				emitPaneEvent(
+					'onpanetitlechanged',
+					{
+						...payload,
+						title: current ?? null
+					},
+					{ previousTitle: typeof prevTitle === 'string' ? prevTitle : undefined }
+				);
 			} catch {}
 			prevTitle = current;
 		}

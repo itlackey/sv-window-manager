@@ -286,23 +286,26 @@ export function restoreGlass(
 		const originalSashId = minimizedGlassEl.bwOriginalSashId;
 		const originalStore = minimizedGlassEl.bwOriginalStore || {};
 
-				// addPane will create a new Glass component with the preserved store
-				const newSash = bwinContext.addPane((targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID)!, {
-			id: originalSashId,
-			position: newPosition,
-			size: newSize,
-			...originalStore // Preserve title, content, and other Glass props
-				});
+		// addPane will create a new Glass component with the preserved store
+		const newSash = bwinContext.addPane(
+			(targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID)!,
+			{
+				id: originalSashId,
+				position: newPosition,
+				size: newSize,
+				...originalStore // Preserve title, content, and other Glass props
+			}
+		);
 
-				// Post-action: emit restored event
-				try {
-					if (newSash) {
-						const payload = buildPanePayload(newSash, undefined);
-						emitPaneEvent('onpanerestored', payload);
-					}
-				} catch (err) {
-					debugWarn('[restoreGlass] failed to emit onpanerestored', err as unknown);
-				}
+		// Post-action: emit restored event
+		try {
+			if (newSash) {
+				const payload = buildPanePayload(newSash, undefined);
+				emitPaneEvent('onpanerestored', payload);
+			}
+		} catch (err) {
+			debugWarn('[restoreGlass] failed to emit onpanerestored', err as unknown);
+		}
 	}
 }
 
