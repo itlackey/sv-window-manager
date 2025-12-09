@@ -4,7 +4,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Empty State Slot Feature', () => {
 	test('should display custom empty state when no content is present', async ({ page }) => {
 		// Navigate to empty state test page
-		await page.goto('http://localhost:5173/test-empty-state');
+		await page.goto('/test-empty-state');
 
 		// Wait for page to fully load
 		await page.waitForLoadState('domcontentloaded');
@@ -36,7 +36,10 @@ test.describe('Empty State Slot Feature', () => {
 		await expect(frameContainer).toHaveClass(/bw-hidden/);
 
 		// Take screenshot of empty state
-		await page.screenshot({ path: '/tmp/empty-state-empty.png', fullPage: false });
+		await page.screenshot({
+			path: 'test-results/screenshots/empty-state-empty.png',
+			fullPage: false
+		});
 	});
 
 	test('should hide empty state and show content when pane is added', async ({ page }) => {
@@ -45,7 +48,7 @@ test.describe('Empty State Slot Feature', () => {
 		page.on('pageerror', (err) => console.log('PAGE ERROR:', err.message));
 
 		// Navigate to empty state test page
-		await page.goto('http://localhost:5173/test-empty-state');
+		await page.goto('/test-empty-state');
 
 		// Wait for page to fully load
 		await page.waitForLoadState('domcontentloaded');
@@ -98,6 +101,9 @@ test.describe('Empty State Slot Feature', () => {
 		await expect(glassTitle).toContainText('Example Pane');
 
 		// Take screenshot of state with content
-		await page.screenshot({ path: '/tmp/empty-state-with-content.png', fullPage: false });
+		await page.screenshot({
+			path: 'test-results/screenshots/empty-state-with-content.png',
+			fullPage: false
+		});
 	});
 });
