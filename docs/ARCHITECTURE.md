@@ -63,6 +63,7 @@ A **Sash** is the fundamental data structure—a node in the binary tree. Every 
 - **Store**: A flexible object for storing component data, title, and other metadata
 
 A sash is either:
+
 - A **leaf node** (no children) → represents an actual **pane** with content
 - A **parent node** (has children) → represents a **split/container**, rendered as a **muntin**
 
@@ -87,6 +88,7 @@ A **Muntin** is a parent sash—a sash with children. Visually, it's the **divid
 ### Glass
 
 **Glass** is the "chrome" or "decoration" around a pane's content. It includes:
+
 - Title bar/header
 - Tab bar (for multiple tabs in one pane)
 - Action buttons (close, minimize, maximize)
@@ -101,6 +103,7 @@ The **Sill** is the bottom bar that appears when panes are minimized. Minimized 
 ### Frame
 
 The **Frame** is the main layout container component. It:
+
 - Manages the sash tree
 - Renders all panes and muntins
 - Handles resize and drop interactions
@@ -139,29 +142,29 @@ Every sash has these reactive properties:
 
 ```typescript
 interface Sash {
-  // Identity
-  id: string;                    // Unique identifier
-  position: Position;            // 'root', 'left', 'right', 'top', 'bottom'
+	// Identity
+	id: string; // Unique identifier
+	position: Position; // 'root', 'left', 'right', 'top', 'bottom'
 
-  // Geometry (reactive - changes trigger re-render)
-  left: number;                  // X position in pixels
-  top: number;                   // Y position in pixels
-  width: number;                 // Width in pixels
-  height: number;                // Height in pixels
+	// Geometry (reactive - changes trigger re-render)
+	left: number; // X position in pixels
+	top: number; // Y position in pixels
+	width: number; // Width in pixels
+	height: number; // Height in pixels
 
-  // Constraints
-  minWidth: number;              // Minimum allowed width
-  minHeight: number;             // Minimum allowed height
+	// Constraints
+	minWidth: number; // Minimum allowed width
+	minHeight: number; // Minimum allowed height
 
-  // Tree structure
-  parent: Sash | null;           // Parent sash (null for root)
-  children: Sash[];              // Child sashes (0-2)
+	// Tree structure
+	parent: Sash | null; // Parent sash (null for root)
+	children: Sash[]; // Child sashes (0-2)
 
-  // Data storage
-  store: Record<string, any>;    // Flexible metadata storage
+	// Data storage
+	store: Record<string, any>; // Flexible metadata storage
 
-  // DOM reference
-  domNode: HTMLElement | null;   // Associated DOM element
+	// DOM reference
+	domNode: HTMLElement | null; // Associated DOM element
 }
 ```
 
@@ -170,7 +173,7 @@ interface Sash {
 ```typescript
 // Walk all nodes (post-order depth-first)
 rootSash.walk((sash) => {
-  console.log(sash.id, sash.position);
+	console.log(sash.id, sash.position);
 });
 
 // Get all leaf panes
@@ -217,14 +220,14 @@ BinaryWindow
 
 ```typescript
 enum Position {
-  Root = 'root',       // The root sash (top-level container)
-  Left = 'left',       // Left child of a horizontal split
-  Right = 'right',     // Right child of a horizontal split
-  Top = 'top',         // Top child of a vertical split
-  Bottom = 'bottom',   // Bottom child of a vertical split
-  Center = 'center',   // Used for drag-drop (swap content)
-  Unknown = 'unknown', // Boundary area
-  Outside = 'outside'  // Cursor outside element
+	Root = 'root', // The root sash (top-level container)
+	Left = 'left', // Left child of a horizontal split
+	Right = 'right', // Right child of a horizontal split
+	Top = 'top', // Top child of a vertical split
+	Bottom = 'bottom', // Bottom child of a vertical split
+	Center = 'center', // Used for drag-drop (swap content)
+	Unknown = 'unknown', // Boundary area
+	Outside = 'outside' // Cursor outside element
 }
 ```
 
@@ -278,21 +281,23 @@ Understanding the pane addition process is crucial:
 
 ```typescript
 binaryWindow.addPane('editor', {
-  position: 'right',
-  size: '40%',
-  component: Terminal,
-  componentProps: { sessionId: 'term-1' },
-  title: 'Terminal'
+	position: 'right',
+	size: '40%',
+	component: Terminal,
+	componentProps: { sessionId: 'term-1' },
+	title: 'Terminal'
 });
 ```
 
 **Before:**
+
 ```
 Root
 └── editor (pane) ← store: { component: Editor, title: 'Editor' }
 ```
 
 **After:**
+
 ```
 Root
 └── abc-123 (muntin) ← new generated ID
@@ -327,15 +332,17 @@ Sash dimensions use `$state` with custom setters that propagate changes:
 
 ```typescript
 class ReactiveSash {
-  private _width = $state<number>(150);
+	private _width = $state<number>(150);
 
-  get width() { return this._width; }
+	get width() {
+		return this._width;
+	}
 
-  set width(value: number) {
-    this._width = value;
-    // Automatically propagate to children
-    this.propagateWidthToChildren(value);
-  }
+	set width(value: number) {
+		this._width = value;
+		// Automatically propagate to children
+		this.propagateWidthToChildren(value);
+	}
 }
 ```
 
@@ -346,16 +353,16 @@ Two contexts provide component-wide access:
 ```typescript
 // BwinContext - Window-level operations
 interface BwinContext {
-  windowElement: HTMLElement | undefined;
-  rootSash: Sash | undefined;
-  addPane(targetId: string, props: object): Sash;
-  removePane(sashId: string): void;
-  // ...
+	windowElement: HTMLElement | undefined;
+	rootSash: Sash | undefined;
+	addPane(targetId: string, props: object): Sash;
+	removePane(sashId: string): void;
+	// ...
 }
 
 // FrameContext - Layout-level settings
 interface FrameContext {
-  debug: boolean;
+	debug: boolean;
 }
 ```
 
@@ -438,12 +445,12 @@ When there are no panes, the window can show custom content:
 
 ```svelte
 <BinaryWindow settings={{ fitContainer: true }}>
-  {#snippet empty()}
-    <div class="welcome">
-      <h2>Welcome!</h2>
-      <p>Add a pane to get started.</p>
-    </div>
-  {/snippet}
+	{#snippet empty()}
+		<div class="welcome">
+			<h2>Welcome!</h2>
+			<p>Add a pane to get started.</p>
+		</div>
+	{/snippet}
 </BinaryWindow>
 ```
 
@@ -460,6 +467,7 @@ When there are no panes, the window can show custom content:
 ### Placeholder Pane
 
 A special pane (`__bwin_placeholder__`) is created when the window initializes empty:
+
 - Marked with `isPlaceholder: true` in store
 - Automatically replaced when first pane is added
 - Glass component skips rendering for placeholder panes
@@ -468,16 +476,16 @@ A special pane (`__bwin_placeholder__`) is created when the window initializes e
 
 ## Quick Reference
 
-| Term | Definition |
-|------|------------|
-| **Sash** | Binary tree node (either pane or container) |
-| **Pane** | Leaf sash with content |
-| **Muntin** | Parent sash rendered as divider |
-| **Glass** | Pane chrome (title bar, actions) |
-| **Sill** | Bottom bar for minimized panes |
-| **Frame** | Main layout component |
-| **Store** | Flexible data object on each sash |
-| **Position** | Direction relative to parent |
+| Term         | Definition                                  |
+| ------------ | ------------------------------------------- |
+| **Sash**     | Binary tree node (either pane or container) |
+| **Pane**     | Leaf sash with content                      |
+| **Muntin**   | Parent sash rendered as divider             |
+| **Glass**    | Pane chrome (title bar, actions)            |
+| **Sill**     | Bottom bar for minimized panes              |
+| **Frame**    | Main layout component                       |
+| **Store**    | Flexible data object on each sash           |
+| **Position** | Direction relative to parent                |
 
 ## Common Operations
 
