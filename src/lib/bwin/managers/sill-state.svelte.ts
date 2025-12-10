@@ -174,8 +174,10 @@ export function getMinimizedGlassElement(sashId: string): Element | null | undef
 /**
  * Restores a minimized glass to a pane
  *
- * Finds the best target pane based on intersection area with original position,
- * then adds a new pane with the preserved glass properties.
+ * Handles multiple scenarios:
+ * - Empty/placeholder state: Replaces the placeholder with the restored content
+ * - Single pane (root position): Replaces the target pane content
+ * - Multiple panes: Splits the best-matching pane based on original position
  *
  * @param minimizedGlassEl - The minimized glass button element to restore
  *
@@ -217,85 +219,31 @@ export function restoreGlass(
 		return;
 	}
 
+	const originalStore = minimizedGlassEl.bwOriginalStore || {};
+	const originalSashId = minimizedGlassEl.bwOriginalSashId;
+	const originalPosition = minimizedGlassEl.bwOriginalPosition;
 	const originalRect = minimizedGlassEl.bwOriginalBoundingRect;
-	if (!originalRect) {
-		debugWarn('[restoreGlass] Missing original bounding rect');
-		return;
-	}
 
-	let biggestIntersectArea = 0;
-	let targetPaneEl: HTMLElement | null = null;
+	// Check if we're in empty/placeholder state (only one pane that is a placeholder)
+	const rootSash = bwinContext.rootSash;
+	const leafPanes = rootSash.getAllLeafDescendants();
+	const isEmptyState =
+		leafPanes.length === 1 &&
+		(leafPanes[0].store?.isPlaceholder ||
+			(leafPanes[0].children.length === 0 && !leafPanes[0].store?.component));
 
-	// Find the pane with the biggest intersection area with the original position
-	bwinContext.windowElement.querySelectorAll(`.${CSS_CLASSES.PANE}`).forEach((paneEl) => {
-		const paneRect = getMetricsFromElement(paneEl as HTMLElement);
-		const intersectRect = getIntersectRect(originalRect, paneRect);
+	if (isEmptyState) {
+		// Restore to empty/placeholder state - just replace the placeholder
+		debugLog('[restoreGlass] Restoring to empty/placeholder state');
 
-		if (intersectRect) {
-			const intersectArea = intersectRect.width * intersectRect.height;
+		const targetSash = leafPanes[0];
+		const targetSashId = targetSash.id;
 
-			if (intersectArea > biggestIntersectArea) {
-				biggestIntersectArea = intersectArea;
-				targetPaneEl = paneEl as HTMLElement;
-			}
-		}
-	});
-
-	debugLog('[restoreGlass] Target pane found:', {
-		targetPaneEl,
-		biggestIntersectArea
-	});
-
-	if (targetPaneEl && bwinContext.rootSash) {
-		const newPosition = minimizedGlassEl.bwOriginalPosition;
-		const targetRect = getMetricsFromElement(targetPaneEl);
-		const targetPaneSashId = (targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID);
-		if (!targetPaneSashId) {
-			debugWarn('[restoreGlass] Target pane missing sash ID');
-			return;
-		}
-
-		const targetPaneSash = bwinContext.rootSash.getById(targetPaneSashId);
-		if (!targetPaneSash) {
-			debugWarn('[restoreGlass] Target pane sash not found');
-			return;
-		}
-
-		debugLog('[restoreGlass] Restoring to pane:', {
-			targetPaneSashId,
-			newPosition,
-			targetRect
+		// Use addPane which handles placeholder replacement
+		const newSash = bwinContext.addPane(targetSashId, {
+			id: originalSashId,
+			...originalStore
 		});
-
-		let newSize = 0;
-
-		if (newPosition === Position.Left || newPosition === Position.Right) {
-			newSize =
-				targetRect.width - originalRect.width < targetPaneSash.minWidth
-					? targetRect.width / 2
-					: originalRect.width;
-		} else if (newPosition === Position.Top || newPosition === Position.Bottom) {
-			newSize =
-				targetRect.height - originalRect.height < targetPaneSash.minHeight
-					? targetRect.height / 2
-					: originalRect.height;
-		} else {
-			throw BwinErrors.invalidPosition(newPosition || 'unknown');
-		}
-
-		const originalSashId = minimizedGlassEl.bwOriginalSashId;
-		const originalStore = minimizedGlassEl.bwOriginalStore || {};
-
-		// addPane will create a new Glass component with the preserved store
-		const newSash = bwinContext.addPane(
-			(targetPaneEl as HTMLElement).getAttribute(DATA_ATTRIBUTES.SASH_ID)!,
-			{
-				id: originalSashId,
-				position: newPosition,
-				size: newSize,
-				...originalStore // Preserve title, content, and other Glass props
-			}
-		);
 
 		// Post-action: emit restored event
 		try {
@@ -306,6 +254,132 @@ export function restoreGlass(
 		} catch (err) {
 			debugWarn('[restoreGlass] failed to emit onpanerestored', err as unknown);
 		}
+		return;
+	}
+
+	// Check if original position was "root" - this means it was a single pane
+	// In this case, we should add to the first available pane
+	const isRootPosition = originalPosition === Position.Root || originalPosition === 'root';
+
+	if (!originalRect && !isRootPosition) {
+		debugWarn('[restoreGlass] Missing original bounding rect');
+		return;
+	}
+
+	let biggestIntersectArea = 0;
+	let targetPaneEl: HTMLElement | null = null;
+
+	// Find the pane with the biggest intersection area with the original position
+	bwinContext.windowElement.querySelectorAll(`.${CSS_CLASSES.PANE}`).forEach((paneEl) => {
+		const paneRect = getMetricsFromElement(paneEl as HTMLElement);
+
+		if (originalRect) {
+			const intersectRect = getIntersectRect(originalRect, paneRect);
+
+			if (intersectRect) {
+				const intersectArea = intersectRect.width * intersectRect.height;
+
+				if (intersectArea > biggestIntersectArea) {
+					biggestIntersectArea = intersectArea;
+					targetPaneEl = paneEl as HTMLElement;
+				}
+			}
+		} else {
+			// If no original rect (e.g., root position), use the first pane
+			if (!targetPaneEl) {
+				targetPaneEl = paneEl as HTMLElement;
+			}
+		}
+	});
+
+	debugLog('[restoreGlass] Target pane found:', {
+		targetPaneEl,
+		biggestIntersectArea,
+		isRootPosition
+	});
+
+	if (!targetPaneEl) {
+		debugWarn('[restoreGlass] No target pane found');
+		return;
+	}
+
+	// TypeScript narrowing helper - targetPaneEl is definitely HTMLElement here
+	const validTargetPaneEl: HTMLElement = targetPaneEl;
+	const targetPaneSashId = validTargetPaneEl.getAttribute(DATA_ATTRIBUTES.SASH_ID);
+	if (!targetPaneSashId) {
+		debugWarn('[restoreGlass] Target pane missing sash ID');
+		return;
+	}
+
+	const targetPaneSash = bwinContext.rootSash.getById(targetPaneSashId);
+	if (!targetPaneSash) {
+		debugWarn('[restoreGlass] Target pane sash not found');
+		return;
+	}
+
+	// Determine the position for the new pane
+	let newPosition: string;
+	if (isRootPosition) {
+		// For root position, default to splitting right
+		newPosition = Position.Right;
+	} else if (
+		originalPosition === Position.Left ||
+		originalPosition === Position.Right ||
+		originalPosition === Position.Top ||
+		originalPosition === Position.Bottom
+	) {
+		newPosition = originalPosition;
+	} else {
+		// Unknown position, default to right
+		debugWarn('[restoreGlass] Unknown original position, defaulting to right:', originalPosition);
+		newPosition = Position.Right;
+	}
+
+	debugLog('[restoreGlass] Restoring to pane:', {
+		targetPaneSashId,
+		newPosition,
+		originalPosition
+	});
+
+	const targetRect = getMetricsFromElement(validTargetPaneEl);
+	let newSize = 0;
+
+	if (newPosition === Position.Left || newPosition === Position.Right) {
+		if (originalRect) {
+			newSize =
+				targetRect.width - originalRect.width < targetPaneSash.minWidth
+					? targetRect.width / 2
+					: originalRect.width;
+		} else {
+			newSize = targetRect.width / 2;
+		}
+	} else if (newPosition === Position.Top || newPosition === Position.Bottom) {
+		if (originalRect) {
+			newSize =
+				targetRect.height - originalRect.height < targetPaneSash.minHeight
+					? targetRect.height / 2
+					: originalRect.height;
+		} else {
+			newSize = targetRect.height / 2;
+		}
+	}
+
+	// addPane will create a new Glass component with the preserved store
+	const newSash = bwinContext.addPane(targetPaneSashId, {
+		id: originalSashId,
+		position: newPosition,
+		size: newSize,
+		...originalStore // Preserve title, content, and other Glass props
+	});
+
+	// Post-action: emit restored event
+	try {
+		if (newSash) {
+			const payload = buildPanePayload(newSash, undefined);
+			emitPaneEvent('onpanerestored', payload);
+		}
+	} catch (err) {
+		debugWarn('[restoreGlass] failed to emit onpanerestored', err as unknown);
 	}
 }
 
