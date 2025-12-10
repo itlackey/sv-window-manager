@@ -26,11 +26,6 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Build package
         run: bun run prepack
-      - name: Auth for npm
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
       - name: Publish to npm
-        run: npm publish --access public --auth-type=legacy
-        env:
-          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public
+
