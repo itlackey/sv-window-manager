@@ -324,7 +324,7 @@ describe('BinaryWindow Empty State', () => {
 		expect(glassElements.length).toBeGreaterThan(0);
 		expect(bwin.getIsEmpty()).toBe(false);
 
-		// Add a second pane so close button is enabled
+		// Add a second pane to test closing multiple panes
 		const updatedLeafPanes = bwin.getRootSash()!.getAllLeafDescendants();
 		const targetPane = updatedLeafPanes.find((p) => !p.store?.isPlaceholder);
 
@@ -336,7 +336,7 @@ describe('BinaryWindow Empty State', () => {
 
 			await new Promise((resolve) => setTimeout(resolve, 100));
 
-			// Now we have 2 panes, close buttons should be enabled
+			// Now we have 2 panes
 			// Find and click a close button
 			const closeButtons = renderContainer.querySelectorAll('.glass-action--close');
 			expect(closeButtons.length).toBe(2);

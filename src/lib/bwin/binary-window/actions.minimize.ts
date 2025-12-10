@@ -37,6 +37,14 @@ export default {
 	onClick: (event: MouseEvent, binaryWindow: BwinContext) => {
 		if (!(event.target instanceof HTMLElement)) return;
 
+		// Get pane info first to check if already minimized
+		const paneEl = event.target.closest(`.${CSS_CLASSES.PANE}`);
+		const glassEl = event.target.closest(`.${CSS_CLASSES.GLASS}`);
+		const paneSashId = paneEl?.getAttribute(DATA_ATTRIBUTES.SASH_ID);
+
+		// Early return if no sash ID
+		if (!paneSashId) return;
+
 		let sillEl = binaryWindow.getSillElement?.();
 
 		// If sill doesn't exist, ensure it's created before proceeding
@@ -52,9 +60,15 @@ export default {
 			}
 		}
 
-		const paneEl = event.target.closest(`.${CSS_CLASSES.PANE}`);
-		const glassEl = event.target.closest(`.${CSS_CLASSES.GLASS}`);
-		const paneSashId = paneEl?.getAttribute(DATA_ATTRIBUTES.SASH_ID);
+		// Check if this pane is already minimized (prevent duplicates)
+		const existingMinimized = sillEl.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`);
+		const alreadyMinimized = Array.from(existingMinimized).some(
+			(el) => (el as BwinMinimizedElement).bwOriginalSashId === paneSashId
+		);
+		if (alreadyMinimized) {
+			// Already minimized, don't create duplicate
+			return;
+		}
 		const panePosition = paneEl?.getAttribute(DATA_ATTRIBUTES.POSITION);
 
 		// Preserve the store (title, content, etc.) before removing the pane

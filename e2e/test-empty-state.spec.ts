@@ -103,23 +103,11 @@ test.describe('Empty State Functionality', () => {
 		const initialCount = await glassElements.count();
 		expect(initialCount).toBeGreaterThan(0);
 
-		// Close all panes one by one
+		// Close all panes one by one (close button is always enabled now)
 		while ((await page.locator('.glass').count()) > 0) {
 			const currentCount = await page.locator('.glass').count();
 
-			// If only one pane left, close button might be disabled
-			// We need to check if close is possible
 			const closeButton = page.locator('.glass-action--close').first();
-
-			// Check if button is disabled
-			const isDisabled = await closeButton.evaluate((btn) => btn.hasAttribute('disabled'));
-
-			if (isDisabled) {
-				// Can't close the last pane via button - this is expected behavior
-				// The test should verify that when possible, closing returns to empty state
-				break;
-			}
-
 			await closeButton.click();
 			await page.waitForTimeout(300);
 
@@ -128,20 +116,9 @@ test.describe('Empty State Functionality', () => {
 			expect(newCount).toBeLessThan(currentCount);
 		}
 
-		// After closing all possible panes, check if we returned to empty state
-		// Note: With current design, close button is disabled on last pane
-		// So we test that when we close down to 1 pane, behavior is correct
-		const remainingPanes = await page.locator('.glass').count();
-
-		if (remainingPanes === 0) {
-			// If we managed to close all panes, empty state should show
-			const emptyStateContent = page.locator('.empty-state-content');
-			await expect(emptyStateContent).toBeVisible();
-		} else {
-			// Verify close button is disabled on last remaining pane
-			const closeButton = page.locator('.glass-action--close').first();
-			await expect(closeButton).toBeDisabled();
-		}
+		// After closing all panes, empty state should show
+		const emptyStateContent = page.locator('.empty-state-content');
+		await expect(emptyStateContent).toBeVisible();
 
 		// Verify no console errors
 		expect(errors.filter((e) => !e.includes('Warning'))).toEqual([]);

@@ -12,7 +12,7 @@
 	import type { FrameComponent } from '../types.js';
 	import type { SashConfig } from '../config/sash-config.js';
 	import type { ConfigRoot } from '../config/config-root.js';
-	import { TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
+	import { TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES, PLACEHOLDER_CONTENT } from '../constants.js';
 	import { BwinErrors } from '../errors.js';
 	import * as GlassState from '../managers/glass-state.svelte.js';
 	import * as SillState from '../managers/sill-state.svelte.js';
@@ -343,6 +343,34 @@
 			// Cleanup glass and user component via GlassState
 			GlassState.removeGlass(sashId);
 
+			// Check if this is the last pane (only one leaf node remaining before removal)
+			const rootSash = frameComponent.rootSash;
+			const leafPanes = rootSash?.getAllLeafDescendants() || [];
+			const isLastPane = leafPanes.length === 1 && leafPanes[0].id === sashId;
+
+			if (isLastPane && rootSash) {
+				// Reset the root sash to placeholder state instead of trying to remove it
+				rootSash.store = {
+					...PLACEHOLDER_CONTENT,
+					isPlaceholder: true
+				};
+				rootSash.children = [];
+
+				// Emit pane removed (post-action)
+				try {
+					if (preSash) {
+						const payload = buildPanePayload(preSash, paneEl as HTMLElement | null);
+						emitPaneEvent('onpaneremoved', payload);
+					}
+				} catch (err) {
+					debugWarn('[removePane] failed to emit onpaneremoved', err);
+				}
+
+				// Increment tree version to trigger reactive updates
+				treeVersion++;
+				return;
+			}
+
 			frameComponent.removePane(sashId);
 
 			// Increment tree version to trigger reactive updates
@@ -414,7 +442,7 @@
 	});
 
 	// Update action button disabled states when pane count changes
-	// Single-pane windows disable close/minimize/maximize buttons
+	// Single-pane windows disable minimize/maximize buttons (but allow close to return to empty state)
 	// Multi-pane windows enable all buttons
 	$effect(() => {
 		const windowEl = frameComponent?.windowElement;
@@ -423,10 +451,10 @@
 		// Access paneCount to make this effect reactive to pane count changes
 		const count = paneCount;
 
-		const updateButton = (cssSelector: string) => {
-			if (count === 1) {
+		const updateButton = (cssSelector: string, disableOnSingle: boolean) => {
+			if (count === 1 && disableOnSingle) {
 				const el = windowEl.querySelector(cssSelector);
-				el && el.setAttribute('disabled', '');
+				if (el) el.setAttribute('disabled', '');
 			} else {
 				windowEl.querySelectorAll(cssSelector).forEach((el) => {
 					(el as HTMLElement).removeAttribute('disabled');
@@ -434,9 +462,11 @@
 			}
 		};
 
-		updateButton('.glass-action--close');
-		updateButton('.glass-action--minimize');
-		updateButton('.glass-action--maximize');
+		// Close is always enabled - allows returning to empty state
+		updateButton('.glass-action--close', false);
+		// Minimize and maximize disabled when only one pane
+		updateButton('.glass-action--minimize', true);
+		updateButton('.glass-action--maximize', true);
 	});
 
 	// Note: Sill component now handles its own mounting via the Sill.svelte component
