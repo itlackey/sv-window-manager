@@ -173,16 +173,26 @@
 			eventLog = [{ ts, type: evt.type, id, title }, ...eventLog].slice(0, maxLog);
 		};
 		// Register event listeners and collect explicit unsubs
-		onpaneadded(push); offs.push(() => removeEventHandler('onpaneadded', push));
-		onpaneremoved(push); offs.push(() => removeEventHandler('onpaneremoved', push));
-		onpaneminimized(push); offs.push(() => removeEventHandler('onpaneminimized', push));
-		onpanemaximized(push); offs.push(() => removeEventHandler('onpanemaximized', push));
-		onpanerestored(push); offs.push(() => removeEventHandler('onpanerestored', push));
-		onpaneresized(push); offs.push(() => removeEventHandler('onpaneresized', push));
-		onpanefocused(push); offs.push(() => removeEventHandler('onpanefocused', push));
-		onpaneblurred(push); offs.push(() => removeEventHandler('onpaneblurred', push));
-		onpaneorderchanged(push); offs.push(() => removeEventHandler('onpaneorderchanged', push));
-		onpanetitlechanged(push); offs.push(() => removeEventHandler('onpanetitlechanged', push));
+		onpaneadded(push);
+		offs.push(() => removeEventHandler('onpaneadded', push));
+		onpaneremoved(push);
+		offs.push(() => removeEventHandler('onpaneremoved', push));
+		onpaneminimized(push);
+		offs.push(() => removeEventHandler('onpaneminimized', push));
+		onpanemaximized(push);
+		offs.push(() => removeEventHandler('onpanemaximized', push));
+		onpanerestored(push);
+		offs.push(() => removeEventHandler('onpanerestored', push));
+		onpaneresized(push);
+		offs.push(() => removeEventHandler('onpaneresized', push));
+		onpanefocused(push);
+		offs.push(() => removeEventHandler('onpanefocused', push));
+		onpaneblurred(push);
+		offs.push(() => removeEventHandler('onpaneblurred', push));
+		onpaneorderchanged(push);
+		offs.push(() => removeEventHandler('onpaneorderchanged', push));
+		onpanetitlechanged(push);
+		offs.push(() => removeEventHandler('onpanetitlechanged', push));
 		eventOffs = offs;
 	}
 
@@ -240,7 +250,10 @@
 		>
 			Styling
 		</button>
-		<button class={{ active: activeSection === 'events' }} onclick={() => (activeSection = 'events')}>
+		<button
+			class={{ active: activeSection === 'events' }}
+			onclick={() => (activeSection = 'events')}
+		>
 			Events
 		</button>
 	</nav>
@@ -270,7 +283,15 @@
 					<BinaryWindow
 						bind:this={bwinRef}
 						settings={{ width: 900, height: 500, fitContainer: true, debug: false }}
-					/>
+					>
+						{#snippet empty()}
+							<div class="empty-state-content">
+								<div class="empty-icon">📂</div>
+								<h3>No Sessions Open</h3>
+								<p>Click "Start Demo" or add sessions using the buttons above to begin.</p>
+							</div>
+						{/snippet}
+					</BinaryWindow>
 				</div>
 
 				<div class="demo-instructions">
@@ -811,8 +832,8 @@ interface AddPaneProps {'{'}
 			<section class="section">
 				<h2>Events</h2>
 				<p>
-					The window manager emits typed lifecycle events as you add, remove, resize, and focus panes.
-					Toggle logging to see events in real time, and copy the snippet to wire up your own
+					The window manager emits typed lifecycle events as you add, remove, resize, and focus
+					panes. Toggle logging to see events in real time, and copy the snippet to wire up your own
 					listeners.
 				</p>
 
@@ -829,7 +850,15 @@ interface AddPaneProps {'{'}
 					<BinaryWindow
 						bind:this={bwinRef}
 						settings={{ width: 900, height: 500, fitContainer: true, debug: false }}
-					/>
+					>
+						{#snippet empty()}
+							<div class="empty-state-content">
+								<div class="empty-icon">🎯</div>
+								<h3>Event Testing Area</h3>
+								<p>Add sessions to see events being logged below.</p>
+							</div>
+						{/snippet}
+					</BinaryWindow>
 				</div>
 
 				<h3>Live Event Log</h3>
@@ -845,7 +874,11 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							{#if eventLog.length === 0}
-								<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">No events captured yet</td></tr>
+								<tr
+									><td colspan="4" style="text-align:center;color:var(--text-muted)"
+										>No events captured yet</td
+									></tr
+								>
 							{:else}
 								{#each eventLog as e}
 									<tr>
@@ -861,7 +894,8 @@ interface AddPaneProps {'{'}
 				</div>
 
 				<h3>Subscribe in your app</h3>
-				<pre><code>import {'{'} addEventHandler, onpaneresized {'}'} from 'sv-window-manager';
+				<pre><code
+						>import {'{'} addEventHandler, onpaneresized {'}'} from 'sv-window-manager';
 
 // All pane events
 const offAll = addEventHandler((evt) => console.log(evt.type, evt.payload));
@@ -871,7 +905,8 @@ const offResize = onpaneresized((evt) => console.log('resized', evt.payload));
 
 // Later to cleanup
 offAll();
-offResize();</code></pre>
+offResize();</code
+					></pre>
 			</section>
 		{/if}
 	</main>
@@ -1269,6 +1304,35 @@ offResize();</code></pre>
 
 	.footer a:hover {
 		text-decoration: underline;
+	}
+
+	/* Empty state content */
+	.empty-state-content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		padding: 2rem;
+		color: var(--text-medium);
+	}
+
+	.empty-state-content .empty-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+		opacity: 0.7;
+	}
+
+	.empty-state-content h3 {
+		margin: 0 0 0.5rem 0;
+		color: var(--text-dark);
+		font-size: 1.25rem;
+	}
+
+	.empty-state-content p {
+		margin: 0;
+		color: var(--text-muted);
+		font-size: 0.95rem;
 	}
 
 	/* Responsive */

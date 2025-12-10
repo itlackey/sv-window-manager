@@ -225,12 +225,7 @@ export type {
  * Typed pane lifecycle events and dispatcher utilities.
  * Consumers can subscribe to specific events or use the generic API.
  */
-export type {
-	PanePayload,
-	PaneEventType,
-	PaneEvent,
-	PaneContext
-} from './events/types.js';
+export type { PanePayload, PaneEventType, PaneEvent, PaneContext } from './events/types.js';
 
 export {
 	addEventHandler,

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, setContext } from 'svelte';
+	import { onDestroy, setContext, type Snippet } from 'svelte';
 	import { Position } from '../position.js';
 	import { getMetricsFromElement } from '../utils.js';
 	import { getSashIdFromPane } from '../frame/frame-utils.js';
@@ -12,7 +12,7 @@
 	import type { FrameComponent } from '../types.js';
 	import type { SashConfig } from '../config/sash-config.js';
 	import type { ConfigRoot } from '../config/config-root.js';
-	import { TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
+	import { TRIM_SIZE, CSS_CLASSES, DATA_ATTRIBUTES, PLACEHOLDER_CONTENT } from '../constants.js';
 	import { BwinErrors } from '../errors.js';
 	import * as GlassState from '../managers/glass-state.svelte.js';
 	import * as SillState from '../managers/sill-state.svelte.js';
@@ -28,12 +28,15 @@
 	 * Props for the BinaryWindow component
 	 *
 	 * @property {SashConfig | ConfigRoot | Record<string, unknown>} settings - Initial window configuration
+	 * @property {Snippet} [empty] - Optional snippet to render when there are no panes open
 	 */
 	interface BinaryWindowProps {
 		settings: SashConfig | ConfigRoot | Record<string, unknown>;
+		/** Optional snippet to render when there are no panes open */
+		empty?: Snippet;
 	}
 
-	let { settings }: BinaryWindowProps = $props();
+	let { settings, empty }: BinaryWindowProps = $props();
 
 	// Get debug from settings, with fallback to DEBUG constant
 	const debug = $derived(
@@ -340,6 +343,34 @@
 			// Cleanup glass and user component via GlassState
 			GlassState.removeGlass(sashId);
 
+			// Check if this is the last pane (only one leaf node remaining before removal)
+			const rootSash = frameComponent.rootSash;
+			const leafPanes = rootSash?.getAllLeafDescendants() || [];
+			const isLastPane = leafPanes.length === 1 && leafPanes[0].id === sashId;
+
+			if (isLastPane && rootSash) {
+				// Reset the root sash to placeholder state instead of trying to remove it
+				rootSash.store = {
+					...PLACEHOLDER_CONTENT,
+					isPlaceholder: true
+				};
+				rootSash.children = [];
+
+				// Emit pane removed (post-action)
+				try {
+					if (preSash) {
+						const payload = buildPanePayload(preSash, paneEl as HTMLElement | null);
+						emitPaneEvent('onpaneremoved', payload);
+					}
+				} catch (err) {
+					debugWarn('[removePane] failed to emit onpaneremoved', err);
+				}
+
+				// Increment tree version to trigger reactive updates
+				treeVersion++;
+				return;
+			}
+
 			frameComponent.removePane(sashId);
 
 			// Increment tree version to trigger reactive updates
@@ -390,8 +421,28 @@
 		frameComponent?.windowElement?.querySelectorAll(`.${CSS_CLASSES.PANE}`).length || 0
 	);
 
+	// Check if the window is in "empty" state (no real panes, only placeholder or no panes at all)
+	// This is reactive and updates whenever treeVersion or frameComponent changes
+	const isEmpty = $derived.by(() => {
+		// Access treeVersion to make this reactive (void prevents unused var warning)
+		void treeVersion;
+		const rootSash = frameComponent?.rootSash;
+		if (!rootSash) return true;
+
+		// Get all leaf nodes (actual panes)
+		const leafNodes = rootSash.getAllLeafDescendants();
+		if (leafNodes.length === 0) return true;
+
+		// Check if the only pane is the placeholder
+		if (leafNodes.length === 1 && leafNodes[0].store?.isPlaceholder) {
+			return true;
+		}
+
+		return false;
+	});
+
 	// Update action button disabled states when pane count changes
-	// Single-pane windows disable close/minimize/maximize buttons
+	// Single-pane windows disable minimize/maximize buttons (but allow close to return to empty state)
 	// Multi-pane windows enable all buttons
 	$effect(() => {
 		const windowEl = frameComponent?.windowElement;
@@ -400,10 +451,10 @@
 		// Access paneCount to make this effect reactive to pane count changes
 		const count = paneCount;
 
-		const updateButton = (cssSelector: string) => {
-			if (count === 1) {
+		const updateButton = (cssSelector: string, disableOnSingle: boolean) => {
+			if (count === 1 && disableOnSingle) {
 				const el = windowEl.querySelector(cssSelector);
-				el && el.setAttribute('disabled', '');
+				if (el) el.setAttribute('disabled', '');
 			} else {
 				windowEl.querySelectorAll(cssSelector).forEach((el) => {
 					(el as HTMLElement).removeAttribute('disabled');
@@ -411,9 +462,11 @@
 			}
 		};
 
-		updateButton('.glass-action--close');
-		updateButton('.glass-action--minimize');
-		updateButton('.glass-action--maximize');
+		// Close is always enabled - allows returning to empty state
+		updateButton('.glass-action--close', false);
+		// Minimize and maximize disabled when only one pane
+		updateButton('.glass-action--minimize', true);
+		updateButton('.glass-action--maximize', true);
 	});
 
 	// Note: Sill component now handles its own mounting via the Sill.svelte component
@@ -640,6 +693,26 @@
 	export function getTreeVersion() {
 		return treeVersion;
 	}
+
+	/**
+	 * Checks if the window is in an empty state (no real panes open).
+	 *
+	 * Returns true when there are no panes, or only the placeholder pane exists.
+	 * This is useful for conditionally rendering UI elements based on whether
+	 * the window has any content.
+	 *
+	 * @returns {boolean} True if the window has no real panes, false otherwise
+	 *
+	 * @example
+	 * ```typescript
+	 * if (binaryWindow.getIsEmpty()) {
+	 *   console.log('Window is empty, showing empty state');
+	 * }
+	 * ```
+	 */
+	export function getIsEmpty() {
+		return isEmpty;
+	}
 </script>
 
 <div
@@ -651,26 +724,37 @@
 	}}
 >
 	<div class="bw-window-area">
-		<Frame
-			bind:this={frameComponent}
-			{settings}
-			{debug}
-			{treeVersion}
-			onmuntinrender={handleMuntinRender}
-			onPaneDrop={handlePaneDrop}
-		>
-			{#snippet paneContent(sash)}
-				<Glass
-					title={sash.store.title}
-					actions={sash.store.actions}
-					draggable={sash.store.draggable !== false}
-					{sash}
-					binaryWindow={bwinContext}
-					component={sash.store.component}
-					componentProps={sash.store.componentProps}
-				/>
-			{/snippet}
-		</Frame>
+		{#if isEmpty && empty}
+			<!-- Empty state with custom content -->
+			<div class="bw-empty-state">
+				{@render empty()}
+			</div>
+		{/if}
+		<!-- Frame is always rendered but hidden when showing empty state -->
+		<div class="bw-frame-container" class:bw-hidden={isEmpty && empty}>
+			<Frame
+				bind:this={frameComponent}
+				{settings}
+				{debug}
+				{treeVersion}
+				onmuntinrender={handleMuntinRender}
+				onPaneDrop={handlePaneDrop}
+			>
+				{#snippet paneContent(sash)}
+					{#if !sash.store?.isPlaceholder}
+						<Glass
+							title={sash.store.title}
+							actions={sash.store.actions}
+							draggable={sash.store.draggable !== false}
+							{sash}
+							binaryWindow={bwinContext}
+							component={sash.store.component}
+							componentProps={sash.store.componentProps}
+						/>
+					{/if}
+				{/snippet}
+			</Frame>
+		</div>
 	</div>
 	<Sill />
 </div>
@@ -689,5 +773,22 @@
 		flex: 1;
 		min-height: 0; /* Allow flex item to shrink below content size */
 		position: relative;
+	}
+
+	.bw-frame-container {
+		width: 100%;
+		height: 100%;
+	}
+
+	.bw-frame-container.bw-hidden {
+		display: none;
+	}
+
+	.bw-empty-state {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 </style>

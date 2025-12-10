@@ -103,7 +103,12 @@ Supported events:
 
 ```svelte
 <script lang="ts">
-	import { BinaryWindow, addEventHandler, onpaneresized, removeEventHandler } from 'sv-window-manager';
+	import {
+		BinaryWindow,
+		addEventHandler,
+		onpaneresized,
+		removeEventHandler
+	} from 'sv-window-manager';
 
 	let bwin = $state<BinaryWindow | undefined>();
 	let unsubs: Array<() => void> = [];
@@ -124,7 +129,10 @@ Supported events:
 		unsubs.push(() => removeEventHandler('onpaneresized', onResize));
 	}
 
-	function stopLogging() { unsubs.forEach((u) => u()); unsubs = []; }
+	function stopLogging() {
+		unsubs.forEach((u) => u());
+		unsubs = [];
+	}
 </script>
 
 <BinaryWindow bind:this={bwin} settings={{ fitContainer: true }} />
@@ -137,13 +145,19 @@ Event callback signature:
 ```ts
 type PaneEvent = {
 	type:
-		| 'onpaneadded' | 'onpaneremoved'
-		| 'onpaneminimized' | 'onpanemaximized' | 'onpanerestored'
-		| 'onpaneresized' | 'onpanefocused' | 'onpaneblurred'
-		| 'onpaneorderchanged' | 'onpanetitlechanged';
-		pane: PanePayload; // id, title, size, position, state, group, index, bounds, etc.
+		| 'onpaneadded'
+		| 'onpaneremoved'
+		| 'onpaneminimized'
+		| 'onpanemaximized'
+		| 'onpanerestored'
+		| 'onpaneresized'
+		| 'onpanefocused'
+		| 'onpaneblurred'
+		| 'onpaneorderchanged'
+		| 'onpanetitlechanged';
+	pane: PanePayload; // id, title, size, position, state, group, index, bounds, etc.
 	context?: { previousTitle?: string; previousIndex?: number; groupId?: string };
-}
+};
 ```
 
 For detailed examples, open the demo app’s “Events” tab at `src/routes/+page.svelte`.

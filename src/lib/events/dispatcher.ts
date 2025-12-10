@@ -4,42 +4,42 @@ import type { PaneContext, PaneEvent, PaneEventType, PanePayload } from './types
 const listeners: Map<PaneEventType, Set<(event: PaneEvent) => void>> = new Map();
 
 function ensureSet(type: PaneEventType) {
-  let set = listeners.get(type);
-  if (!set) {
-    set = new Set();
-    listeners.set(type, set);
-  }
-  return set;
+	let set = listeners.get(type);
+	if (!set) {
+		set = new Set();
+		listeners.set(type, set);
+	}
+	return set;
 }
 
 export function addEventHandler(type: PaneEventType, handler: (event: PaneEvent) => void): void {
-  ensureSet(type).add(handler);
+	ensureSet(type).add(handler);
 }
 
 export function removeEventHandler(type: PaneEventType, handler: (event: PaneEvent) => void): void {
-  const set = listeners.get(type);
-  if (set) set.delete(handler);
+	const set = listeners.get(type);
+	if (set) set.delete(handler);
 }
 
 export function emitPaneEvent(type: PaneEventType, pane: PanePayload, context?: PaneContext): void {
-  const event: PaneEvent = {
-    type,
-    timestamp: new Date().toISOString(),
-    pane,
-    ...(context ? { context } : {})
-  };
-  const set = listeners.get(type);
-  if (!set || set.size === 0) return;
-  // Copy to prevent mutation during iteration
-  [...set].forEach((fn) => {
-    try {
-      fn(event);
-    } catch (err) {
-      // Swallow to isolate subscribers; could add debug hook later
-      // eslint-disable-next-line no-console
-      console.error('[sv-window-manager] Uncaught error in pane event handler', err);
-    }
-  });
+	const event: PaneEvent = {
+		type,
+		timestamp: new Date().toISOString(),
+		pane,
+		...(context ? { context } : {})
+	};
+	const set = listeners.get(type);
+	if (!set || set.size === 0) return;
+	// Copy to prevent mutation during iteration
+	[...set].forEach((fn) => {
+		try {
+			fn(event);
+		} catch (err) {
+			// Swallow to isolate subscribers; could add debug hook later
+			// eslint-disable-next-line no-console
+			console.error('[sv-window-manager] Uncaught error in pane event handler', err);
+		}
+	});
 }
 
 // Convenience specific subscriptions (optional)
@@ -51,5 +51,7 @@ export const onpanerestored = (h: (e: PaneEvent) => void) => addEventHandler('on
 export const onpaneresized = (h: (e: PaneEvent) => void) => addEventHandler('onpaneresized', h);
 export const onpanefocused = (h: (e: PaneEvent) => void) => addEventHandler('onpanefocused', h);
 export const onpaneblurred = (h: (e: PaneEvent) => void) => addEventHandler('onpaneblurred', h);
-export const onpaneorderchanged = (h: (e: PaneEvent) => void) => addEventHandler('onpaneorderchanged', h);
-export const onpanetitlechanged = (h: (e: PaneEvent) => void) => addEventHandler('onpanetitlechanged', h);
+export const onpaneorderchanged = (h: (e: PaneEvent) => void) =>
+	addEventHandler('onpaneorderchanged', h);
+export const onpanetitlechanged = (h: (e: PaneEvent) => void) =>
+	addEventHandler('onpanetitlechanged', h);

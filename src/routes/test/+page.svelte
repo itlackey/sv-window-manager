@@ -205,25 +205,46 @@
 		const push = (evt: PaneEvent) => {
 			const ts = new Date().toLocaleTimeString();
 			recentEvents = [
-				{ ts, type: evt.type, id: evt.pane?.id ?? '', title: evt.pane?.title as string | undefined },
+				{
+					ts,
+					type: evt.type,
+					id: evt.pane?.id ?? '',
+					title: evt.pane?.title as string | undefined
+				},
 				...recentEvents
 			].slice(0, MAX);
 		};
-		onpaneadded(push); offs.push(() => removeEventHandler('onpaneadded', push));
-		onpaneremoved(push); offs.push(() => removeEventHandler('onpaneremoved', push));
-		onpaneminimized(push); offs.push(() => removeEventHandler('onpaneminimized', push));
-		onpanemaximized(push); offs.push(() => removeEventHandler('onpanemaximized', push));
-		onpanerestored(push); offs.push(() => removeEventHandler('onpanerestored', push));
-		onpaneresized(push); offs.push(() => removeEventHandler('onpaneresized', push));
-		onpanefocused(push); offs.push(() => removeEventHandler('onpanefocused', push));
-		onpaneblurred(push); offs.push(() => removeEventHandler('onpaneblurred', push));
-		onpaneorderchanged(push); offs.push(() => removeEventHandler('onpaneorderchanged', push));
-		onpanetitlechanged(push); offs.push(() => removeEventHandler('onpanetitlechanged', push));
+		onpaneadded(push);
+		offs.push(() => removeEventHandler('onpaneadded', push));
+		onpaneremoved(push);
+		offs.push(() => removeEventHandler('onpaneremoved', push));
+		onpaneminimized(push);
+		offs.push(() => removeEventHandler('onpaneminimized', push));
+		onpanemaximized(push);
+		offs.push(() => removeEventHandler('onpanemaximized', push));
+		onpanerestored(push);
+		offs.push(() => removeEventHandler('onpanerestored', push));
+		onpaneresized(push);
+		offs.push(() => removeEventHandler('onpaneresized', push));
+		onpanefocused(push);
+		offs.push(() => removeEventHandler('onpanefocused', push));
+		onpaneblurred(push);
+		offs.push(() => removeEventHandler('onpaneblurred', push));
+		onpaneorderchanged(push);
+		offs.push(() => removeEventHandler('onpaneorderchanged', push));
+		onpanetitlechanged(push);
+		offs.push(() => removeEventHandler('onpanetitlechanged', push));
 		eventOffs = offs;
 	}
 
-	function stopEventsNow() { for (const off of eventOffs) off(); eventOffs = []; eventLogging = false; }
-	function clearEvents() { recentEvents = []; }
+	function stopEventsNow() {
+		for (const off of eventOffs) off();
+		eventOffs = [];
+		eventLogging = false;
+	}
+	function clearEvents() {
+		recentEvents = [];
+	}
 </script>
 
 <svelte:head>
@@ -638,10 +659,19 @@
 		font-size: 0.9rem;
 	}
 
-	.event-list .ts { color: #666; }
-	.event-list .id { color: #333; }
-	.event-list .title { color: #555; font-style: italic; }
-	.event-list .type { color: #0461ad; }
+	.event-list .ts {
+		color: #666;
+	}
+	.event-list .id {
+		color: #333;
+	}
+	.event-list .title {
+		color: #555;
+		font-style: italic;
+	}
+	.event-list .type {
+		color: #0461ad;
+	}
 
 	.event-empty {
 		color: #666;

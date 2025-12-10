@@ -129,10 +129,21 @@
 		const targetSash = rootSash.getById(targetId);
 		if (!targetSash) return null;
 
+		// Safeguard: Check if the provided id already exists in the tree
+		// This prevents duplicate key errors when splitting panes
+		let safeId = id as string | undefined;
+		if (safeId) {
+			const existingIds = rootSash.getAllIds();
+			if (existingIds.includes(safeId)) {
+				console.warn(`[Frame.addPane] ID "${safeId}" already exists in tree, generating new ID`);
+				safeId = undefined; // Will auto-generate in addPaneSash
+			}
+		}
+
 		const newSash = addPaneSash(targetSash, {
 			position: position as string,
 			size: size as string | number | undefined,
-			id: id as string | undefined
+			id: safeId
 		});
 		return newSash || null;
 	}
@@ -300,7 +311,7 @@
 	function getLeafIndexWithin(parent: Sash, leafId: string): number {
 		const leaves = parent.getAllLeafDescendants();
 		// Sort by visual order: top->bottom, then left->right
-		leaves.sort((a, b) => (a.top - b.top) || (a.left - b.left));
+		leaves.sort((a, b) => a.top - b.top || a.left - b.left);
 		return leaves.findIndex((l) => l.id === leafId);
 	}
 

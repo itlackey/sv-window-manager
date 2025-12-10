@@ -3,8 +3,8 @@
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
 	import { getLayoutContext } from '../context.js';
-  import { emitPaneEvent } from '../../events/dispatcher.js';
-  import { buildPanePayload } from '../../events/payload.js';
+	import { emitPaneEvent } from '../../events/dispatcher.js';
+	import { buildPanePayload } from '../../events/payload.js';
 
 	interface PaneProps {
 		sash: Sash;

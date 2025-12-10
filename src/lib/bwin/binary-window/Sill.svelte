@@ -3,7 +3,6 @@
 	import { CSS_CLASSES } from '../constants.js';
 	import * as SillState from '../managers/sill-state.svelte.js';
 
-
 	let sillElement = $state<HTMLElement>();
 
 	// Register the sill element with SillState when it becomes available
@@ -24,5 +23,4 @@
 	class={CSS_CLASSES.SILL}
 	role="complementary"
 	aria-label="Minimized windows"
->
-</div>
+></div>

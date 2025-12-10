@@ -21,7 +21,10 @@ import { buildPanePayload } from '../../events/payload.js';
 export default {
 	label: '',
 	className: 'glass-action glass-action--maximize',
-	onClick: (/** @type {MouseEvent} */ event, /** @type {import('../types.js').BwinContext} */ binaryWindow) => {
+	onClick: (
+		/** @type {MouseEvent} */ event,
+		/** @type {import('../types.js').BwinContext} */ binaryWindow
+	) => {
 		if (!(event.target instanceof HTMLElement)) return;
 
 		const paneElCandidate = event.target.closest(`.${CSS_CLASSES.PANE}`);

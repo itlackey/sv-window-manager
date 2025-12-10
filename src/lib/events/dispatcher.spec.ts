@@ -1,66 +1,66 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
-  addEventHandler,
-  removeEventHandler,
-  emitPaneEvent,
-  type PaneEventType,
-  type PanePayload
+	addEventHandler,
+	removeEventHandler,
+	emitPaneEvent,
+	type PaneEventType,
+	type PanePayload
 } from '../index.js';
 
 const samplePane = (): PanePayload => ({
-  id: 'pane-1',
-  title: 'Pane 1',
-  size: { width: 100, height: 80 },
-  position: { x: 10, y: 20 },
-  state: 'normal',
-  groupId: null,
-  index: 0,
-  config: {},
-  dynamic: {}
+	id: 'pane-1',
+	title: 'Pane 1',
+	size: { width: 100, height: 80 },
+	position: { x: 10, y: 20 },
+	state: 'normal',
+	groupId: null,
+	index: 0,
+	config: {},
+	dynamic: {}
 });
 
 function isIso8601(str: string) {
-  return /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(str);
+	return /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/.test(str);
 }
 
 describe('pane event dispatcher', () => {
-  it('subscribes and receives emitted events', () => {
-    const handler = vi.fn();
-    addEventHandler('onpaneadded', handler);
+	it('subscribes and receives emitted events', () => {
+		const handler = vi.fn();
+		addEventHandler('onpaneadded', handler);
 
-    emitPaneEvent('onpaneadded', samplePane());
+		emitPaneEvent('onpaneadded', samplePane());
 
-    expect(handler).toHaveBeenCalledTimes(1);
-    const evt = handler.mock.calls[0][0];
-    expect(evt.type).toBe('onpaneadded');
-    expect(isIso8601(evt.timestamp)).toBe(true);
-    expect(evt.pane.id).toBe('pane-1');
+		expect(handler).toHaveBeenCalledTimes(1);
+		const evt = handler.mock.calls[0][0];
+		expect(evt.type).toBe('onpaneadded');
+		expect(isIso8601(evt.timestamp)).toBe(true);
+		expect(evt.pane.id).toBe('pane-1');
 
-    removeEventHandler('onpaneadded', handler);
-  });
+		removeEventHandler('onpaneadded', handler);
+	});
 
-  it('does not leak across event types', () => {
-    const addHandler = vi.fn();
-    const removeHandler = vi.fn();
-    addEventHandler('onpaneadded', addHandler);
-    addEventHandler('onpaneremoved', removeHandler);
+	it('does not leak across event types', () => {
+		const addHandler = vi.fn();
+		const removeHandler = vi.fn();
+		addEventHandler('onpaneadded', addHandler);
+		addEventHandler('onpaneremoved', removeHandler);
 
-    emitPaneEvent('onpaneadded', samplePane());
+		emitPaneEvent('onpaneadded', samplePane());
 
-    expect(addHandler).toHaveBeenCalledTimes(1);
-    expect(removeHandler).not.toHaveBeenCalled();
+		expect(addHandler).toHaveBeenCalledTimes(1);
+		expect(removeHandler).not.toHaveBeenCalled();
 
-    removeEventHandler('onpaneadded', addHandler);
-    removeEventHandler('onpaneremoved', removeHandler);
-  });
+		removeEventHandler('onpaneadded', addHandler);
+		removeEventHandler('onpaneremoved', removeHandler);
+	});
 
-  it('unsubscribes correctly', () => {
-    const handler = vi.fn();
-    addEventHandler('onpanemaximized', handler);
-    removeEventHandler('onpanemaximized', handler);
+	it('unsubscribes correctly', () => {
+		const handler = vi.fn();
+		addEventHandler('onpanemaximized', handler);
+		removeEventHandler('onpanemaximized', handler);
 
-    emitPaneEvent('onpanemaximized', samplePane());
+		emitPaneEvent('onpanemaximized', samplePane());
 
-    expect(handler).not.toHaveBeenCalled();
-  });
+		expect(handler).not.toHaveBeenCalled();
+	});
 });
