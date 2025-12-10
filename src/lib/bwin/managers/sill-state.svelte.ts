@@ -239,11 +239,13 @@ export function restoreGlass(
 		const targetSash = leafPanes[0];
 		const targetSashId = targetSash.id;
 
+		// Filter out any 'id' property from originalStore to avoid confusion
+		// For placeholder replacement, the sash keeps its existing ID
+		const { id: _unusedId, ...storeWithoutId } = originalStore;
+
 		// Use addPane which handles placeholder replacement
-		const newSash = bwinContext.addPane(targetSashId, {
-			id: originalSashId,
-			...originalStore
-		});
+		// Note: Don't pass id for placeholder replacement - the sash keeps its ID
+		const newSash = bwinContext.addPane(targetSashId, storeWithoutId);
 
 		// Post-action: emit restored event
 		try {
