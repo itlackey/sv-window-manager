@@ -116,11 +116,11 @@ export default {
 		const paneTitle = (store.title as string) || 'Untitled';
 		const paneIcon = (store.icon as string) || null;
 
-		// Create MinimizedGlass component using Svelte's mount API
-		const minimizedContainer = document.createElement('div');
-
+		// Mount MinimizedGlass component directly to the sill element
+		// IMPORTANT: We mount directly to sill instead of using an intermediate container
+		// to avoid orphaned DOM nodes and ensure proper cleanup on unmount
 		const componentInstance = mount(MinimizedGlass, {
-			target: minimizedContainer,
+			target: sillEl,
 			props: {
 				title: paneTitle,
 				icon: paneIcon,
@@ -131,15 +131,16 @@ export default {
 			}
 		});
 
-		// Extract the button element from the container
-		const minimizedGlassNode = minimizedContainer.firstElementChild;
+		// The component renders a button as its root element - find it
+		// It will be the last child of the sill since we just mounted it
+		const minimizedGlassNode = sillEl.lastElementChild;
 
 		if (!(minimizedGlassNode instanceof HTMLElement)) {
 			throw BwinErrors.minimizedGlassCreationFailed();
 		}
 
+		// Element is already in the sill from the mount() call above
 		const minimizedGlassEl = minimizedGlassNode as BwinMinimizedElement;
-		sillEl.append(minimizedGlassEl);
 
 		// Store restoration data and component instance on the element
 		// Note: We intentionally don't store bwGlassElement as it would keep the destroyed
