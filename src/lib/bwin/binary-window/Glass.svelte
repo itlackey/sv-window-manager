@@ -17,6 +17,7 @@
 	 * with title and action buttons, plus a content area for Svelte components.
 	 *
 	 * @property {string | HTMLElement | Snippet | null} [title] - Title text, element, or snippet for the header
+	 * @property {string | null} [icon] - Icon to display alongside the title (URL, emoji, or HTML string)
 	 * @property {GlassAction[] | boolean} [actions] - Action buttons or false to hide defaults
 	 * @property {boolean} [draggable=true] - Whether the glass can be dragged to reposition
 	 * @property {Sash} [sash] - The sash this glass is attached to
@@ -26,6 +27,7 @@
 	 */
 	interface GlassProps {
 		title?: string | HTMLElement | Snippet | null;
+		icon?: string | null;
 		actions?: GlassAction[] | boolean;
 		draggable?: boolean;
 		sash?: Sash;
@@ -36,6 +38,7 @@
 
 	let {
 		title = null,
+		icon = null,
 		actions = undefined,
 		draggable = true,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -68,6 +71,17 @@
 	// Helper to check if value is a Snippet
 	function isSnippet(value: unknown): value is Snippet {
 		return typeof value === 'function';
+	}
+
+	// Helper to check if icon is a URL (for image icons)
+	function isImageUrl(value: string | null | undefined): boolean {
+		if (!value) return false;
+		return (
+			value.startsWith('http://') ||
+			value.startsWith('https://') ||
+			value.startsWith('/') ||
+			value.startsWith('data:image/')
+		);
 	}
 
 	let contentElement = $state<HTMLElement>();
@@ -156,12 +170,25 @@
 
 <div class="glass" role="region" aria-label={title ? String(title) : 'Window pane'}>
 	<header class="glass-header" data-can-drag={draggable}>
-		{#if title}
-			<div class="glass-title">
-				{#if isSnippet(title)}
-					{@render title()}
-				{:else}
-					{title}
+		{#if icon || title}
+			<div class="glass-title-container">
+				{#if icon}
+					<span class="glass-icon">
+						{#if isImageUrl(icon)}
+							<img src={icon} alt="" class="glass-icon-img" />
+						{:else}
+							{@html icon}
+						{/if}
+					</span>
+				{/if}
+				{#if title}
+					<div class="glass-title">
+						{#if isSnippet(title)}
+							{@render title()}
+						{:else}
+							{title}
+						{/if}
+					</div>
 				{/if}
 			</div>
 		{/if}
@@ -197,6 +224,36 @@
 		align-items: center;
 		padding: 0.5rem;
 		border-bottom: 1px solid #ccc;
+	}
+
+	.glass-title-container {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		min-width: 0;
+		overflow: hidden;
+	}
+
+	.glass-icon {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1rem;
+		line-height: 1;
+	}
+
+	.glass-icon-img {
+		width: 1rem;
+		height: 1rem;
+		object-fit: contain;
+	}
+
+	.glass-title {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		min-width: 0;
 	}
 
 	.glass-content {

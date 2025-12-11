@@ -1,45 +1,58 @@
 :root {
 	/* ===== Global Font & Typography ===== */
-	--bw-font-family: system-ui;
-	--bw-font-size: 14px;
+	--sw-font-family: system-ui;
+	--sw-font-size: 14px;
 
 	/* ===== Colors ===== */
-	--bw-accent-color: hsl(210, 100%, 50%);
+	--sw-accent-color: hsl(210, 100%, 50%);
 
 	/* ===== Pane & Window ===== */
-	--bw-pane-bg-color: hsl(0, 0%, 95%); /* Light gray background for panes */
-	--bw-drop-area-bg-color: color-mix(in srgb, black 5%, transparent);
+	--sw-pane-bg-color: hsl(0, 0%, 95%); /* Light gray background for panes */
+	--sw-drop-area-bg-color: color-mix(in srgb, black 5%, transparent);
 
 	/* ===== Glass (Individual Pane Chrome) ===== */
-	--bw-glass-clearance: 2px;
-	--bw-glass-border-radius: 2px;
-	--bw-glass-border-color: hsl(0, 0%, 10%);
-	--bw-glass-border-color-disabled: hsl(0, 0%, 80%);
-	--bw-glass-bg-color: white; /* Main glass background */
-	--bw-glass-bg-color-disabled: hsl(0, 0%, 97%);
+	--sw-glass-clearance: 2px;
+	--sw-glass-border-radius: 2px;
+	--sw-glass-border-color: hsl(0, 0%, 10%);
+	--sw-glass-border-color-disabled: hsl(0, 0%, 80%);
+	--sw-glass-bg-color: white; /* Main glass background */
+	--sw-glass-bg-color-disabled: hsl(0, 0%, 97%);
 
 	/* Glass Header */
-	--bw-glass-header-height: 30px;
-	--bw-glass-header-gap: 4px;
-	--bw-glass-header-bg-color: hsl(0, 0%, 97%);
+	--sw-glass-header-height: 30px;
+	--sw-glass-header-gap: 4px;
+	--sw-glass-header-bg-color: hsl(0, 0%, 97%);
 
 	/* Glass Actions (Buttons) */
-	--bw-action-gap: 2px;
-	--bw-glass-action-bg-color: transparent;
-	--bw-glass-action-hover-bg: transparent;
-	--bw-glass-action-hover-color: var(--bw-accent-color);
-	--bw-glass-action-border: none;
+	--sw-action-gap: 2px;
+	--sw-glass-action-bg-color: transparent;
+	--sw-glass-action-hover-bg: transparent;
+	--sw-glass-action-hover-color: var(--sw-accent-color);
+	--sw-glass-action-border: none;
 
 	/* ===== Muntin (Dividers/Splitters) ===== */
-	--bw-muntin-bg-color: hsl(0, 0%, 80%); /* Gray divider between panes */
+	--sw-muntin-bg-color: hsl(0, 0%, 80%); /* Gray divider between panes */
 
 	/* ===== Sill (Taskbar) ===== */
-	--bw-sill-height: 32px;
-	--bw-sill-gap: 8px;
-	--bw-sill-padding: 4px 8px;
-	--bw-sill-bg-color: rgba(0, 0, 0, 0.05);
-	--bw-sill-border-color: hsl(0, 0%, 80%);
+	--sw-sill-height: 32px;
+	--sw-sill-gap: 8px;
+	--sw-sill-padding: 4px 8px;
+	--sw-sill-bg-color: rgba(0, 0, 0, 0.05);
+	--sw-sill-border-color: hsl(0, 0%, 80%);
 
-	/* ===== Minimized Glass ===== */
-	--bw-minimized-glass-height: 10px;
+	/* ===== Minimized Glass Buttons ===== */
+	--sw-minimized-glass-height: 24px;
+	--sw-minimized-glass-min-width: 80px;
+	--sw-minimized-glass-max-width: 180px;
+	--sw-minimized-glass-basis: 120px;
+	--sw-minimized-glass-padding: 0.25rem 0.5rem;
+	--sw-minimized-glass-gap: 0.375rem;
+	--sw-minimized-glass-font-size: 0.75rem;
+	--sw-minimized-glass-bg-color: hsl(0, 0%, 87%);
+	--sw-minimized-glass-border-color: var(--sw-glass-border-color);
+	--sw-minimized-glass-border-radius: 2px;
+	--sw-minimized-glass-hover-bg: white;
+	--sw-minimized-glass-hover-transform: translateY(-2px);
+	--sw-minimized-glass-hover-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	--sw-minimized-glass-icon-size: 0.875rem;
 }

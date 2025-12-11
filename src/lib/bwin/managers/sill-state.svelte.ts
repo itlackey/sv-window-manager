@@ -78,8 +78,9 @@ export function initialize(context: BwinContext, debug = false): void {
 /**
  * Registers the sill element from the Sill component
  *
- * Called by Sill.svelte when it mounts. This replaces the old mount() logic
- * that appended the sill to the window element.
+ * Called by Sill.svelte when it mounts. The sill element can be placed anywhere
+ * on the page, not just inside the BinaryWindow component tree. This allows for
+ * flexible layout options where the minimized pane bar can be positioned independently.
  *
  * @param element - The sill element from Sill.svelte
  *
@@ -96,7 +97,7 @@ export function registerSillElement(element: HTMLElement): void {
 	}
 
 	sillElement = element;
-	debugLog('[registerSillElement] Sill element registered:', sillElement);
+	debugLog('[registerSillElement] Sill element registered:', { element: sillElement });
 
 	// Setup click handler
 	setupClickHandler();
@@ -105,7 +106,14 @@ export function registerSillElement(element: HTMLElement): void {
 /**
  * Unregisters the sill element
  *
- * Called by Sill.svelte when it unmounts.
+ * Called by Sill.svelte when it unmounts. Cleans up click handlers and clears
+ * the sill element reference, allowing the sill to be re-registered later if needed.
+ *
+ * @example
+ * ```typescript
+ * // In Sill.svelte onDestroy:
+ * unregisterSillElement();
+ * ```
  */
 export function unregisterSillElement(): void {
 	debugLog('[unregisterSillElement] Unregistering sill element');

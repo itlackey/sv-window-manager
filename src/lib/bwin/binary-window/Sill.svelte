@@ -1,7 +1,18 @@
+<!--
+	Sill Component
+
+	Renders a container for minimized window buttons. Can be placed anywhere on the page,
+	not just within the BinaryWindow component tree. The component self-registers with
+	SillState to receive minimized window buttons.
+-->
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import { CSS_CLASSES } from '../constants.js';
 	import * as SillState from '../managers/sill-state.svelte.js';
+
+	interface SillProps {}
+
+	let {}: SillProps = $props();
 
 	let sillElement = $state<HTMLElement>();
 
@@ -18,6 +29,7 @@
 	});
 </script>
 
+<!-- Component can be placed anywhere on the page to receive minimized window buttons -->
 <div
 	bind:this={sillElement}
 	class={CSS_CLASSES.SILL}

@@ -113,7 +113,7 @@ export const CSS_CLASSES = {
 	GLASS_ACTION: 'glass-action',
 	SILL: 'sill',
 	WINDOW: 'window',
-	MINIMIZED_GLASS: 'bw-minimized-glass'
+	MINIMIZED_GLASS: 'sw-minimized-glass'
 } as const;
 
 /**

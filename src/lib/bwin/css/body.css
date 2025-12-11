@@ -1,9 +1,9 @@
-.body--bw-resize-x {
+.body--sw-resize-x {
 	user-select: none;
 	cursor: ew-resize;
 }
 
-.body--bw-resize-y {
+.body--sw-resize-y {
 	user-select: none;
 	cursor: ns-resize;
 }

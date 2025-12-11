@@ -17,6 +17,7 @@ export { default as Frame } from './bwin/frame/Frame.svelte';
 export { default as Pane } from './bwin/frame/Pane.svelte';
 export { default as Muntin } from './bwin/frame/Muntin.svelte';
 export { default as Glass } from './bwin/binary-window/Glass.svelte';
+export { default as Sill } from './bwin/binary-window/Sill.svelte';
 
 // ============================================================================
 // EXAMPLES
