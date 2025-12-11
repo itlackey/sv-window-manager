@@ -33,14 +33,15 @@
 	border-radius: var(--sw-minimized-glass-border-radius, 2px);
 	cursor: pointer;
 	background-color: var(--sw-minimized-glass-bg-color, #ddd);
-	transition: all 0.2s;
+	/* Specific transitions instead of 'all' to prevent compositor overload */
+	transition: background-color 0.15s ease-out;
 	font-size: var(--sw-minimized-glass-font-size, 0.75rem);
 	text-align: left;
 
 	&:hover {
 		background-color: var(--sw-minimized-glass-hover-bg, white);
-		transform: var(--sw-minimized-glass-hover-transform, translateY(-2px));
-		box-shadow: var(--sw-minimized-glass-hover-shadow, 0 2px 4px rgba(0, 0, 0, 0.2));
+		/* Removed transform and box-shadow on hover - these cause GPU compositor issues
+		   when rapidly hovering over many elements */
 	}
 
 	&:focus-visible {
