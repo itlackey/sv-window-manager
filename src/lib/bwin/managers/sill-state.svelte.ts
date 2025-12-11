@@ -216,7 +216,6 @@ export function restoreGlass(
 		bwOriginalBoundingRect?: DOMRect;
 		bwOriginalSashId?: string;
 		bwOriginalPosition?: string;
-		bwGlassElement?: HTMLElement;
 		bwOriginalStore?: Record<string, unknown>;
 	}
 ): void {
@@ -226,13 +225,11 @@ export function restoreGlass(
 	}
 
 	debugLog('[restoreGlass] Starting restore:', {
-		minimizedGlassEl,
 		hasWindowElement: !!bwinContext.windowElement,
 		hasRootSash: !!bwinContext.rootSash,
 		originalBoundingRect: minimizedGlassEl.bwOriginalBoundingRect,
 		originalSashId: minimizedGlassEl.bwOriginalSashId,
-		originalPosition: minimizedGlassEl.bwOriginalPosition,
-		glassElement: minimizedGlassEl.bwGlassElement
+		originalPosition: minimizedGlassEl.bwOriginalPosition
 	});
 
 	if (!bwinContext.windowElement || !bwinContext.rootSash) {

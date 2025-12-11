@@ -32,9 +32,11 @@ export interface BwinMinimizedElement extends HTMLElement {
 
 /**
  * Cleanup a minimized glass element by unmounting its Svelte component
- * Must be called before removing the element from the DOM
+ * and clearing all references to prevent memory leaks.
+ * Must be called before removing the element from the DOM.
  */
 export function cleanupMinimizedGlass(element: BwinMinimizedElement): void {
+	// Unmount Svelte component if present
 	if (element.bwComponentInstance) {
 		try {
 			unmount(element.bwComponentInstance);
@@ -43,6 +45,13 @@ export function cleanupMinimizedGlass(element: BwinMinimizedElement): void {
 		}
 		element.bwComponentInstance = undefined;
 	}
+
+	// Clear all references to prevent memory leaks
+	// These references could keep destroyed DOM elements in memory
+	element.bwGlassElement = undefined;
+	element.bwOriginalBoundingRect = undefined;
+	element.bwOriginalStore = undefined;
+	// Note: bwOriginalSashId and bwOriginalPosition are primitives, no need to clear
 }
 
 /**
@@ -133,7 +142,8 @@ export default {
 		sillEl.append(minimizedGlassEl);
 
 		// Store restoration data and component instance on the element
-		minimizedGlassEl.bwGlassElement = glassEl;
+		// Note: We intentionally don't store bwGlassElement as it would keep the destroyed
+		// Glass element in memory after removePane() is called
 		minimizedGlassEl.bwOriginalPosition = panePosition;
 		minimizedGlassEl.bwOriginalBoundingRect =
 			paneEl instanceof HTMLElement ? getMetricsFromElement(paneEl) : undefined;
