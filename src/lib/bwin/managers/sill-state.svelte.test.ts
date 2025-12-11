@@ -459,6 +459,100 @@ describe('SillState - Reactive State Module', () => {
 	});
 
 	describe('Click Handler Integration', () => {
+		it('should restore glass when child element (icon/title) is clicked', () => {
+			// This test reproduces a bug where clicking on child elements (icon span, title span)
+			// inside the minimized glass button would fail because event.target is the child,
+			// not the button itself. The click handler must use closest() instead of matches().
+			const sill = createAndRegisterSill();
+
+			// Create minimized glass button with child elements (like MinimizedGlass.svelte does)
+			const minimizedGlassButton = document.createElement('button') as any;
+			minimizedGlassButton.className = CSS_CLASSES.MINIMIZED_GLASS;
+			minimizedGlassButton.bwOriginalSashId = 'pane-1';
+			minimizedGlassButton.bwOriginalPosition = 'right';
+			minimizedGlassButton.bwOriginalBoundingRect = new DOMRect(0, 0, 200, 150);
+			minimizedGlassButton.bwOriginalStore = { title: 'Test' };
+
+			// Add child elements like MinimizedGlass.svelte creates
+			const iconSpan = document.createElement('span');
+			iconSpan.className = 'sw-minimized-glass-icon';
+			iconSpan.textContent = '📄';
+
+			const titleSpan = document.createElement('span');
+			titleSpan.className = 'sw-minimized-glass-title';
+			titleSpan.textContent = 'Test Window';
+
+			minimizedGlassButton.appendChild(iconSpan);
+			minimizedGlassButton.appendChild(titleSpan);
+			sill?.appendChild(minimizedGlassButton);
+
+			// Create target pane element
+			const targetPane = document.createElement('div');
+			targetPane.className = CSS_CLASSES.PANE;
+			targetPane.setAttribute('data-sash-id', 'pane-1');
+			targetPane.style.position = 'absolute';
+			targetPane.style.left = '0px';
+			targetPane.style.top = '0px';
+			targetPane.style.width = '400px';
+			targetPane.style.height = '300px';
+			windowElement.append(targetPane);
+
+			document.body.append(windowElement);
+
+			// Simulate clicking on the TITLE SPAN (child element), not the button
+			// This is what causes the bug - event.target is the span, not the button
+			const clickEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true
+			});
+			Object.defineProperty(clickEvent, 'target', { value: titleSpan });
+
+			// Dispatch click on the sill (event delegation)
+			sill?.dispatchEvent(clickEvent);
+
+			// The click handler should find the button via closest() and restore the glass
+			expect(mockBwinContext.addPane).toHaveBeenCalled();
+
+			// Cleanup
+			document.body.removeChild(windowElement);
+		});
+
+		it('should restore glass when icon child element is clicked', () => {
+			const sill = createAndRegisterSill();
+
+			// Create minimized glass button with icon
+			const minimizedGlassButton = document.createElement('button') as any;
+			minimizedGlassButton.className = CSS_CLASSES.MINIMIZED_GLASS;
+			minimizedGlassButton.bwOriginalSashId = 'pane-1';
+			minimizedGlassButton.bwOriginalPosition = 'right';
+			minimizedGlassButton.bwOriginalBoundingRect = new DOMRect(0, 0, 200, 150);
+			minimizedGlassButton.bwOriginalStore = { title: 'Test', icon: '📄' };
+
+			const iconSpan = document.createElement('span');
+			iconSpan.className = 'sw-minimized-glass-icon';
+			iconSpan.textContent = '📄';
+			minimizedGlassButton.appendChild(iconSpan);
+			sill?.appendChild(minimizedGlassButton);
+
+			// Create target pane
+			const targetPane = document.createElement('div');
+			targetPane.className = CSS_CLASSES.PANE;
+			targetPane.setAttribute('data-sash-id', 'pane-1');
+			targetPane.style.cssText = 'position:absolute;left:0;top:0;width:400px;height:300px;';
+			windowElement.append(targetPane);
+
+			document.body.append(windowElement);
+
+			// Click on the icon span
+			const clickEvent = new MouseEvent('click', { bubbles: true });
+			Object.defineProperty(clickEvent, 'target', { value: iconSpan });
+			sill?.dispatchEvent(clickEvent);
+
+			expect(mockBwinContext.addPane).toHaveBeenCalled();
+
+			document.body.removeChild(windowElement);
+		});
+
 		it('should restore glass when minimized glass is clicked', () => {
 			const sill = createAndRegisterSill();
 

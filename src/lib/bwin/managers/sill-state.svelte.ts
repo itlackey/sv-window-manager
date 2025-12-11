@@ -434,19 +434,24 @@ function setupClickHandler(): void {
 	debugLog('[setupClickHandler] Setting up click handler on sill:', sillElement);
 
 	clickHandler = (event: MouseEvent) => {
+		// Use closest() to find the minimized glass button even when clicking on child elements
+		// (icon span, title span). This handles event bubbling correctly.
+		const minimizedGlassEl = (event.target as HTMLElement).closest(
+			`.${CSS_CLASSES.MINIMIZED_GLASS}`
+		) as HTMLElement | null;
+
 		debugLog('[Click] Click detected on sill:', {
 			target: event.target,
-			targetMatches: (event.target as HTMLElement).matches(`.${CSS_CLASSES.MINIMIZED_GLASS}`),
+			foundMinimizedGlass: !!minimizedGlassEl,
 			targetClassName: (event.target as HTMLElement).className
 		});
 
-		if (!(event.target as HTMLElement).matches(`.${CSS_CLASSES.MINIMIZED_GLASS}`)) {
-			debugLog('[Click] Target is not a minimized glass, ignoring');
+		if (!minimizedGlassEl) {
+			debugLog('[Click] Target is not within a minimized glass, ignoring');
 			return;
 		}
 
 		debugLog('[Click] Restoring minimized glass...');
-		const minimizedGlassEl = event.target as HTMLElement;
 		restoreGlass(minimizedGlassEl);
 		minimizedGlassEl.remove();
 		debugLog('[Click] Minimized glass removed');
