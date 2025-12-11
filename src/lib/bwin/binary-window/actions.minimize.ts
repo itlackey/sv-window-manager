@@ -1,4 +1,4 @@
-import { mount } from 'svelte';
+import { mount, unmount } from 'svelte';
 import { getMetricsFromElement } from '../utils.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { BwinErrors } from '../errors.js';
@@ -20,12 +20,29 @@ interface BoundingRect {
 /**
  * Extended HTMLElement with custom bwin properties for minimized glass restoration
  */
-interface BwinMinimizedElement extends HTMLElement {
+export interface BwinMinimizedElement extends HTMLElement {
 	bwGlassElement?: Element | null;
 	bwOriginalPosition?: string | null;
 	bwOriginalBoundingRect?: BoundingRect;
 	bwOriginalSashId?: string | null;
 	bwOriginalStore?: Record<string, unknown>;
+	/** Svelte component instance for proper cleanup */
+	bwComponentInstance?: Record<string, unknown>;
+}
+
+/**
+ * Cleanup a minimized glass element by unmounting its Svelte component
+ * Must be called before removing the element from the DOM
+ */
+export function cleanupMinimizedGlass(element: BwinMinimizedElement): void {
+	if (element.bwComponentInstance) {
+		try {
+			unmount(element.bwComponentInstance);
+		} catch {
+			// Ignore unmount errors - component may already be destroyed
+		}
+		element.bwComponentInstance = undefined;
+	}
 }
 
 /**
@@ -93,7 +110,7 @@ export default {
 		// Create MinimizedGlass component using Svelte's mount API
 		const minimizedContainer = document.createElement('div');
 
-		mount(MinimizedGlass, {
+		const componentInstance = mount(MinimizedGlass, {
 			target: minimizedContainer,
 			props: {
 				title: paneTitle,
@@ -115,13 +132,15 @@ export default {
 		const minimizedGlassEl = minimizedGlassNode as BwinMinimizedElement;
 		sillEl.append(minimizedGlassEl);
 
-		// Store restoration data on the element
+		// Store restoration data and component instance on the element
 		minimizedGlassEl.bwGlassElement = glassEl;
 		minimizedGlassEl.bwOriginalPosition = panePosition;
 		minimizedGlassEl.bwOriginalBoundingRect =
 			paneEl instanceof HTMLElement ? getMetricsFromElement(paneEl) : undefined;
 		minimizedGlassEl.bwOriginalSashId = paneSashId;
 		minimizedGlassEl.bwOriginalStore = store;
+		// Store component instance for proper cleanup on restore
+		minimizedGlassEl.bwComponentInstance = componentInstance as Record<string, unknown>;
 
 		if (paneSashId) {
 			// Perform removal first per spec (post-action emission)

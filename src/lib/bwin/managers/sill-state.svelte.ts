@@ -6,6 +6,10 @@ import { Position } from '../position.js';
 import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
 import { emitPaneEvent } from '../../events/dispatcher.js';
 import { buildPanePayload } from '../../events/payload.js';
+import {
+	cleanupMinimizedGlass,
+	type BwinMinimizedElement
+} from '../binary-window/actions.minimize.js';
 
 /**
  * Sill Reactive State Module (Svelte 5)
@@ -116,6 +120,16 @@ export function registerSillElement(element: HTMLElement): void {
  */
 export function unregisterSillElement(): void {
 	debugLog('[unregisterSillElement] Unregistering sill element');
+
+	// Cleanup all minimized glass components before destroying the sill
+	if (sillElement) {
+		const minimizedGlasses = sillElement.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`);
+		minimizedGlasses.forEach((el) => {
+			cleanupMinimizedGlass(el as BwinMinimizedElement);
+		});
+		debugLog(`[unregisterSillElement] Cleaned up ${minimizedGlasses.length} minimized glasses`);
+	}
+
 	removeClickHandler();
 	sillElement = undefined;
 }
@@ -438,7 +452,7 @@ function setupClickHandler(): void {
 		// (like the icon span or title span inside the button)
 		const minimizedGlassEl = (event.target as HTMLElement).closest(
 			`.${CSS_CLASSES.MINIMIZED_GLASS}`
-		) as HTMLElement | null;
+		) as BwinMinimizedElement | null;
 
 		debugLog('[Click] Click detected on sill:', {
 			target: event.target,
@@ -453,8 +467,10 @@ function setupClickHandler(): void {
 
 		debugLog('[Click] Restoring minimized glass...');
 		restoreGlass(minimizedGlassEl);
+		// CRITICAL: Cleanup Svelte component before removing DOM element to prevent memory leaks
+		cleanupMinimizedGlass(minimizedGlassEl);
 		minimizedGlassEl.remove();
-		debugLog('[Click] Minimized glass removed');
+		debugLog('[Click] Minimized glass removed and component unmounted');
 	};
 
 	sillElement.addEventListener('click', clickHandler);
