@@ -1,6 +1,7 @@
 .sill {
 	/* Normal flex layout - no absolute positioning */
-	width: 100%;
+	/* Width can be customized via --sw-sill-width to support different positions (e.g., vertical sidebars) */
+	width: var(--sw-sill-width, 100%);
 	min-height: var(--sw-sill-height, 32px);
 	display: flex;
 	gap: var(--sw-sill-gap, 8px);

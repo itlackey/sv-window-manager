@@ -29,14 +29,17 @@
 	 *
 	 * @property {SashConfig | ConfigRoot | Record<string, unknown>} settings - Initial window configuration
 	 * @property {Snippet} [empty] - Optional snippet to render when there are no panes open
+	 * @property {boolean} [externalSill] - If true, the default internal sill is not rendered. Use this when placing <Sill /> externally on the page
 	 */
 	interface BinaryWindowProps {
 		settings: SashConfig | ConfigRoot | Record<string, unknown>;
 		/** Optional snippet to render when there are no panes open */
 		empty?: Snippet;
+		/** If true, the default internal sill is not rendered. Use this when placing <Sill /> externally on the page */
+		externalSill?: boolean;
 	}
 
-	let { settings, empty }: BinaryWindowProps = $props();
+	let { settings, empty, externalSill = false }: BinaryWindowProps = $props();
 
 	// Get debug from settings, with fallback to DEBUG constant
 	const debug = $derived(
@@ -757,7 +760,9 @@
 			</Frame>
 		</div>
 	</div>
-	<Sill />
+	{#if !externalSill}
+		<Sill />
+	{/if}
 </div>
 
 <style>

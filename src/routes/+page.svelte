@@ -545,6 +545,37 @@ interface AddPaneProps {'{'}
 			<section class="section">
 				<h2>Styling</h2>
 
+				<h3>External Sill Placement</h3>
+				<p>
+					By default, the sill (taskbar for minimized windows) is rendered at the bottom of the BinaryWindow.
+					You can place the sill anywhere on your page by using the <code>externalSill</code> prop and the
+					<code>Sill</code> component.
+				</p>
+
+				<div class="code-block">
+					<pre><code>{`<!-- Import the Sill component -->
+<script>
+  import { BinaryWindow, Sill } from 'sv-window-manager';
+</script>
+
+<!-- Layout with sill at custom position -->
+<div class="my-layout">
+  <!-- Sill at the top -->
+  <Sill />
+
+  <!-- BinaryWindow without internal sill -->
+  <BinaryWindow
+    settings={mySettings}
+    externalSill={true}
+  />
+</div>`}</code></pre>
+				</div>
+
+				<p>
+					The <code>Sill</code> component will automatically receive minimized windows from the BinaryWindow.
+					You can style the sill container using CSS custom properties like <code>--sw-sill-width</code>.
+				</p>
+
 				<p>
 					Customize the appearance using CSS custom properties. All variables are prefixed with <code
 						>--sw-</code
