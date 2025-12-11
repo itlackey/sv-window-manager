@@ -547,7 +547,7 @@ interface AddPaneProps {'{'}
 
 				<p>
 					Customize the appearance using CSS custom properties. All variables are prefixed with <code
-						>--bw-</code
+						>--sw-</code
 					> to avoid naming conflicts.
 				</p>
 
@@ -565,12 +565,12 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>--bw-font-family</code></td>
+								<td><code>--sw-font-family</code></td>
 								<td><code>system-ui</code></td>
 								<td>Font family for all window manager text</td>
 							</tr>
 							<tr>
-								<td><code>--bw-font-size</code></td>
+								<td><code>--sw-font-size</code></td>
 								<td><code>14px</code></td>
 								<td>Base font size for window manager components</td>
 							</tr>
@@ -590,7 +590,7 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>--bw-accent-color</code></td>
+								<td><code>--sw-accent-color</code></td>
 								<td><code>hsl(210, 100%, 50%)</code></td>
 								<td>Primary accent color used for focus states and hover highlights</td>
 							</tr>
@@ -610,12 +610,12 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>--bw-pane-bg-color</code></td>
+								<td><code>--sw-pane-bg-color</code></td>
 								<td><code>hsl(0, 0%, 95%)</code></td>
 								<td>Background color for panes (visible when glass is transparent or absent)</td>
 							</tr>
 							<tr>
-								<td><code>--bw-drop-area-bg-color</code></td>
+								<td><code>--sw-drop-area-bg-color</code></td>
 								<td><code>color-mix(in srgb, black 5%, transparent)</code></td>
 								<td>Background color for drop target areas during drag operations</td>
 							</tr>
@@ -635,32 +635,32 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>--bw-glass-bg-color</code></td>
+								<td><code>--sw-glass-bg-color</code></td>
 								<td><code>white</code></td>
 								<td>Background color for glass (window) content area</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-bg-color-disabled</code></td>
+								<td><code>--sw-glass-bg-color-disabled</code></td>
 								<td><code>hsl(0, 0%, 97%)</code></td>
 								<td>Background color for disabled glass elements</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-border-color</code></td>
+								<td><code>--sw-glass-border-color</code></td>
 								<td><code>hsl(0, 0%, 10%)</code></td>
 								<td>Border color for glass windows</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-border-color-disabled</code></td>
+								<td><code>--sw-glass-border-color-disabled</code></td>
 								<td><code>hsl(0, 0%, 80%)</code></td>
 								<td>Border color for disabled glass elements</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-border-radius</code></td>
+								<td><code>--sw-glass-border-radius</code></td>
 								<td><code>2px</code></td>
 								<td>Border radius for glass windows</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-clearance</code></td>
+								<td><code>--sw-glass-clearance</code></td>
 								<td><code>2px</code></td>
 								<td>Spacing between glass windows and pane edges</td>
 							</tr>
@@ -680,17 +680,17 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>--bw-glass-header-height</code></td>
+								<td><code>--sw-glass-header-height</code></td>
 								<td><code>30px</code></td>
 								<td>Height of glass window headers</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-header-gap</code></td>
+								<td><code>--sw-glass-header-gap</code></td>
 								<td><code>4px</code></td>
 								<td>Gap between header elements (title, actions)</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-header-bg-color</code></td>
+								<td><code>--sw-glass-header-bg-color</code></td>
 								<td><code>hsl(0, 0%, 97%)</code></td>
 								<td>Background color for glass window headers</td>
 							</tr>
@@ -710,27 +710,27 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>--bw-action-gap</code></td>
+								<td><code>--sw-action-gap</code></td>
 								<td><code>2px</code></td>
 								<td>Gap between action buttons in glass header</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-action-bg-color</code></td>
+								<td><code>--sw-glass-action-bg-color</code></td>
 								<td><code>transparent</code></td>
 								<td>Background color for glass action buttons</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-action-hover-bg</code></td>
+								<td><code>--sw-glass-action-hover-bg</code></td>
 								<td><code>transparent</code></td>
 								<td>Background color for glass action buttons on hover</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-action-hover-color</code></td>
-								<td><code>var(--bw-accent-color)</code></td>
+								<td><code>--sw-glass-action-hover-color</code></td>
+								<td><code>var(--sw-accent-color)</code></td>
 								<td>Text color for glass action buttons on hover</td>
 							</tr>
 							<tr>
-								<td><code>--bw-glass-action-border</code></td>
+								<td><code>--sw-glass-action-border</code></td>
 								<td><code>none</code></td>
 								<td>Border style for glass action buttons</td>
 							</tr>
@@ -750,7 +750,7 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>--bw-muntin-bg-color</code></td>
+								<td><code>--sw-muntin-bg-color</code></td>
 								<td><code>hsl(0, 0%, 80%)</code></td>
 								<td>Background color for muntins (dividers between panes)</td>
 							</tr>
@@ -770,32 +770,32 @@ interface AddPaneProps {'{'}
 						</thead>
 						<tbody>
 							<tr>
-								<td><code>--bw-sill-height</code></td>
+								<td><code>--sw-sill-height</code></td>
 								<td><code>32px</code></td>
 								<td>Height of the sill (taskbar) for minimized windows</td>
 							</tr>
 							<tr>
-								<td><code>--bw-sill-gap</code></td>
+								<td><code>--sw-sill-gap</code></td>
 								<td><code>8px</code></td>
 								<td>Gap between minimized window buttons in sill</td>
 							</tr>
 							<tr>
-								<td><code>--bw-sill-padding</code></td>
+								<td><code>--sw-sill-padding</code></td>
 								<td><code>4px 8px</code></td>
 								<td>Padding inside the sill container</td>
 							</tr>
 							<tr>
-								<td><code>--bw-sill-bg-color</code></td>
+								<td><code>--sw-sill-bg-color</code></td>
 								<td><code>rgba(0, 0, 0, 0.05)</code></td>
 								<td>Background color for the sill</td>
 							</tr>
 							<tr>
-								<td><code>--bw-sill-border-color</code></td>
+								<td><code>--sw-sill-border-color</code></td>
 								<td><code>hsl(0, 0%, 80%)</code></td>
 								<td>Border color for the sill</td>
 							</tr>
 							<tr>
-								<td><code>--bw-minimized-glass-height</code></td>
+								<td><code>--sw-minimized-glass-height</code></td>
 								<td><code>10px</code></td>
 								<td>Height of minimized glass buttons in the sill</td>
 							</tr>
@@ -807,13 +807,13 @@ interface AddPaneProps {'{'}
 				<pre><code
 						>:root {'{'}
   /* Override key colors for dark theme */
-  --bw-pane-bg-color: #1e1e1e;
-  --bw-glass-bg-color: #252526;
-  --bw-glass-border-color: #3a3a3a;
-  --bw-glass-header-bg-color: #2d2d30;
-  --bw-muntin-bg-color: #3a3a3a;
-  --bw-sill-bg-color: rgba(255, 255, 255, 0.05);
-  --bw-accent-color: #0078d4;
+  --sw-pane-bg-color: #1e1e1e;
+  --sw-glass-bg-color: #252526;
+  --sw-glass-border-color: #3a3a3a;
+  --sw-glass-header-bg-color: #2d2d30;
+  --sw-muntin-bg-color: #3a3a3a;
+  --sw-sill-bg-color: rgba(255, 255, 255, 0.05);
+  --sw-accent-color: #0078d4;
 {'}'}</code
 					></pre>
 
@@ -821,8 +821,8 @@ interface AddPaneProps {'{'}
 				<pre><code
 						>:root {'{'}
   /* Purple accent theme */
-  --bw-accent-color: #7c3aed;
-  --bw-glass-action-hover-color: #7c3aed;
+  --sw-accent-color: #7c3aed;
+  --sw-glass-action-hover-color: #7c3aed;
 {'}'}</code
 					></pre>
 			</section>
@@ -963,33 +963,33 @@ offResize();</code
 		/** bwin properties*/
 
 		/* Typography */
-		--bw-font-family: inherit;
-		--bw-font-size: inherit;
+		--sw-font-family: inherit;
+		--sw-font-size: inherit;
 
 		/* Window Manager Colors - using derived accent colors */
-		--bw-drop-area-bg-color: var(--accent-color-light);
-		--bw-pane-bg-color: var(--bg-color-dark);
-		--bw-muntin-bg-color: var(--accent-color-strong);
-		--bw-glass-bg-color: var(--bg-color);
-		--bw-glass-border-color: var(--accent-color);
-		--bw-glass-border-color-disabled: var(--disabled-color);
-		--bw-glass-bg-color-disabled: var(--accent-color-light);
-		--bw-glass-header-bg-color: var(--accent-color);
-		--bw-glass-tab-hover-bg: var(--accent-color-light);
-		--bw-glass-action-hover-bg: var(--accent-color-light);
-		--bw-minimized-glass-hover-bg: var(--accent-color-light);
+		--sw-drop-area-bg-color: var(--accent-color-light);
+		--sw-pane-bg-color: var(--bg-color-dark);
+		--sw-muntin-bg-color: var(--accent-color-strong);
+		--sw-glass-bg-color: var(--bg-color);
+		--sw-glass-border-color: var(--accent-color);
+		--sw-glass-border-color-disabled: var(--disabled-color);
+		--sw-glass-bg-color-disabled: var(--accent-color-light);
+		--sw-glass-header-bg-color: var(--accent-color);
+		--sw-glass-tab-hover-bg: var(--accent-color-light);
+		--sw-glass-action-hover-bg: var(--accent-color-light);
+		--sw-minimized-glass-hover-bg: var(--accent-color-light);
 
 		/* Sizing & Spacing */
-		--bw-container-width: stretch;
-		--bw-container-height: 500px;
-		--bw-glass-clearance: 2px;
-		--bw-glass-border-radius: 5px;
-		--bw-glass-header-height: 30px;
-		--bw-glass-header-gap: 4px;
-		--bw-sill-gap: 6px;
-		--bw-action-gap: 2px;
-		--bw-minimized-glass-height: 10px;
-		--bw-minimized-glass-basis: 10%;
+		--sw-container-width: stretch;
+		--sw-container-height: 500px;
+		--sw-glass-clearance: 2px;
+		--sw-glass-border-radius: 5px;
+		--sw-glass-header-height: 30px;
+		--sw-glass-header-gap: 4px;
+		--sw-sill-gap: 6px;
+		--sw-action-gap: 2px;
+		--sw-minimized-glass-height: 10px;
+		--sw-minimized-glass-basis: 10%;
 	}
 
 	:global(body) {

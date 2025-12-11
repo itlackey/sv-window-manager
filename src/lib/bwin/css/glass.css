@@ -7,35 +7,35 @@
 		}
 
 		&[data-drop-area='top']::before {
-			top: var(--bw-glass-clearance);
-			left: var(--bw-glass-clearance);
-			right: var(--bw-glass-clearance);
+			top: var(--sw-glass-clearance);
+			left: var(--sw-glass-clearance);
+			right: var(--sw-glass-clearance);
 			height: 50%;
 		}
 
 		&[data-drop-area='right']::before {
-			top: var(--bw-glass-clearance);
-			right: var(--bw-glass-clearance);
-			bottom: var(--bw-glass-clearance);
+			top: var(--sw-glass-clearance);
+			right: var(--sw-glass-clearance);
+			bottom: var(--sw-glass-clearance);
 			width: 50%;
 		}
 
 		&[data-drop-area='bottom']::before {
-			bottom: var(--bw-glass-clearance);
-			left: var(--bw-glass-clearance);
-			right: var(--bw-glass-clearance);
+			bottom: var(--sw-glass-clearance);
+			left: var(--sw-glass-clearance);
+			right: var(--sw-glass-clearance);
 			height: 50%;
 		}
 
 		&[data-drop-area='left']::before {
-			top: var(--bw-glass-clearance);
-			left: var(--bw-glass-clearance);
-			bottom: var(--bw-glass-clearance);
+			top: var(--sw-glass-clearance);
+			left: var(--sw-glass-clearance);
+			bottom: var(--sw-glass-clearance);
 			width: 50%;
 		}
 
 		&[data-drop-area='center']::before {
-			inset: var(--bw-glass-clearance);
+			inset: var(--sw-glass-clearance);
 		}
 	}
 
@@ -46,14 +46,14 @@
 
 .glass {
 	position: absolute;
-	inset: var(--bw-glass-clearance);
+	inset: var(--sw-glass-clearance);
 	display: flex;
 	flex-direction: column;
-	border: 1px solid var(--bw-glass-border-color);
-	border-radius: var(--bw-glass-border-radius);
-	background-color: var(--bw-glass-bg-color, white);
-	font-family: var(--bw-font-family);
-	font-size: var(--bw-font-size);
+	border: 1px solid var(--sw-glass-border-color);
+	border-radius: var(--sw-glass-border-radius);
+	background-color: var(--sw-glass-bg-color, white);
+	font-family: var(--sw-font-family);
+	font-size: var(--sw-font-size);
 	box-sizing: border-box;
 
 	&[data-draggable='true']:active {
@@ -64,17 +64,17 @@
 
 .glass-header {
 	box-sizing: border-box;
-	flex-basis: var(--bw-glass-header-height);
+	flex-basis: var(--sw-glass-header-height);
 	flex-shrink: 0;
 	display: flex;
 	align-items: center;
-	gap: var(--bw-glass-header-gap);
+	gap: var(--sw-glass-header-gap);
 	overflow: hidden;
-	padding-inline: var(--bw-glass-header-gap);
-	border-bottom: 1px solid var(--bw-glass-border-color);
-	border-top-left-radius: var(--bw-glass-border-radius);
-	border-top-right-radius: var(--bw-glass-border-radius);
-	background-color: var(--bw-glass-header-bg-color);
+	padding-inline: var(--sw-glass-header-gap);
+	border-bottom: 1px solid var(--sw-glass-border-color);
+	border-top-left-radius: var(--sw-glass-border-radius);
+	border-top-right-radius: var(--sw-glass-border-radius);
+	background-color: var(--sw-glass-header-bg-color);
 
 	/* Show grab cursor when header is draggable */
 	&[data-can-drag='true'] {
@@ -99,25 +99,25 @@
 .glass-tabs {
 	align-self: flex-end;
 	display: flex;
-	gap: var(--bw-glass-header-gap);
+	gap: var(--sw-glass-header-gap);
 }
 
 .glass-tab {
-	font-family: var(--bw-font-family);
-	border: 1px solid var(--bw-glass-border-color);
+	font-family: var(--sw-font-family);
+	border: 1px solid var(--sw-glass-border-color);
 	border-bottom: none;
-	border-top-left-radius: var(--bw-glass-border-radius);
-	border-top-right-radius: var(--bw-glass-border-radius);
+	border-top-left-radius: var(--sw-glass-border-radius);
+	border-top-right-radius: var(--sw-glass-border-radius);
 	cursor: pointer !important; /* Override header's grab cursor */
 	background: transparent;
 	padding: 0.25rem 0.5rem;
 
 	&:hover {
-		background-color: var(--bw-glass-tab-hover-bg, white);
+		background-color: var(--sw-glass-tab-hover-bg, white);
 	}
 
 	&:focus-visible {
-		outline: 2px solid var(--bw-accent-color);
+		outline: 2px solid var(--sw-accent-color);
 		outline-offset: 2px;
 		z-index: 1;
 	}
@@ -132,25 +132,25 @@
 	margin-left: auto;
 	display: flex;
 	flex-shrink: 0;
-	gap: var(--bw-action-gap, 2px);
+	gap: var(--sw-action-gap, 2px);
 }
 
 .glass-action {
-	font-family: var(--bw-font-family);
-	border: var(--bw-glass-action-border);
-	border-radius: var(--bw-glass-border-radius);
+	font-family: var(--sw-font-family);
+	border: var(--sw-glass-action-border);
+	border-radius: var(--sw-glass-border-radius);
 	cursor: pointer !important; /* Override header's grab cursor */
-	background: var(--bw-glass-action-bg-color);
+	background: var(--sw-glass-action-bg-color);
 	padding: 0.25rem 0.5rem;
 	min-width: 24px;
 
 	&:hover {
-		color: var(--bw-glass-action-hover-color);
-		background-color: var(--bw-glass-action-hover-bg, white);
+		color: var(--sw-glass-action-hover-color);
+		background-color: var(--sw-glass-action-hover-bg, white);
 	}
 
 	&:focus-visible {
-		outline: 2px solid var(--bw-accent-color);
+		outline: 2px solid var(--sw-accent-color);
 		outline-offset: 2px;
 		z-index: 1;
 	}
@@ -160,12 +160,12 @@
 	}
 
 	&:disabled {
-		border: 1px solid var(--bw-glass-border-color-disabled);
-		background-color: var(--bw-glass-bg-color-disabled);
+		border: 1px solid var(--sw-glass-border-color-disabled);
+		background-color: var(--sw-glass-bg-color-disabled);
 		cursor: not-allowed;
 
 		&:hover {
-			background-color: var(--bw-glass-bg-color-disabled);
+			background-color: var(--sw-glass-bg-color-disabled);
 		}
 
 		&:active {

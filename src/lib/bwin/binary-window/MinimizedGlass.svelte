@@ -7,7 +7,7 @@
 	 * Displays an optional icon and truncated title.
 	 *
 	 * Styling is provided by the global sill.css file which defines
-	 * the .bw-minimized-glass class with hover effects and transitions.
+	 * the .sw-minimized-glass class with hover effects and transitions.
 	 */
 
 	interface MinimizedGlassProps {
@@ -42,27 +42,27 @@
 </script>
 
 <button
-	class="bw-minimized-glass"
+	class="sw-minimized-glass"
 	{onclick}
 	type="button"
 	aria-label={`Restore ${title}`}
 	title={`Restore ${title}`}
 >
 	{#if icon}
-		<span class="bw-minimized-glass-icon">
+		<span class="sw-minimized-glass-icon">
 			{#if isImageUrl(icon)}
-				<img src={icon} alt="" class="bw-minimized-glass-icon-img" />
+				<img src={icon} alt="" class="sw-minimized-glass-icon-img" />
 			{:else}
 				{@html icon}
 			{/if}
 		</span>
 	{/if}
-	<span class="bw-minimized-glass-title">{title}</span>
+	<span class="sw-minimized-glass-title">{title}</span>
 </button>
 
 <!--
   Styling is defined in src/lib/bwin/css/sill.css
-  The .bw-minimized-glass class provides:
+  The .sw-minimized-glass class provides:
   - Base dimensions and appearance
   - Hover effects (lift and shadow)
   - Focus-visible outline

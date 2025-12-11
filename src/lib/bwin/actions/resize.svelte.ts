@@ -39,15 +39,15 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
 
 	function applyResizeStyles(muntinEl: HTMLElement) {
 		if (muntinEl.classList.contains('vertical')) {
-			document.body.classList.add('body--bw-resize-x');
+			document.body.classList.add('body--sw-resize-x');
 		} else if (muntinEl.classList.contains('horizontal')) {
-			document.body.classList.add('body--bw-resize-y');
+			document.body.classList.add('body--sw-resize-y');
 		}
 	}
 
 	function revertResizeStyles() {
-		document.body.classList.remove('body--bw-resize-x');
-		document.body.classList.remove('body--bw-resize-y');
+		document.body.classList.remove('body--sw-resize-x');
+		document.body.classList.remove('body--sw-resize-y');
 	}
 
 	function handleMouseDown(event: MouseEvent) {
