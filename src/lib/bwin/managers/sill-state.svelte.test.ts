@@ -494,6 +494,148 @@ describe('SillState - Reactive State Module', () => {
 			document.body.removeChild(windowElement);
 		});
 
+		it('should restore glass when clicking on child elements (icon/title) inside minimized glass button', () => {
+			const sill = createAndRegisterSill();
+
+			// Create minimized glass element with child elements (simulating real DOM structure)
+			const minimizedGlass = document.createElement('button') as any;
+			minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
+			minimizedGlass.bwOriginalSashId = 'pane-1';
+			minimizedGlass.bwOriginalPosition = 'right';
+			minimizedGlass.bwOriginalBoundingRect = new DOMRect(0, 0, 200, 150);
+			minimizedGlass.bwOriginalStore = { title: 'Test Glass' };
+
+			// Add child elements like icon and title spans
+			const iconSpan = document.createElement('span');
+			iconSpan.className = 'sw-minimized-glass-icon';
+			iconSpan.textContent = '📄';
+
+			const titleSpan = document.createElement('span');
+			titleSpan.className = 'sw-minimized-glass-title';
+			titleSpan.textContent = 'Test Glass';
+
+			minimizedGlass.appendChild(iconSpan);
+			minimizedGlass.appendChild(titleSpan);
+			sill?.append(minimizedGlass);
+
+			// Create target pane element
+			const targetPane = document.createElement('div');
+			targetPane.className = CSS_CLASSES.PANE;
+			targetPane.setAttribute('data-sash-id', 'pane-1');
+			targetPane.style.position = 'absolute';
+			targetPane.style.left = '0px';
+			targetPane.style.top = '0px';
+			targetPane.style.width = '400px';
+			targetPane.style.height = '300px';
+			windowElement.append(targetPane);
+
+			document.body.append(windowElement);
+
+			// Simulate click on the CHILD element (icon span), not the button itself
+			// This tests the fix: closest() should find the parent minimized glass button
+			const clickEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true
+			});
+
+			// Dispatch click on the icon span (child element)
+			iconSpan.dispatchEvent(clickEvent);
+
+			// The click handler should use closest() to find the minimized glass parent
+			// and restore it correctly
+			expect(mockBwinContext.addPane).toHaveBeenCalledWith(
+				'pane-1',
+				expect.objectContaining({
+					id: 'pane-1',
+					position: 'right',
+					title: 'Test Glass'
+				})
+			);
+
+			// Also verify the minimized glass element was removed
+			expect(sill?.contains(minimizedGlass)).toBe(false);
+
+			// Cleanup
+			document.body.removeChild(windowElement);
+		});
+
+		it('should restore glass when clicking on title span inside minimized glass button', () => {
+			const sill = createAndRegisterSill();
+
+			// Create minimized glass element with child elements
+			const minimizedGlass = document.createElement('button') as any;
+			minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
+			minimizedGlass.bwOriginalSashId = 'pane-1';
+			minimizedGlass.bwOriginalPosition = 'bottom';
+			minimizedGlass.bwOriginalBoundingRect = new DOMRect(0, 0, 300, 200);
+			minimizedGlass.bwOriginalStore = { title: 'Another Glass' };
+
+			const titleSpan = document.createElement('span');
+			titleSpan.className = 'sw-minimized-glass-title';
+			titleSpan.textContent = 'Another Glass';
+
+			minimizedGlass.appendChild(titleSpan);
+			sill?.append(minimizedGlass);
+
+			// Create target pane element
+			const targetPane = document.createElement('div');
+			targetPane.className = CSS_CLASSES.PANE;
+			targetPane.setAttribute('data-sash-id', 'pane-1');
+			targetPane.style.position = 'absolute';
+			targetPane.style.left = '0px';
+			targetPane.style.top = '0px';
+			targetPane.style.width = '400px';
+			targetPane.style.height = '300px';
+			windowElement.append(targetPane);
+
+			document.body.append(windowElement);
+
+			// Simulate click on the title span
+			const clickEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true
+			});
+
+			titleSpan.dispatchEvent(clickEvent);
+
+			expect(mockBwinContext.addPane).toHaveBeenCalledWith(
+				'pane-1',
+				expect.objectContaining({
+					id: 'pane-1',
+					position: 'bottom',
+					title: 'Another Glass'
+				})
+			);
+
+			// Cleanup
+			document.body.removeChild(windowElement);
+		});
+
+		it('should ignore clicks on sill that are not within a minimized glass', () => {
+			const sill = createAndRegisterSill();
+
+			// Add a non-minimized-glass element to the sill
+			const otherElement = document.createElement('div');
+			otherElement.className = 'some-other-element';
+			sill?.append(otherElement);
+
+			document.body.append(windowElement);
+
+			// Simulate click on the other element
+			const clickEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true
+			});
+
+			otherElement.dispatchEvent(clickEvent);
+
+			// addPane should NOT be called
+			expect(mockBwinContext.addPane).not.toHaveBeenCalled();
+
+			// Cleanup
+			document.body.removeChild(windowElement);
+		});
+
 		it('should setup click listener on sill element', () => {
 			const sill = createAndRegisterSill();
 

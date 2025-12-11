@@ -98,7 +98,7 @@ export default {
 			props: {
 				title: paneTitle,
 				icon: paneIcon,
-				onclick: (clickEvent: MouseEvent) => {
+				onclick: () => {
 					// Restore logic will be handled by the sill manager's click handler
 					// which queries for .bw-minimized-glass elements
 				}
@@ -135,7 +135,7 @@ export default {
 					emitPaneEvent('onpaneminimized', payload);
 				}
 			} catch (err) {
-				// eslint-disable-next-line no-console
+				 
 				console.warn('[minimize] failed to emit onpaneminimized', err);
 			}
 		}

@@ -53,6 +53,7 @@
 			{#if isImageUrl(icon)}
 				<img src={icon} alt="" class="sw-minimized-glass-icon-img" />
 			{:else}
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -- Icon can be emoji or HTML content -->
 				{@html icon}
 			{/if}
 		</span>

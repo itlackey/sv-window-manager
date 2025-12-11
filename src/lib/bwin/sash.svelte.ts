@@ -56,6 +56,7 @@ export interface SashConstructorParams {
 	resizeStrategy?: 'classic' | 'natural';
 	parent?: ReactiveSash | null;
 	domNode?: HTMLElement | null;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Store holds arbitrary user-defined data
 	store?: Record<string, any>;
 	position: string; // Required
 	id?: string;
@@ -131,6 +132,7 @@ export class ReactiveSash {
 	 * Reactive store for arbitrary properties
 	 * Used for content, title, tabs, actions, etc.
 	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Store holds arbitrary user-defined data
 	store = $state<Record<string, any>>({});
 
 	// ==========================================

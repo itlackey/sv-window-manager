@@ -3,7 +3,6 @@ import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { getMetricsFromElement } from '../utils.js';
 import { getIntersectRect } from '../rect.js';
 import { Position } from '../position.js';
-import { BwinErrors } from '../errors.js';
 import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
 import { emitPaneEvent } from '../../events/dispatcher.js';
 import { buildPanePayload } from '../../events/payload.js';
@@ -250,6 +249,7 @@ export function restoreGlass(
 		// Filter out any 'id' property from originalStore to avoid confusion
 		// For placeholder replacement, the sash keeps its existing ID
 		const { id: _unusedId, ...storeWithoutId } = originalStore;
+		void _unusedId; // Intentionally unused - destructured to remove from object
 
 		// Use addPane which handles placeholder replacement
 		// Note: Don't pass id for placeholder replacement - the sash keeps its ID

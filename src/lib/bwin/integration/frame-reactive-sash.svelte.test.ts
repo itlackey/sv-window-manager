@@ -225,7 +225,7 @@ describe('Frame with Reactive Sash', () => {
 
 		sash.split({ position: Position.Right });
 
-		let renderedSashes: any[] = [];
+		const renderedSashes: any[] = [];
 
 		const { container: frameContainer } = render(Frame, {
 			target: container,

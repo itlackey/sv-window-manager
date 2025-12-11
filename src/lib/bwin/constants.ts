@@ -193,5 +193,6 @@ export const PLACEHOLDER_PANE_ID = '__bwin_placeholder__';
  */
 export const PLACEHOLDER_CONTENT = {
 	title: 'Empty Window',
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Component type requires generic parameter
 	component: PlaceholderPane as Component<any>
 } as const;

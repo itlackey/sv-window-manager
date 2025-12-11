@@ -34,9 +34,11 @@ import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
 // ============================================================================
 
 /** BwinContext reference (set during initialization) */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Stored for potential future use
 let bwinContext: BwinContext | undefined = $state();
 
 /** Debug mode flag */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Stored for potential future use
 let debugMode = $state(false);
 
 /** Debug utility instance */
@@ -68,7 +70,7 @@ const _hasActiveGlass = $derived(activeGlass !== undefined);
 
 /** Map of glasses by sash ID (computed from array) */
 const _glassesBySashId = $derived.by(() => {
-	const map = new Map<string, GlassInstance>();
+	const map = new SvelteMap<string, GlassInstance>();
 	glasses.forEach((glass) => map.set(glass.sashId, glass));
 	return map;
 });

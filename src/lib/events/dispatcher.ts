@@ -36,7 +36,7 @@ export function emitPaneEvent(type: PaneEventType, pane: PanePayload, context?: 
 			fn(event);
 		} catch (err) {
 			// Swallow to isolate subscribers; could add debug hook later
-			// eslint-disable-next-line no-console
+			 
 			console.error('[sv-window-manager] Uncaught error in pane event handler', err);
 		}
 	});

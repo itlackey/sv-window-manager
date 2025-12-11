@@ -10,8 +10,11 @@
 	import { CSS_CLASSES } from '../constants.js';
 	import * as SillState from '../managers/sill-state.svelte.js';
 
+	// Currently no props, but prepared for future expansion
+	// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 	interface SillProps {}
 
+	// eslint-disable-next-line no-empty-pattern
 	let {}: SillProps = $props();
 
 	let sillElement = $state<HTMLElement>();

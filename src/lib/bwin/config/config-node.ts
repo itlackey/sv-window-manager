@@ -2,7 +2,7 @@ import { parseSize, isPlainObject } from '../utils.js';
 import { Sash, type SashConstructorParams } from '../sash.js';
 import { Position, getOppositePosition } from '../position.js';
 import { BwinErrors } from '../errors.js';
-import { PLACEHOLDER_PANE_ID, PLACEHOLDER_CONTENT } from '../constants.js';
+import { PLACEHOLDER_CONTENT } from '../constants.js';
 
 const PRIMARY_NODE_DEFAULTS = {
 	size: '50%',

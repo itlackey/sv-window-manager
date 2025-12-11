@@ -41,7 +41,7 @@
 		icon = null,
 		actions = undefined,
 		draggable = true,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		 
 		sash: _sash,
 		binaryWindow,
 		component,
@@ -49,9 +49,9 @@
 	}: GlassProps = $props();
 
 	// Track title changes and emit event
-	let prevTitle: string | null | undefined = title as any;
+	let prevTitle: string | null | undefined = title as string | null | undefined;
 	$effect(() => {
-		const current = title as any as string | null | undefined;
+		const current = title as string | null | undefined;
 		if (current !== prevTitle) {
 			try {
 				const payload = buildPanePayload(_sash as Sash, undefined);
@@ -63,7 +63,9 @@
 					},
 					{ previousTitle: typeof prevTitle === 'string' ? prevTitle : undefined }
 				);
-			} catch {}
+			} catch {
+				// Ignore pane event emission errors
+			}
 			prevTitle = current;
 		}
 	});
@@ -115,7 +117,9 @@
 			});
 
 			// Clear previous content and append component container
+			// eslint-disable-next-line svelte/no-dom-manipulating -- Intentional: imperative Svelte component mounting
 			contentElement.innerHTML = '';
+			// eslint-disable-next-line svelte/no-dom-manipulating -- Intentional: imperative Svelte component mounting
 			contentElement.appendChild(container);
 
 			// Track for cleanup
@@ -177,6 +181,7 @@
 						{#if isImageUrl(icon)}
 							<img src={icon} alt="" class="glass-icon-img" />
 						{:else}
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -- Icon can be emoji or HTML content -->
 							{@html icon}
 						{/if}
 					</span>

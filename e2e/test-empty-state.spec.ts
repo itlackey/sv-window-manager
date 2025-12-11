@@ -99,7 +99,7 @@ test.describe('Empty State Functionality', () => {
 		await page.waitForTimeout(1500);
 
 		// Verify we have panes
-		let glassElements = page.locator('.glass');
+		const glassElements = page.locator('.glass');
 		const initialCount = await glassElements.count();
 		expect(initialCount).toBeGreaterThan(0);
 
@@ -146,7 +146,7 @@ test.describe('Empty State Functionality', () => {
 		await page.waitForTimeout(800);
 
 		// Verify pane was added
-		let glassCount = await page.locator('.glass').count();
+		const glassCount = await page.locator('.glass').count();
 		expect(glassCount).toBeGreaterThan(0);
 
 		// Add another session using the Add Chat button
