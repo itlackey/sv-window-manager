@@ -33,6 +33,8 @@ export interface UserComponentInstance {
 export interface CreateGlassProps {
 	/** Title text or element */
 	title?: string | HTMLElement | null;
+	/** Icon to display alongside the title (URL, emoji, or HTML string) */
+	icon?: string | null;
 	/** Content to display (ignored if component provided) */
 	content?: string | HTMLElement | null;
 	/** Tab labels */

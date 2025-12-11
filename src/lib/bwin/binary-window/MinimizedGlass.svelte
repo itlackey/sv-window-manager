@@ -4,6 +4,7 @@
 	 *
 	 * Represents a minimized glass in the sill (tab bar).
 	 * When clicked, restores the minimized pane to its original position.
+	 * Displays an optional icon and truncated title.
 	 *
 	 * Styling is provided by the global sill.css file which defines
 	 * the .bw-minimized-glass class with hover effects and transitions.
@@ -11,9 +12,14 @@
 
 	interface MinimizedGlassProps {
 		/**
-		 * Title to display for accessibility
+		 * Title to display in the minimized button
 		 */
 		title: string;
+
+		/**
+		 * Optional icon to display alongside the title (URL, emoji, or HTML string)
+		 */
+		icon?: string | null;
 
 		/**
 		 * Click handler to restore the minimized glass
@@ -21,7 +27,18 @@
 		onclick: (event: MouseEvent) => void;
 	}
 
-	let { title, onclick }: MinimizedGlassProps = $props();
+	let { title, icon = null, onclick }: MinimizedGlassProps = $props();
+
+	// Helper to check if icon is a URL (for image icons)
+	function isImageUrl(value: string | null | undefined): boolean {
+		if (!value) return false;
+		return (
+			value.startsWith('http://') ||
+			value.startsWith('https://') ||
+			value.startsWith('/') ||
+			value.startsWith('data:image/')
+		);
+	}
 </script>
 
 <button
@@ -30,7 +47,18 @@
 	type="button"
 	aria-label={`Restore ${title}`}
 	title={`Restore ${title}`}
-></button>
+>
+	{#if icon}
+		<span class="bw-minimized-glass-icon">
+			{#if isImageUrl(icon)}
+				<img src={icon} alt="" class="bw-minimized-glass-icon-img" />
+			{:else}
+				{@html icon}
+			{/if}
+		</span>
+	{/if}
+	<span class="bw-minimized-glass-title">{title}</span>
+</button>
 
 <!--
   Styling is defined in src/lib/bwin/css/sill.css
@@ -40,4 +68,5 @@
   - Focus-visible outline
   - Active state transform
   - Transition animations
+  - Icon and title layout with truncation
 -->

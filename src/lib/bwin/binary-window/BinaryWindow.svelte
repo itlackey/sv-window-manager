@@ -744,6 +744,7 @@
 					{#if !sash.store?.isPlaceholder}
 						<Glass
 							title={sash.store.title}
+							icon={sash.store.icon}
 							actions={sash.store.actions}
 							draggable={sash.store.draggable !== false}
 							{sash}

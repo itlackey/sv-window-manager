@@ -88,6 +88,7 @@ export default {
 		}
 
 		const paneTitle = (store.title as string) || 'Untitled';
+		const paneIcon = (store.icon as string) || null;
 
 		// Create MinimizedGlass component using Svelte's mount API
 		const minimizedContainer = document.createElement('div');
@@ -96,6 +97,7 @@ export default {
 			target: minimizedContainer,
 			props: {
 				title: paneTitle,
+				icon: paneIcon,
 				onclick: (clickEvent: MouseEvent) => {
 					// Restore logic will be handled by the sill manager's click handler
 					// which queries for .bw-minimized-glass elements
