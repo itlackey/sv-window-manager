@@ -54,7 +54,7 @@ export class GlassManager {
 
 	/** Map of glasses by sash ID (computed from array) */
 	glassesBySashId = $derived.by(() => {
-		const map = new Map<string, GlassInstance>();
+		const map = new SvelteMap<string, GlassInstance>();
 		this.glasses.forEach((glass) => map.set(glass.sashId, glass));
 		return map;
 	});

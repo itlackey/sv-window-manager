@@ -1,8 +1,6 @@
-import { mount } from 'svelte';
 import { getMetricsFromElement } from '../utils.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { BwinErrors } from '../errors.js';
-import MinimizedGlass from './MinimizedGlass.svelte';
 import { emitPaneEvent } from '../../events/dispatcher.js';
 import { buildPanePayload } from '../../events/payload.js';
 import type { BwinContext } from '../types.js';
@@ -20,12 +18,75 @@ interface BoundingRect {
 /**
  * Extended HTMLElement with custom bwin properties for minimized glass restoration
  */
-interface BwinMinimizedElement extends HTMLElement {
-	bwGlassElement?: Element | null;
+export interface BwinMinimizedElement extends HTMLElement {
 	bwOriginalPosition?: string | null;
 	bwOriginalBoundingRect?: BoundingRect;
 	bwOriginalSashId?: string | null;
 	bwOriginalStore?: Record<string, unknown>;
+}
+
+/**
+ * Helper to check if icon is a URL (for image icons)
+ */
+function isImageUrl(value: string | null | undefined): boolean {
+	if (!value) return false;
+	return (
+		value.startsWith('http://') ||
+		value.startsWith('https://') ||
+		value.startsWith('/') ||
+		value.startsWith('data:image/')
+	);
+}
+
+/**
+ * Creates a minimized glass button element (plain DOM, no Svelte component)
+ * This is simpler and avoids component lifecycle complexity.
+ */
+function createMinimizedGlassElement(title: string, icon: string | null): HTMLButtonElement {
+	const button = document.createElement('button');
+	button.className = CSS_CLASSES.MINIMIZED_GLASS;
+	button.type = 'button';
+	button.setAttribute('aria-label', `Restore ${title}`);
+	button.title = `Restore ${title}`;
+
+	// Add icon if provided
+	if (icon) {
+		const iconSpan = document.createElement('span');
+		iconSpan.className = 'sw-minimized-glass-icon';
+
+		if (isImageUrl(icon)) {
+			const img = document.createElement('img');
+			img.src = icon;
+			img.alt = '';
+			img.className = 'sw-minimized-glass-icon-img';
+			iconSpan.appendChild(img);
+		} else {
+			// Emoji or HTML icon
+			iconSpan.innerHTML = icon;
+		}
+
+		button.appendChild(iconSpan);
+	}
+
+	// Add title
+	const titleSpan = document.createElement('span');
+	titleSpan.className = 'sw-minimized-glass-title';
+	titleSpan.textContent = title;
+	button.appendChild(titleSpan);
+
+	return button;
+}
+
+/**
+ * Cleanup a minimized glass element by clearing stored references.
+ * Simple cleanup since we use plain DOM elements (no Svelte unmount needed).
+ */
+export function cleanupMinimizedGlass(element: BwinMinimizedElement): void {
+	// Clear references to allow garbage collection
+	element.bwOriginalBoundingRect = undefined;
+	element.bwOriginalStore = undefined;
+	element.bwOriginalSashId = undefined;
+	element.bwOriginalPosition = undefined;
 }
 
 /**
@@ -49,12 +110,9 @@ export default {
 
 		// If sill doesn't exist, ensure it's created before proceeding
 		if (!sillEl) {
-			// Call ensureSillElement if available to create/retrieve sill element
 			if (typeof binaryWindow.ensureSillElement === 'function') {
 				sillEl = binaryWindow.ensureSillElement();
 			}
-
-			// If still no sill element, throw error
 			if (!sillEl) {
 				throw BwinErrors.sillElementNotFound();
 			}
@@ -66,9 +124,9 @@ export default {
 			(el) => (el as BwinMinimizedElement).bwOriginalSashId === paneSashId
 		);
 		if (alreadyMinimized) {
-			// Already minimized, don't create duplicate
 			return;
 		}
+
 		const panePosition = paneEl?.getAttribute(DATA_ATTRIBUTES.POSITION);
 
 		// Preserve the store (title, content, etc.) before removing the pane
@@ -76,7 +134,7 @@ export default {
 		const sash = paneSashId ? rootSash?.getById(paneSashId) : null;
 		const store = { ...(sash?.store || {}) };
 
-		// Extract title and content from the actual Glass DOM element to ensure we capture them
+		// Extract title and content from the actual Glass DOM element
 		const glassTitleEl = glassEl?.querySelector(`.${CSS_CLASSES.GLASS_TITLE}`);
 		const glassContentEl = glassEl?.querySelector(`.${CSS_CLASSES.GLASS_CONTENT}`);
 
@@ -90,52 +148,33 @@ export default {
 		const paneTitle = (store.title as string) || 'Untitled';
 		const paneIcon = (store.icon as string) || null;
 
-		// Create MinimizedGlass component using Svelte's mount API
-		const minimizedContainer = document.createElement('div');
-
-		mount(MinimizedGlass, {
-			target: minimizedContainer,
-			props: {
-				title: paneTitle,
-				icon: paneIcon,
-				onclick: (clickEvent: MouseEvent) => {
-					// Restore logic will be handled by the sill manager's click handler
-					// which queries for .bw-minimized-glass elements
-				}
-			}
-		});
-
-		// Extract the button element from the container
-		const minimizedGlassNode = minimizedContainer.firstElementChild;
-
-		if (!(minimizedGlassNode instanceof HTMLElement)) {
-			throw BwinErrors.minimizedGlassCreationFailed();
-		}
-
-		const minimizedGlassEl = minimizedGlassNode as BwinMinimizedElement;
-		sillEl.append(minimizedGlassEl);
+		// Create minimized glass button (plain DOM element - no Svelte component)
+		const minimizedGlassEl = createMinimizedGlassElement(
+			paneTitle,
+			paneIcon
+		) as BwinMinimizedElement;
 
 		// Store restoration data on the element
-		minimizedGlassEl.bwGlassElement = glassEl;
 		minimizedGlassEl.bwOriginalPosition = panePosition;
 		minimizedGlassEl.bwOriginalBoundingRect =
 			paneEl instanceof HTMLElement ? getMetricsFromElement(paneEl) : undefined;
 		minimizedGlassEl.bwOriginalSashId = paneSashId;
 		minimizedGlassEl.bwOriginalStore = store;
 
+		// Add to sill
+		sillEl.appendChild(minimizedGlassEl);
+
+		// Remove the pane
 		if (paneSashId) {
-			// Perform removal first per spec (post-action emission)
 			binaryWindow.removePane(paneSashId);
 
 			try {
-				// Emit minimized using pre-removal sash and pane element bounds
 				if (sash) {
 					const payload = buildPanePayload(sash, paneEl as HTMLElement | null);
 					payload.state = 'minimized';
 					emitPaneEvent('onpaneminimized', payload);
 				}
 			} catch (err) {
-				// eslint-disable-next-line no-console
 				console.warn('[minimize] failed to emit onpaneminimized', err);
 			}
 		}

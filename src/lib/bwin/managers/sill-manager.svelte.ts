@@ -1,5 +1,4 @@
 import type { BwinContext } from '../context.js';
-import type { Sash } from '../sash.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { getMetricsFromElement } from '../utils.js';
 import { getIntersectRect } from '../rect.js';
@@ -174,18 +173,15 @@ export class SillManager {
 			bwOriginalBoundingRect?: DOMRect;
 			bwOriginalSashId?: string;
 			bwOriginalPosition?: string;
-			bwGlassElement?: HTMLElement;
 			bwOriginalStore?: Record<string, unknown>;
 		}
 	): void {
 		this.debugLog('[restoreGlass] Starting restore:', {
-			minimizedGlassEl,
 			hasWindowElement: !!this.bwinContext.windowElement,
 			hasRootSash: !!this.bwinContext.rootSash,
 			originalBoundingRect: minimizedGlassEl.bwOriginalBoundingRect,
 			originalSashId: minimizedGlassEl.bwOriginalSashId,
-			originalPosition: minimizedGlassEl.bwOriginalPosition,
-			glassElement: minimizedGlassEl.bwGlassElement
+			originalPosition: minimizedGlassEl.bwOriginalPosition
 		});
 
 		if (!this.bwinContext.windowElement || !this.bwinContext.rootSash) {

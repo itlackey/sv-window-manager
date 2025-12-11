@@ -69,7 +69,7 @@
 	// Include treeVersion in the derivation to trigger reactivity when tree structure changes
 	const panes = $derived.by(() => {
 		// Access treeVersion to make this reactive to tree changes
-		const _ = treeVersion;
+		void treeVersion;
 		if (!rootSash) return [];
 		const result: Sash[] = [];
 		rootSash.walk((sash) => {
@@ -80,7 +80,7 @@
 
 	const muntins = $derived.by(() => {
 		// Access treeVersion to make this reactive to tree changes
-		const _ = treeVersion;
+		void treeVersion;
 		if (!rootSash) return [];
 		const result: Sash[] = [];
 		rootSash.walk((sash) => {
@@ -244,8 +244,11 @@
 
 				// Emit order-changed for both panes if a common parent exists
 				if (parent) {
-					const sourceIndex = getLeafIndexWithin(parent, sourceSash.id);
-					const targetIndex = getLeafIndexWithin(parent, targetSash.id);
+					// Calculate new indices after swap (currently unused, but kept for future use)
+					const _sourceIndex = getLeafIndexWithin(parent, sourceSash.id);
+					const _targetIndex = getLeafIndexWithin(parent, targetSash.id);
+					void _sourceIndex;
+					void _targetIndex;
 
 					try {
 						const srcEl = sourcePaneEl as HTMLElement;
@@ -254,7 +257,9 @@
 							groupId: parent.id,
 							previousIndex: prevSourceIndex ?? undefined
 						});
-					} catch {}
+					} catch {
+						// Ignore event emission errors to keep UI responsive
+					}
 
 					try {
 						const tgtEl = targetPaneEl as HTMLElement;
@@ -263,7 +268,9 @@
 							groupId: parent.id,
 							previousIndex: prevTargetIndex ?? undefined
 						});
-					} catch {}
+					} catch {
+						// Ignore event emission errors to keep UI responsive
+					}
 				}
 			}
 		}

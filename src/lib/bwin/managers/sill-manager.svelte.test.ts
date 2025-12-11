@@ -239,7 +239,6 @@ describe('SillManager - Reactive State', () => {
 			bwOriginalBoundingRect?: DOMRect;
 			bwOriginalSashId?: string;
 			bwOriginalPosition?: string;
-			bwGlassElement?: HTMLElement;
 			bwOriginalStore?: Record<string, unknown>;
 		};
 		let targetPane: HTMLElement;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Sash } from '../sash.js';
-	import { MUNTIN_SIZE, DATA_ATTRIBUTES } from '../constants.js';
+	import { MUNTIN_SIZE } from '../constants.js';
 	import { onMount } from 'svelte';
 
 	interface MuntinProps {

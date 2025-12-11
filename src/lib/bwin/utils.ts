@@ -223,6 +223,7 @@ export function strictAssign<T extends Record<string, unknown>, S extends Record
  * @param limit - The time limit in milliseconds
  * @returns The throttled function
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Generic function type requires any for flexibility
 export function throttle<T extends (...args: any[]) => any>(
 	func: T,
 	limit: number

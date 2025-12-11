@@ -47,11 +47,11 @@
 	);
 
 	// Debug utility to gate console logs
-	function debugLog(...args: any[]) {
+	function debugLog(...args: unknown[]) {
 		if (debug) console.log('[BinaryWindow]', ...args);
 	}
 
-	function debugWarn(...args: any[]) {
+	function debugWarn(...args: unknown[]) {
 		if (debug) console.warn('[BinaryWindow]', ...args);
 	}
 

@@ -326,7 +326,7 @@
 						>&lt;script lang="ts"&gt;
   import BinaryWindow from 'sv-window-manager';
   import YourComponent from './YourComponent.svelte';
-  import type {'{'} Component {'}'} from 'svelte';
+  import type {'{'} Component } from 'svelte';
 
   let bwin = $state&lt;BinaryWindow | undefined&gt;();
 &lt;/script&gt;</code
@@ -336,7 +336,7 @@
 				<pre><code
 						>&lt;BinaryWindow
   bind:this={'{bwin}'}
-  settings={'{{'} fitContainer: true {'}}'}
+  settings={'{{'} fitContainer: true }}
 /&gt;</code
 					></pre>
 
@@ -356,11 +356,11 @@
     component: YourComponent,   // Svelte component to render
     componentProps: {'{'}          // Props passed to component
       sessionId: 'session-1',
-      data: {'{'} title: 'My Pane' {'}'}
-    {'}'},
+      data: {'{'} title: 'My Pane' }
+    },
     title: 'My Pane Title'      // Glass header title
-  {'}'});
-{'}'}</code
+  });
+}</code
 					></pre>
 
 				<h3>Complete Example</h3>
@@ -368,7 +368,7 @@
 						>&lt;script lang="ts"&gt;
   import BinaryWindow from 'sv-window-manager';
   import ChatComponent from './ChatComponent.svelte';
-  import type {'{'} Component {'}'} from 'svelte';
+  import type {'{'} Component } from 'svelte';
 
   let bwin = $state&lt;BinaryWindow | undefined&gt;();
 
@@ -392,14 +392,14 @@
       component: ChatComponent,
       componentProps: {'{'}
         sessionId: id,
-        data: {'{'} title, timestamp: new Date() {'}'}
-      {'}'},
+        data: {'{'} title, timestamp: new Date() }
+      },
       title
-    {'}'});
-  {'}'}
+    });
+  }
 &lt;/script&gt;
 
-&lt;BinaryWindow bind:this={'{bwin}'} settings={'{{'} fitContainer: true {'}}'}  /&gt;
+&lt;BinaryWindow bind:this={'{bwin}'} settings={'{{'} fitContainer: true }}  /&gt;
 
 &lt;button onclick={'{() => addChatSession("chat-1", "Chat Session")}'}&gt;
   Add Chat
@@ -536,7 +536,7 @@ interface AddPaneProps {'{'}
 
   // Additional Glass props can be passed as needed
   [key: string]: any;
-{'}'}</code
+}</code
 					></pre>
 			</section>
 		{/if}
@@ -547,13 +547,17 @@ interface AddPaneProps {'{'}
 
 				<h3>External Sill Placement</h3>
 				<p>
-					By default, the sill (taskbar for minimized windows) is rendered at the bottom of the BinaryWindow.
-					You can place the sill anywhere on your page by using the <code>externalSill</code> prop and the
+					By default, the sill (taskbar for minimized windows) is rendered at the bottom of the
+					BinaryWindow. You can place the sill anywhere on your page by using the <code
+						>externalSill</code
+					>
+					prop and the
 					<code>Sill</code> component.
 				</p>
 
 				<div class="code-block">
-					<pre><code>{`<!-- Import the Sill component -->
+					<pre><code
+							>{`<!-- Import the Sill component -->
 <script>
   import { BinaryWindow, Sill } from 'sv-window-manager';
 </script>
@@ -568,12 +572,14 @@ interface AddPaneProps {'{'}
     settings={mySettings}
     externalSill={true}
   />
-</div>`}</code></pre>
+</div>`}</code
+						></pre>
 				</div>
 
 				<p>
-					The <code>Sill</code> component will automatically receive minimized windows from the BinaryWindow.
-					You can style the sill container using CSS custom properties like <code>--sw-sill-width</code>.
+					The <code>Sill</code> component will automatically receive minimized windows from the
+					BinaryWindow. You can style the sill container using CSS custom properties like
+					<code>--sw-sill-width</code>.
 				</p>
 
 				<p>
@@ -845,7 +851,7 @@ interface AddPaneProps {'{'}
   --sw-muntin-bg-color: #3a3a3a;
   --sw-sill-bg-color: rgba(255, 255, 255, 0.05);
   --sw-accent-color: #0078d4;
-{'}'}</code
+}</code
 					></pre>
 
 				<h3>Example: Custom Accent Color</h3>
@@ -854,7 +860,7 @@ interface AddPaneProps {'{'}
   /* Purple accent theme */
   --sw-accent-color: #7c3aed;
   --sw-glass-action-hover-color: #7c3aed;
-{'}'}</code
+}</code
 					></pre>
 			</section>
 		{/if}
@@ -926,7 +932,7 @@ interface AddPaneProps {'{'}
 
 				<h3>Subscribe in your app</h3>
 				<pre><code
-						>import {'{'} addEventHandler, onpaneresized {'}'} from 'sv-window-manager';
+						>import {'{'} addEventHandler, onpaneresized } from 'sv-window-manager';
 
 // All pane events
 const offAll = addEventHandler((evt) => console.log(evt.type, evt.payload));

@@ -247,7 +247,6 @@ describe('SillState - Reactive State Module', () => {
 			bwOriginalBoundingRect?: DOMRect;
 			bwOriginalSashId?: string;
 			bwOriginalPosition?: string;
-			bwGlassElement?: HTMLElement;
 			bwOriginalStore?: Record<string, unknown>;
 		};
 		let targetPane: HTMLElement;
@@ -494,6 +493,148 @@ describe('SillState - Reactive State Module', () => {
 			document.body.removeChild(windowElement);
 		});
 
+		it('should restore glass when clicking on child elements (icon/title) inside minimized glass button', () => {
+			const sill = createAndRegisterSill();
+
+			// Create minimized glass element with child elements (simulating real DOM structure)
+			const minimizedGlass = document.createElement('button') as any;
+			minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
+			minimizedGlass.bwOriginalSashId = 'pane-1';
+			minimizedGlass.bwOriginalPosition = 'right';
+			minimizedGlass.bwOriginalBoundingRect = new DOMRect(0, 0, 200, 150);
+			minimizedGlass.bwOriginalStore = { title: 'Test Glass' };
+
+			// Add child elements like icon and title spans
+			const iconSpan = document.createElement('span');
+			iconSpan.className = 'sw-minimized-glass-icon';
+			iconSpan.textContent = '📄';
+
+			const titleSpan = document.createElement('span');
+			titleSpan.className = 'sw-minimized-glass-title';
+			titleSpan.textContent = 'Test Glass';
+
+			minimizedGlass.appendChild(iconSpan);
+			minimizedGlass.appendChild(titleSpan);
+			sill?.append(minimizedGlass);
+
+			// Create target pane element
+			const targetPane = document.createElement('div');
+			targetPane.className = CSS_CLASSES.PANE;
+			targetPane.setAttribute('data-sash-id', 'pane-1');
+			targetPane.style.position = 'absolute';
+			targetPane.style.left = '0px';
+			targetPane.style.top = '0px';
+			targetPane.style.width = '400px';
+			targetPane.style.height = '300px';
+			windowElement.append(targetPane);
+
+			document.body.append(windowElement);
+
+			// Simulate click on the CHILD element (icon span), not the button itself
+			// This tests the fix: closest() should find the parent minimized glass button
+			const clickEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true
+			});
+
+			// Dispatch click on the icon span (child element)
+			iconSpan.dispatchEvent(clickEvent);
+
+			// The click handler should use closest() to find the minimized glass parent
+			// and restore it correctly
+			expect(mockBwinContext.addPane).toHaveBeenCalledWith(
+				'pane-1',
+				expect.objectContaining({
+					id: 'pane-1',
+					position: 'right',
+					title: 'Test Glass'
+				})
+			);
+
+			// Also verify the minimized glass element was removed
+			expect(sill?.contains(minimizedGlass)).toBe(false);
+
+			// Cleanup
+			document.body.removeChild(windowElement);
+		});
+
+		it('should restore glass when clicking on title span inside minimized glass button', () => {
+			const sill = createAndRegisterSill();
+
+			// Create minimized glass element with child elements
+			const minimizedGlass = document.createElement('button') as any;
+			minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
+			minimizedGlass.bwOriginalSashId = 'pane-1';
+			minimizedGlass.bwOriginalPosition = 'bottom';
+			minimizedGlass.bwOriginalBoundingRect = new DOMRect(0, 0, 300, 200);
+			minimizedGlass.bwOriginalStore = { title: 'Another Glass' };
+
+			const titleSpan = document.createElement('span');
+			titleSpan.className = 'sw-minimized-glass-title';
+			titleSpan.textContent = 'Another Glass';
+
+			minimizedGlass.appendChild(titleSpan);
+			sill?.append(minimizedGlass);
+
+			// Create target pane element
+			const targetPane = document.createElement('div');
+			targetPane.className = CSS_CLASSES.PANE;
+			targetPane.setAttribute('data-sash-id', 'pane-1');
+			targetPane.style.position = 'absolute';
+			targetPane.style.left = '0px';
+			targetPane.style.top = '0px';
+			targetPane.style.width = '400px';
+			targetPane.style.height = '300px';
+			windowElement.append(targetPane);
+
+			document.body.append(windowElement);
+
+			// Simulate click on the title span
+			const clickEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true
+			});
+
+			titleSpan.dispatchEvent(clickEvent);
+
+			expect(mockBwinContext.addPane).toHaveBeenCalledWith(
+				'pane-1',
+				expect.objectContaining({
+					id: 'pane-1',
+					position: 'bottom',
+					title: 'Another Glass'
+				})
+			);
+
+			// Cleanup
+			document.body.removeChild(windowElement);
+		});
+
+		it('should ignore clicks on sill that are not within a minimized glass', () => {
+			const sill = createAndRegisterSill();
+
+			// Add a non-minimized-glass element to the sill
+			const otherElement = document.createElement('div');
+			otherElement.className = 'some-other-element';
+			sill?.append(otherElement);
+
+			document.body.append(windowElement);
+
+			// Simulate click on the other element
+			const clickEvent = new MouseEvent('click', {
+				bubbles: true,
+				cancelable: true
+			});
+
+			otherElement.dispatchEvent(clickEvent);
+
+			// addPane should NOT be called
+			expect(mockBwinContext.addPane).not.toHaveBeenCalled();
+
+			// Cleanup
+			document.body.removeChild(windowElement);
+		});
+
 		it('should setup click listener on sill element', () => {
 			const sill = createAndRegisterSill();
 
@@ -590,6 +731,139 @@ describe('SillState - Reactive State Module', () => {
 			SillState.restoreGlass(minimizedGlass);
 
 			expect(mockBwinContext.addPane).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('Memory Management - Multiple Minimize/Restore Cycles', () => {
+		it('should cleanup component instance on restore', () => {
+			const sill = createAndRegisterSill();
+
+			// Create minimized glass with a mock component instance
+			const minimizedGlass = document.createElement('button') as any;
+			minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
+			minimizedGlass.bwOriginalSashId = 'pane-1';
+			minimizedGlass.bwOriginalPosition = 'right';
+			minimizedGlass.bwOriginalBoundingRect = new DOMRect(0, 0, 200, 150);
+			minimizedGlass.bwOriginalStore = { title: 'Test' };
+			// Simulate stored component instance
+			minimizedGlass.bwComponentInstance = { mockComponent: true };
+			sill?.append(minimizedGlass);
+
+			// Create target pane element
+			const targetPane = document.createElement('div');
+			targetPane.className = CSS_CLASSES.PANE;
+			targetPane.setAttribute('data-sash-id', 'pane-1');
+			targetPane.style.cssText = 'position:absolute;left:0;top:0;width:400px;height:300px;';
+			windowElement.append(targetPane);
+
+			document.body.append(windowElement);
+
+			// Simulate click to trigger restore
+			const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+			minimizedGlass.dispatchEvent(clickEvent);
+
+			// Component instance should be cleared
+			expect(minimizedGlass.bwComponentInstance).toBeUndefined();
+
+			// Cleanup
+			document.body.removeChild(windowElement);
+		});
+
+		it('should handle multiple minimize/restore cycles without accumulating memory', () => {
+			const sill = createAndRegisterSill();
+
+			document.body.append(windowElement);
+
+			// Simulate 10 minimize/restore cycles
+			for (let i = 0; i < 10; i++) {
+				const minimizedGlass = document.createElement('button') as any;
+				minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
+				minimizedGlass.bwOriginalSashId = 'pane-1';
+				minimizedGlass.bwOriginalPosition = 'right';
+				minimizedGlass.bwOriginalBoundingRect = new DOMRect(0, 0, 200, 150);
+				minimizedGlass.bwOriginalStore = { title: `Test ${i}` };
+				minimizedGlass.bwComponentInstance = { id: i };
+				sill?.append(minimizedGlass);
+
+				// Create target pane
+				const targetPane = document.createElement('div');
+				targetPane.className = CSS_CLASSES.PANE;
+				targetPane.setAttribute('data-sash-id', 'pane-1');
+				targetPane.style.cssText = 'position:absolute;left:0;top:0;width:400px;height:300px;';
+				windowElement.append(targetPane);
+
+				// Trigger restore via click
+				const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+				minimizedGlass.dispatchEvent(clickEvent);
+
+				// Verify cleanup
+				expect(minimizedGlass.bwComponentInstance).toBeUndefined();
+				expect(sill?.contains(minimizedGlass)).toBe(false);
+
+				// Remove target pane for next cycle
+				targetPane.remove();
+			}
+
+			// Sill should be empty after all cycles
+			expect(sill?.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`).length).toBe(0);
+
+			document.body.removeChild(windowElement);
+		});
+
+		it('should cleanup all minimized glasses on sill unregister', () => {
+			const sill = createAndRegisterSill();
+
+			// Add multiple minimized glasses with component instances
+			const glasses: any[] = [];
+			for (let i = 0; i < 5; i++) {
+				const glass = document.createElement('button') as any;
+				glass.className = CSS_CLASSES.MINIMIZED_GLASS;
+				glass.bwOriginalSashId = `pane-${i}`;
+				glass.bwComponentInstance = { id: i };
+				sill?.append(glass);
+				glasses.push(glass);
+			}
+
+			expect(sill?.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`).length).toBe(5);
+
+			// Unregister sill - should cleanup all component instances
+			SillState.unregisterSillElement();
+
+			// All component instances should be cleared
+			glasses.forEach((glass) => {
+				expect(glass.bwComponentInstance).toBeUndefined();
+			});
+		});
+
+		it('should clear originalStore reference on restore to prevent memory leaks', () => {
+			const sill = createAndRegisterSill();
+
+			// Create minimized glass with originalStore reference
+			const minimizedGlass = document.createElement('button') as any;
+			minimizedGlass.className = CSS_CLASSES.MINIMIZED_GLASS;
+			minimizedGlass.bwOriginalSashId = 'pane-1';
+			minimizedGlass.bwOriginalPosition = 'right';
+			minimizedGlass.bwOriginalBoundingRect = new DOMRect(0, 0, 200, 150);
+			minimizedGlass.bwOriginalStore = { title: 'Test', component: {}, data: {} };
+			sill?.append(minimizedGlass);
+
+			// Create target pane
+			const targetPane = document.createElement('div');
+			targetPane.className = CSS_CLASSES.PANE;
+			targetPane.setAttribute('data-sash-id', 'pane-1');
+			targetPane.style.cssText = 'position:absolute;left:0;top:0;width:400px;height:300px;';
+			windowElement.append(targetPane);
+
+			document.body.append(windowElement);
+
+			// Trigger restore
+			const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+			minimizedGlass.dispatchEvent(clickEvent);
+
+			// originalStore reference should be cleared to allow garbage collection
+			expect(minimizedGlass.bwOriginalStore).toBeUndefined();
+
+			document.body.removeChild(windowElement);
 		});
 	});
 });

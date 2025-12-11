@@ -1,5 +1,4 @@
 import type { Component } from 'svelte';
-import type { Sash } from '../sash.js';
 
 /**
  * Represents a mounted Glass component instance
@@ -40,7 +39,7 @@ export interface CreateGlassProps {
 	/** Tab labels */
 	tabs?: (string | { label: string })[];
 	/** Action buttons */
-	actions?: Array<{ label: string; onClick: Function }> | boolean;
+	actions?: Array<{ label: string; onClick: () => void }> | boolean;
 	/** Whether glass is draggable */
 	draggable?: boolean;
 	/** User Svelte component to mount */

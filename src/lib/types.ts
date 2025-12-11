@@ -7,6 +7,7 @@ export interface BwinConfig {
 	/** Whether the window manager should fit its container */
 	fitContainer?: boolean;
 	/** Additional BinaryWindow configuration options */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Flexible config extension
 	[key: string]: any;
 }
 
@@ -19,6 +20,7 @@ export interface PaneConfig {
 	/** The content element to display in the pane */
 	content?: HTMLElement;
 	/** Additional pane configuration options */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Flexible config extension
 	[key: string]: any;
 }
 
@@ -29,6 +31,7 @@ export interface BwinHostProps {
 	/** Configuration for the BinaryWindow instance */
 	config?: BwinConfig;
 	/** Callback when the BinaryWindow instance is created */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Event handler with flexible parameters
 	oncreated?: (event: any, node: any) => void;
 	/** Callback when the window layout is updated */
 	onupdated?: () => void;
@@ -41,7 +44,8 @@ export interface SessionComponentProps {
 	/** Unique identifier for the session */
 	sessionId: string;
 	/** Additional data for the session component */
-	data?: Record<string, any>;
+	data?: Record<string, unknown>;
 	/** Additional props */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Flexible props extension
 	[key: string]: any;
 }

@@ -27,7 +27,9 @@
 		try {
 			const payload = buildPanePayload(sash, paneElement);
 			emitPaneEvent('onpanefocused', payload);
-		} catch {}
+		} catch {
+			// Ignore event emission errors to keep UI responsive
+		}
 	}
 
 	function handleFocusOut() {
@@ -36,7 +38,9 @@
 		try {
 			const payload = buildPanePayload(sash, paneElement);
 			emitPaneEvent('onpaneblurred', payload);
-		} catch {}
+		} catch {
+			// Ignore event emission errors to keep UI responsive
+		}
 	}
 
 	// REFACTORED: Use onMount lifecycle hook instead of $effect

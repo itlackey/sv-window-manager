@@ -3,10 +3,13 @@ import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { getMetricsFromElement } from '../utils.js';
 import { getIntersectRect } from '../rect.js';
 import { Position } from '../position.js';
-import { BwinErrors } from '../errors.js';
 import { createDebugger, type Debugger } from '../utils/debug.svelte.js';
 import { emitPaneEvent } from '../../events/dispatcher.js';
 import { buildPanePayload } from '../../events/payload.js';
+import {
+	cleanupMinimizedGlass,
+	type BwinMinimizedElement
+} from '../binary-window/actions.minimize.js';
 
 /**
  * Sill Reactive State Module (Svelte 5)
@@ -117,6 +120,16 @@ export function registerSillElement(element: HTMLElement): void {
  */
 export function unregisterSillElement(): void {
 	debugLog('[unregisterSillElement] Unregistering sill element');
+
+	// Cleanup all minimized glass components before destroying the sill
+	if (sillElement) {
+		const minimizedGlasses = sillElement.querySelectorAll(`.${CSS_CLASSES.MINIMIZED_GLASS}`);
+		minimizedGlasses.forEach((el) => {
+			cleanupMinimizedGlass(el as BwinMinimizedElement);
+		});
+		debugLog(`[unregisterSillElement] Cleaned up ${minimizedGlasses.length} minimized glasses`);
+	}
+
 	removeClickHandler();
 	sillElement = undefined;
 }
@@ -203,7 +216,6 @@ export function restoreGlass(
 		bwOriginalBoundingRect?: DOMRect;
 		bwOriginalSashId?: string;
 		bwOriginalPosition?: string;
-		bwGlassElement?: HTMLElement;
 		bwOriginalStore?: Record<string, unknown>;
 	}
 ): void {
@@ -213,13 +225,11 @@ export function restoreGlass(
 	}
 
 	debugLog('[restoreGlass] Starting restore:', {
-		minimizedGlassEl,
 		hasWindowElement: !!bwinContext.windowElement,
 		hasRootSash: !!bwinContext.rootSash,
 		originalBoundingRect: minimizedGlassEl.bwOriginalBoundingRect,
 		originalSashId: minimizedGlassEl.bwOriginalSashId,
-		originalPosition: minimizedGlassEl.bwOriginalPosition,
-		glassElement: minimizedGlassEl.bwGlassElement
+		originalPosition: minimizedGlassEl.bwOriginalPosition
 	});
 
 	if (!bwinContext.windowElement || !bwinContext.rootSash) {
@@ -250,6 +260,7 @@ export function restoreGlass(
 		// Filter out any 'id' property from originalStore to avoid confusion
 		// For placeholder replacement, the sash keeps its existing ID
 		const { id: _unusedId, ...storeWithoutId } = originalStore;
+		void _unusedId; // Intentionally unused - destructured to remove from object
 
 		// Use addPane which handles placeholder replacement
 		// Note: Don't pass id for placeholder replacement - the sash keeps its ID
@@ -434,22 +445,29 @@ function setupClickHandler(): void {
 	debugLog('[setupClickHandler] Setting up click handler on sill:', sillElement);
 
 	clickHandler = (event: MouseEvent) => {
+		// Use closest() to find the minimized glass button even when clicking on child elements
+		// (like the icon span or title span inside the button)
+		const minimizedGlassEl = (event.target as HTMLElement).closest(
+			`.${CSS_CLASSES.MINIMIZED_GLASS}`
+		) as BwinMinimizedElement | null;
+
 		debugLog('[Click] Click detected on sill:', {
 			target: event.target,
-			targetMatches: (event.target as HTMLElement).matches(`.${CSS_CLASSES.MINIMIZED_GLASS}`),
+			minimizedGlassEl,
 			targetClassName: (event.target as HTMLElement).className
 		});
 
-		if (!(event.target as HTMLElement).matches(`.${CSS_CLASSES.MINIMIZED_GLASS}`)) {
-			debugLog('[Click] Target is not a minimized glass, ignoring');
+		if (!minimizedGlassEl) {
+			debugLog('[Click] Target is not within a minimized glass, ignoring');
 			return;
 		}
 
 		debugLog('[Click] Restoring minimized glass...');
-		const minimizedGlassEl = event.target as HTMLElement;
 		restoreGlass(minimizedGlassEl);
+		// CRITICAL: Cleanup Svelte component before removing DOM element to prevent memory leaks
+		cleanupMinimizedGlass(minimizedGlassEl);
 		minimizedGlassEl.remove();
-		debugLog('[Click] Minimized glass removed');
+		debugLog('[Click] Minimized glass removed and component unmounted');
 	};
 
 	sillElement.addEventListener('click', clickHandler);

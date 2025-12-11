@@ -7,6 +7,7 @@ import type { PanePayload, PaneState, Position, Size } from './types.js';
  *
  * This function avoids DOM access unless `paneEl` is provided (SSR-safe by default).
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Accepts various sash object shapes
 export function buildPanePayload(sash: any, paneEl?: HTMLElement | null): PanePayload {
 	const id = pickString(sash?.id, sash?.pane?.id, sash?.store?.id, sash?.props?.id) || 'unknown';
 
@@ -45,21 +46,23 @@ function pickNumber(...vals: unknown[]): number | undefined {
 	for (const v of vals) if (typeof v === 'number' && Number.isFinite(v)) return v;
 }
 
-function normalizeSize(obj: any): Size | undefined {
-	if (!obj) return undefined;
-	const w = toInt(obj.width);
-	const h = toInt(obj.height);
+function normalizeSize(obj: unknown): Size | undefined {
+	if (!obj || typeof obj !== 'object') return undefined;
+	const o = obj as Record<string, unknown>;
+	const w = toInt(o.width);
+	const h = toInt(o.height);
 	if (w >= 0 && h >= 0) return { width: w, height: h };
 }
 
-function normalizePosition(obj: any): Position | undefined {
-	if (!obj) return undefined;
-	const x = toInt(obj.x);
-	const y = toInt(obj.y);
+function normalizePosition(obj: unknown): Position | undefined {
+	if (!obj || typeof obj !== 'object') return undefined;
+	const o = obj as Record<string, unknown>;
+	const x = toInt(o.x);
+	const y = toInt(o.y);
 	if (Number.isFinite(x) && Number.isFinite(y)) return { x, y };
 }
 
-function toInt(v: any): number {
+function toInt(v: unknown): number {
 	if (typeof v === 'number') return Math.round(v);
 	const n = Number(v);
 	return Number.isFinite(n) ? Math.round(n) : 0;

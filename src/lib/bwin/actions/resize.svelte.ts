@@ -199,7 +199,7 @@ export const resize: Action<HTMLElement, ResizeActionParams> = (node, params) =>
 				) as HTMLElement | null;
 				const payload = buildPanePayload(pane, el);
 				emitPaneEvent('onpaneresized', payload);
-			} catch (err) {
+			} catch {
 				// ignore emission errors to keep UI responsive
 			}
 		}

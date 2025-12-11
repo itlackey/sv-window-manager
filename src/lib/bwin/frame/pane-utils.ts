@@ -104,9 +104,11 @@ function addPaneSashToLeft(
 	let newLeftSashWidth = targetPaneSash.width / 2;
 
 	if (sizeParsed) {
-		sizeParsed < 1
-			? (newLeftSashWidth = targetPaneSash.width * sizeParsed)
-			: (newLeftSashWidth = sizeParsed);
+		if (sizeParsed < 1) {
+			newLeftSashWidth = targetPaneSash.width * sizeParsed;
+		} else {
+			newLeftSashWidth = sizeParsed;
+		}
 	}
 
 	const newLeftSash = new (targetPaneSash.constructor as typeof ReactiveSash)({
@@ -159,9 +161,11 @@ function addPaneSashToRight(
 	let newRightSashWidth = targetPaneSash.width / 2;
 
 	if (sizeParsed) {
-		sizeParsed < 1
-			? (newRightSashWidth = targetPaneSash.width * sizeParsed)
-			: (newRightSashWidth = sizeParsed);
+		if (sizeParsed < 1) {
+			newRightSashWidth = targetPaneSash.width * sizeParsed;
+		} else {
+			newRightSashWidth = sizeParsed;
+		}
 	}
 
 	const newLeftSash = new (targetPaneSash.constructor as typeof ReactiveSash)({
@@ -213,9 +217,11 @@ function addPaneSashToTop(
 	let newTopSashHeight = targetPaneSash.height / 2;
 
 	if (sizeParsed) {
-		sizeParsed < 1
-			? (newTopSashHeight = targetPaneSash.height * sizeParsed)
-			: (newTopSashHeight = sizeParsed);
+		if (sizeParsed < 1) {
+			newTopSashHeight = targetPaneSash.height * sizeParsed;
+		} else {
+			newTopSashHeight = sizeParsed;
+		}
 	}
 
 	const newTopSash = new (targetPaneSash.constructor as typeof ReactiveSash)({
@@ -267,9 +273,11 @@ function addPaneSashToBottom(
 	let newBottomSashHeight = targetPaneSash.height / 2;
 
 	if (sizeParsed) {
-		sizeParsed < 1
-			? (newBottomSashHeight = targetPaneSash.height * sizeParsed)
-			: (newBottomSashHeight = sizeParsed);
+		if (sizeParsed < 1) {
+			newBottomSashHeight = targetPaneSash.height * sizeParsed;
+		} else {
+			newBottomSashHeight = sizeParsed;
+		}
 	}
 
 	const newTopSash = new (targetPaneSash.constructor as typeof ReactiveSash)({
