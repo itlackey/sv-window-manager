@@ -1,8 +1,6 @@
-import { mount, unmount } from 'svelte';
 import { getMetricsFromElement } from '../utils.js';
 import { CSS_CLASSES, DATA_ATTRIBUTES } from '../constants.js';
 import { BwinErrors } from '../errors.js';
-import MinimizedGlass from './MinimizedGlass.svelte';
 import { emitPaneEvent } from '../../events/dispatcher.js';
 import { buildPanePayload } from '../../events/payload.js';
 import type { BwinContext } from '../types.js';
@@ -21,37 +19,74 @@ interface BoundingRect {
  * Extended HTMLElement with custom bwin properties for minimized glass restoration
  */
 export interface BwinMinimizedElement extends HTMLElement {
-	bwGlassElement?: Element | null;
 	bwOriginalPosition?: string | null;
 	bwOriginalBoundingRect?: BoundingRect;
 	bwOriginalSashId?: string | null;
 	bwOriginalStore?: Record<string, unknown>;
-	/** Svelte component instance for proper cleanup */
-	bwComponentInstance?: Record<string, unknown>;
 }
 
 /**
- * Cleanup a minimized glass element by unmounting its Svelte component
- * and clearing all references to prevent memory leaks.
- * Must be called before removing the element from the DOM.
+ * Helper to check if icon is a URL (for image icons)
  */
-export function cleanupMinimizedGlass(element: BwinMinimizedElement): void {
-	// Unmount Svelte component if present
-	if (element.bwComponentInstance) {
-		try {
-			unmount(element.bwComponentInstance);
-		} catch {
-			// Ignore unmount errors - component may already be destroyed
+function isImageUrl(value: string | null | undefined): boolean {
+	if (!value) return false;
+	return (
+		value.startsWith('http://') ||
+		value.startsWith('https://') ||
+		value.startsWith('/') ||
+		value.startsWith('data:image/')
+	);
+}
+
+/**
+ * Creates a minimized glass button element (plain DOM, no Svelte component)
+ * This is simpler and avoids component lifecycle complexity.
+ */
+function createMinimizedGlassElement(title: string, icon: string | null): HTMLButtonElement {
+	const button = document.createElement('button');
+	button.className = CSS_CLASSES.MINIMIZED_GLASS;
+	button.type = 'button';
+	button.setAttribute('aria-label', `Restore ${title}`);
+	button.title = `Restore ${title}`;
+
+	// Add icon if provided
+	if (icon) {
+		const iconSpan = document.createElement('span');
+		iconSpan.className = 'sw-minimized-glass-icon';
+
+		if (isImageUrl(icon)) {
+			const img = document.createElement('img');
+			img.src = icon;
+			img.alt = '';
+			img.className = 'sw-minimized-glass-icon-img';
+			iconSpan.appendChild(img);
+		} else {
+			// Emoji or HTML icon
+			iconSpan.innerHTML = icon;
 		}
-		element.bwComponentInstance = undefined;
+
+		button.appendChild(iconSpan);
 	}
 
-	// Clear all references to prevent memory leaks
-	// These references could keep destroyed DOM elements in memory
-	element.bwGlassElement = undefined;
+	// Add title
+	const titleSpan = document.createElement('span');
+	titleSpan.className = 'sw-minimized-glass-title';
+	titleSpan.textContent = title;
+	button.appendChild(titleSpan);
+
+	return button;
+}
+
+/**
+ * Cleanup a minimized glass element by clearing stored references.
+ * Simple cleanup since we use plain DOM elements (no Svelte unmount needed).
+ */
+export function cleanupMinimizedGlass(element: BwinMinimizedElement): void {
+	// Clear references to allow garbage collection
 	element.bwOriginalBoundingRect = undefined;
 	element.bwOriginalStore = undefined;
-	// Note: bwOriginalSashId and bwOriginalPosition are primitives, no need to clear
+	element.bwOriginalSashId = undefined;
+	element.bwOriginalPosition = undefined;
 }
 
 /**
@@ -75,12 +110,9 @@ export default {
 
 		// If sill doesn't exist, ensure it's created before proceeding
 		if (!sillEl) {
-			// Call ensureSillElement if available to create/retrieve sill element
 			if (typeof binaryWindow.ensureSillElement === 'function') {
 				sillEl = binaryWindow.ensureSillElement();
 			}
-
-			// If still no sill element, throw error
 			if (!sillEl) {
 				throw BwinErrors.sillElementNotFound();
 			}
@@ -92,9 +124,9 @@ export default {
 			(el) => (el as BwinMinimizedElement).bwOriginalSashId === paneSashId
 		);
 		if (alreadyMinimized) {
-			// Already minimized, don't create duplicate
 			return;
 		}
+
 		const panePosition = paneEl?.getAttribute(DATA_ATTRIBUTES.POSITION);
 
 		// Preserve the store (title, content, etc.) before removing the pane
@@ -102,7 +134,7 @@ export default {
 		const sash = paneSashId ? rootSash?.getById(paneSashId) : null;
 		const store = { ...(sash?.store || {}) };
 
-		// Extract title and content from the actual Glass DOM element to ensure we capture them
+		// Extract title and content from the actual Glass DOM element
 		const glassTitleEl = glassEl?.querySelector(`.${CSS_CLASSES.GLASS_TITLE}`);
 		const glassContentEl = glassEl?.querySelector(`.${CSS_CLASSES.GLASS_CONTENT}`);
 
@@ -116,56 +148,33 @@ export default {
 		const paneTitle = (store.title as string) || 'Untitled';
 		const paneIcon = (store.icon as string) || null;
 
-		// Mount MinimizedGlass component directly to the sill element
-		// IMPORTANT: We mount directly to sill instead of using an intermediate container
-		// to avoid orphaned DOM nodes and ensure proper cleanup on unmount
-		const componentInstance = mount(MinimizedGlass, {
-			target: sillEl,
-			props: {
-				title: paneTitle,
-				icon: paneIcon,
-				onclick: () => {
-					// Restore logic will be handled by the sill manager's click handler
-					// which queries for .bw-minimized-glass elements
-				}
-			}
-		});
+		// Create minimized glass button (plain DOM element - no Svelte component)
+		const minimizedGlassEl = createMinimizedGlassElement(
+			paneTitle,
+			paneIcon
+		) as BwinMinimizedElement;
 
-		// The component renders a button as its root element - find it
-		// It will be the last child of the sill since we just mounted it
-		const minimizedGlassNode = sillEl.lastElementChild;
-
-		if (!(minimizedGlassNode instanceof HTMLElement)) {
-			throw BwinErrors.minimizedGlassCreationFailed();
-		}
-
-		// Element is already in the sill from the mount() call above
-		const minimizedGlassEl = minimizedGlassNode as BwinMinimizedElement;
-
-		// Store restoration data and component instance on the element
-		// Note: We intentionally don't store bwGlassElement as it would keep the destroyed
-		// Glass element in memory after removePane() is called
+		// Store restoration data on the element
 		minimizedGlassEl.bwOriginalPosition = panePosition;
 		minimizedGlassEl.bwOriginalBoundingRect =
 			paneEl instanceof HTMLElement ? getMetricsFromElement(paneEl) : undefined;
 		minimizedGlassEl.bwOriginalSashId = paneSashId;
 		minimizedGlassEl.bwOriginalStore = store;
-		// Store component instance for proper cleanup on restore
-		minimizedGlassEl.bwComponentInstance = componentInstance as Record<string, unknown>;
 
+		// Add to sill
+		sillEl.appendChild(minimizedGlassEl);
+
+		// Remove the pane
 		if (paneSashId) {
-			// Perform removal first per spec (post-action emission)
 			binaryWindow.removePane(paneSashId);
 
 			try {
-				// Emit minimized using pre-removal sash and pane element bounds
 				if (sash) {
 					const payload = buildPanePayload(sash, paneEl as HTMLElement | null);
 					payload.state = 'minimized';
 					emitPaneEvent('onpaneminimized', payload);
 				}
 			} catch (err) {
-				 
 				console.warn('[minimize] failed to emit onpaneminimized', err);
 			}
 		}

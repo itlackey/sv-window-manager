@@ -41,7 +41,7 @@
 		icon = null,
 		actions = undefined,
 		draggable = true,
-		 
+
 		sash: _sash,
 		binaryWindow,
 		component,
